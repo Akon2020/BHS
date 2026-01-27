@@ -37,7 +37,8 @@ export default function LoginPage() {
         setError(response.data.message);
         return;
       }
-      const user = response?.userInfo;
+      const user = response;
+      console.log("USER: ", user)
 
       if (!user) {
         throw new Error("Utilisateur non trouvé");
@@ -45,7 +46,7 @@ export default function LoginPage() {
 
       toast({
         title: "Connexion réussie",
-        description: `Vous êtes maintenant connecté en tant que ${response?.userInfo?.nomComplet || formData.email}.`,
+        description: `Vous êtes maintenant connecté en tant que ${user?.nomComplet || formData.email}.`,
       })
 
       // Rediriger vers la page demandée ou le dashboard
