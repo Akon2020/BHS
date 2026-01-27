@@ -1,6 +1,8 @@
 import { Calendar, MapPin, Clock } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export const metadata = {
   title: "Événements - Burning Heart",
@@ -63,6 +65,7 @@ const events = [
 export default function EventsPage() {
   return (
     <div className="flex flex-col">
+      <Header />
       {/* Hero */}
       <section className="bg-muted/30 py-24">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -110,6 +113,7 @@ export default function EventsPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }

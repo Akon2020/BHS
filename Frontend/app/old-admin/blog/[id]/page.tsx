@@ -1,4 +1,21 @@
-"use client"
+import { getAllPosts } from "@/lib/blog-data"
+import EditBlogPostClient from "./EditBlogPostClient"
+
+// ✅ Obligatoire pour output: "export"
+export async function generateStaticParams() {
+  const posts = getAllPosts()
+
+  return posts.map((post) => ({
+    id: post.id.toString(),
+  }))
+}
+
+export default function Page({ params }: { params: { id: string } }) {
+  return <EditBlogPostClient id={params.id} />
+}
+
+
+/* "use client"
 
 import type React from "react"
 
@@ -9,9 +26,19 @@ import { ArrowLeft, Save } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { isAuthenticated, getCurrentUser } from "@/lib/auth"
-import { getPostById, updatePost } from "@/lib/blog-data"
+import { getAllPosts, getPostById, updatePost } from "@/lib/blog-data"
+
 
 const categories = ["Spiritualité", "Étude Biblique", "Communauté", "Témoignages", "Louange", "Famille"]
+
+export async function generateStaticParams() {
+  const posts = getAllPosts()
+
+  return posts.map((post) => ({
+    id: post.id.toString(),
+  }))
+}
+
 
 export default function EditBlogPostPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -142,3 +169,4 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
     </div>
   )
 }
+ */

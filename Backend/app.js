@@ -42,7 +42,7 @@ setupSwagger(app);
 
 app.get("/", (req, res) => {
   return res.status(200).json({
-    message: `Checking BurningHeart API\n=> Passed successfully at ${new Date()}`,
+    message: `Checking BurningHeart API\n=> Passed successfully at ${new Date().toLocaleString("fr-FR")}`,
   });
 });
 

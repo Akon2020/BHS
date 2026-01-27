@@ -1,154 +1,140 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { BookOpen, Users, Calendar, FileText, LogOut } from "lucide-react"
-import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Users, FileText, Calendar, Mail, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { isAuthenticated, logout, getCurrentUser } from "@/lib/auth"
-import { getAllPosts } from "@/lib/blog-data"
+import Link from "next/link"
+import AdminRecentUsers from "@/components/admin/recent-users"
+import AdminRecentPosts from "@/components/admin/recent-posts"
+import AdminChart from "@/components/admin/chart"
 
 export default function AdminDashboard() {
-  const router = useRouter()
-  const [mounted, setMounted] = useState(false)
-  const user = getCurrentUser()
-  const posts = getAllPosts()
-
-  useEffect(() => {
-    setMounted(true)
-    if (!isAuthenticated()) {
-      router.push("/connexion")
-    }
-  }, [router])
-
-  const handleLogout = () => {
-    logout()
-    router.push("/")
-  }
-
-  if (!mounted || !user) {
-    return null
-  }
-
-  const stats = [
-    { name: "Articles publiés", value: posts.length, icon: FileText, href: "/admin/blog" },
-    { name: "Événements", value: "6", icon: Calendar, href: "/evenements" },
-    { name: "Services", value: "6", icon: BookOpen, href: "/services" },
-    { name: "Membres", value: "248", icon: Users, href: "#" },
-  ]
-
   return (
-    <div className="flex min-h-[calc(100vh-200px)] flex-col py-12">
-      <div className="mx-auto w-full max-w-7xl px-4 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="font-serif text-3xl font-bold">Tableau de bord</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Bienvenue, {user.name}</p>
-          </div>
-          <Button onClick={handleLogout} variant="outline" className="gap-2 bg-transparent">
-            <LogOut className="h-4 w-4" />
-            Déconnexion
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Tableau de bord</h1>
+        <div className="flex gap-2">
+          <Button asChild>
+            <Link href="/admin/blog/new">Nouvel article</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin/newsletter/new">Nouvelle newsletter</Link>
           </Button>
         </div>
-
-        {/* Stats Grid */}
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <Link key={stat.name} href={stat.href}>
-              <Card className="border-none shadow-sm transition-shadow hover:shadow-md">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{stat.name}</CardTitle>
-                  <stat.icon className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-12">
-          <h2 className="font-serif text-2xl font-bold">Actions rapides</h2>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Link href="/admin/blog">
-              <Card className="border-none shadow-sm transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <FileText className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Gérer les articles</h3>
-                    <p className="text-sm text-muted-foreground">Créer et modifier</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/evenements">
-              <Card className="border-none shadow-sm transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Calendar className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Événements</h3>
-                    <p className="text-sm text-muted-foreground">Voir et gérer</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/services">
-              <Card className="border-none shadow-sm transition-shadow hover:shadow-md">
-                <CardContent className="flex items-center gap-4 p-6">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <BookOpen className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Services</h3>
-                    <p className="text-sm text-muted-foreground">Gérer les activités</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
-        {/* Recent Posts */}
-        <div className="mt-12">
-          <div className="flex items-center justify-between">
-            <h2 className="font-serif text-2xl font-bold">Articles récents</h2>
-            <Link href="/admin/blog">
-              <Button variant="outline" size="sm">
-                Voir tous
-              </Button>
-            </Link>
-          </div>
-          <div className="mt-6 space-y-4">
-            {posts.slice(0, 5).map((post) => (
-              <Card key={post.id} className="border-none shadow-sm">
-                <CardContent className="flex items-center justify-between p-6">
-                  <div>
-                    <h3 className="font-semibold">{post.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {post.author} • {post.date}
-                    </p>
-                  </div>
-                  <Link href={`/admin/blog/${post.id}`}>
-                    <Button variant="outline" size="sm">
-                      Modifier
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
       </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1,248</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <span className="text-green-500 flex items-center mr-1">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                12%
+              </span>
+              depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Articles</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">84</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <span className="text-green-500 flex items-center mr-1">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                8%
+              </span>
+              depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Événements</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">12</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <span className="text-green-500 flex items-center mr-1">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                24%
+              </span>
+              depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Abonnés Newsletter</CardTitle>
+            <Mail className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">573</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <span className="text-red-500 flex items-center mr-1">
+                <ArrowDownRight className="h-3 w-3 mr-1" />
+                3%
+              </span>
+              depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Analytics Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyse des visites</CardTitle>
+          <CardDescription>Nombre de visites sur le site au cours des 30 derniers jours</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AdminChart />
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity Tabs */}
+      <Tabs defaultValue="users">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="users">Utilisateurs récents</TabsTrigger>
+          <TabsTrigger value="posts">Articles récents</TabsTrigger>
+        </TabsList>
+        <TabsContent value="users" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Nouveaux utilisateurs</CardTitle>
+              <CardDescription>Les 5 derniers utilisateurs inscrits sur la plateforme</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AdminRecentUsers />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="posts" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Articles récents</CardTitle>
+              <CardDescription>Les 5 derniers articles publiés sur le blog</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AdminRecentPosts />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

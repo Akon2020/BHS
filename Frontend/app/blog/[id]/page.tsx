@@ -3,6 +3,8 @@ import { User, Calendar, Clock, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { getPostById, getAllPosts } from "@/lib/blog-data"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export function generateStaticParams() {
   const posts = getAllPosts()
@@ -20,6 +22,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="flex flex-col">
+      <Header />
       <section className="py-12">
         <div className="mx-auto max-w-4xl px-4 lg:px-8">
           <Link href="/blog">
@@ -99,6 +102,7 @@ export default function BlogPostPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }

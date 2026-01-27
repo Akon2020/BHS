@@ -57,9 +57,9 @@ export default function RootLayout({
         className={`${inter.variable} ${crimsonPro.variable} font-sans antialiased`}
       >
         <ThemeProvider>
-          <Header />
+          {/* <Header /> */}
           <main className="min-h-screen">{children}</main>
-          <Footer />
+          {/* <Footer /> */}
         </ThemeProvider>
         <Analytics />
       </body>

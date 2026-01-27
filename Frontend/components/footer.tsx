@@ -18,20 +18,26 @@ export function Footer() {
             </p>
             <div className="mt-6 flex gap-3">
               <Link
-                href="#"
+                href="https://www.facebook.com/burningheart87"
                 className="rounded-full bg-background p-2 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Facebook className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.instagram.com/burningheart87"
                 className="rounded-full bg-background p-2 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Instagram className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.youtube.com/@burningheart-bhis"
                 className="rounded-full bg-background p-2 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Youtube className="h-5 w-5" />
               </Link>
@@ -78,13 +84,23 @@ export function Footer() {
                 <MapPin className="h-5 w-5 shrink-0 text-primary" />
                 <span>259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu, République Démocratique du Congo</span>
               </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2 text-sm">
                 <Phone className="h-5 w-5 shrink-0 text-primary" />
-                <span>+243 849 005 240</span>
+                <a 
+                  href="tel:+243849005240"
+                  className="text-muted-foreground hover:text-primary hover:underline transition-colors duration-200"
+                >
+                  +243 849 005 240
+                </a>
               </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
+              <li className="flex items-center gap-2 text-sm">
                 <Mail className="h-5 w-5 shrink-0 text-primary" />
-                <span>burningheartihs@gmail.com</span>
+                <a 
+                  href="mailto:burningheartihs@gmail.com"
+                  className="text-muted-foreground hover:text-primary hover:underline transition-colors duration-200"
+                >
+                  burningheartihs@gmail.com
+                </a>
               </li>
             </ul>
           </div>

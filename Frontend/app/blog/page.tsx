@@ -5,6 +5,8 @@ import Link from "next/link"
 import { User, Calendar, Clock } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { getPostsByCategory } from "@/lib/blog-data"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 const categories = ["Tous", "Spiritualité", "Étude Biblique", "Communauté", "Témoignages", "Louange", "Famille"]
 
@@ -14,6 +16,7 @@ export default function BlogPage() {
 
   return (
     <div className="flex flex-col">
+      <Header />
       {/* Hero */}
       <section className="bg-muted/30 py-24">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -89,6 +92,7 @@ export default function BlogPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }

@@ -5,15 +5,18 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export default function HomePage() {
   return (
     <div className="flex flex-col">
+      <Header />
       {/* Hero Section with Background Image */}
-      <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[100vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image src="/images/bg.jpg" alt="Burning Heart Hero" fill className="object-cover brightness-50" priority />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
+          <div className="absolute inset-0 from-black/60 via-black/40 to-background" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-24 text-center lg:px-8">
@@ -106,7 +109,7 @@ export default function HomePage() {
 
               <div className="pt-4">
                 <Link href="/a-propos">
-                  <Button className="gap-2">
+                  <Button className="gap-2 w-full" size="lg">
                     En savoir plus
                     <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -705,7 +708,7 @@ export default function HomePage() {
               {/* Map */}
               <div className="aspect-video rounded-lg overflow-hidden border bg-muted">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.0234567890123!2d28.8507!3d-2.5085!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMsKwMzAnMzAuNiJTIDI4wrA1MScwMi41IkU!5e0!3m2!1sen!2scd!4v1234567890"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3986.0225212120026!2d28.87330107577174!3d-2.4994653381572034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x19c2974c3bce9397%3A0x1519f32559211e7d!2sColl%C3%A8ge%20Alfajiri!5e0!3m2!1sfr!2scd!4v1764982349518!5m2!1sfr!2scd"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -750,7 +753,7 @@ export default function HomePage() {
                       <label htmlFor="message" className="text-sm font-medium">
                         Message <span className="text-destructive">*</span>
                       </label>
-                      <Textarea id="message" placeholder="Écrivez votre message ici..." rows={6} required />
+                      <Textarea id="message" name="message" placeholder="Écrivez votre message ici..." rows={15} required />
                     </div>
                     <Button type="submit" className="w-full" size="lg">
                       Envoyer le message
@@ -762,6 +765,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }

@@ -2,10 +2,13 @@ import Link from "next/link"
 import { ArrowLeft, Heart, CreditCard, Building2, Smartphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export default function DonationPage() {
   return (
     <div className="min-h-screen py-16">
+      <Header />
       <div className="mx-auto max-w-4xl px-4 lg:px-8">
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8">
           <ArrowLeft className="h-4 w-4" />
@@ -92,6 +95,7 @@ export default function DonationPage() {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   )
 }
