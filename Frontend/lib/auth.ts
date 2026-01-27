@@ -1,5 +1,5 @@
 export const getAuthHeaders = (): { Authorization: string } => {
-  const token = localStorage.getItem("loginToken");
+  const token = localStorage.getItem("token");
 
   if (!token) {
     throw new Error("Access token manquant");

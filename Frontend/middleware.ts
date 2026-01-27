@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("loginToken")?.value;
+  const token = req.cookies.get("token")?.value;
   const { pathname } = req.nextUrl;
 
   const protectedRoutes = ["/admin"];

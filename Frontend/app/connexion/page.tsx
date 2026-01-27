@@ -23,13 +23,6 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    /* const user = login({email: formData.email, password: formData.password})
-    console.log("Utilisateur Connecté:", user)
-    if (user) {
-      router.push("/admin")
-    } else {
-      setError("Email ou mot de passe incorrect")
-    } */
     try {
       const response = await login({
         email: formData.email,
@@ -54,8 +47,6 @@ export default function LoginPage() {
         title: "Connexion réussie",
         description: `Vous êtes maintenant connecté en tant que ${response?.userInfo?.nomComplet || formData.email}.`,
       })
-
-      // localStorage.setItem("token", response.token);
 
       // Rediriger vers la page demandée ou le dashboard
       router.push("/admin");
@@ -140,16 +131,6 @@ export default function LoginPage() {
                 <LogIn className="h-4 w-4" />
                 Se connecter
               </Button>
-
-              {/* <div className="rounded-md bg-muted/50 p-4">
-                <p className="text-xs text-muted-foreground">
-                  <strong>Identifiants de démonstration:</strong>
-                  <br />
-                  Email: admin@burningheart.com
-                  <br />
-                  Mot de passe: admin123
-                </p>
-              </div> */}
             </form>
 
             <div className="mt-6 text-center">

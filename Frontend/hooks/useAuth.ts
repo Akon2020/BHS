@@ -13,7 +13,7 @@ export const useAuth = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("loginToken");
+        const token = localStorage.getItem("token");
         if (!token) throw new Error("No token");
 
         const res = await api.get("/api/auth/profile", {
@@ -23,7 +23,7 @@ export const useAuth = () => {
         });
         setUser(res.data.user);
       } catch {
-        localStorage.removeItem("loginToken");
+        localStorage.removeItem("token");
         localStorage.removeItem("user");
         setUser(null);
       } finally {

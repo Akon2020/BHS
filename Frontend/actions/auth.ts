@@ -13,8 +13,8 @@ export const login = async (payload: AuthPayload) => {
 
   const { token, userInfo } = res.data.data;
 
-  localStorage.setItem("loginToken", token);
-  Cookies.set("loginToken", token, {
+  localStorage.setItem("token", token);
+  Cookies.set("token", token, {
     expires: 7,
     secure: true,
   });
@@ -27,8 +27,8 @@ export const logout = async () => {
   try {
     await api.post("/api/auth/logout");
   } finally {
-    localStorage.removeItem("loginToken");
-    Cookies.remove("loginToken");
+    localStorage.removeItem("token");
+    Cookies.remove("token");
     localStorage.removeItem("user");
   }
 };
