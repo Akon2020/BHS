@@ -1,83 +1,63 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-// import { login } from "@/lib/auth"
 import { login } from "@/actions/auth";
-import { LogIn } from "lucide-react";
+import { LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setIsLoading(true);
 
     try {
-      const response = await login({
+      const user = await login({
         email: formData.email,
         password: formData.password,
       });
-      console.log("Réponse complète:", response);
-      console.log({ email: formData.email, password: formData.password });
-
-      // Vérifier si la réponse contient une erreur
-      if (response?.data?.message) {
-        // C'est une erreur retournée par le backend
-        setError(response.data.message);
-        return;
-      }
-      const user = response;
-      console.log("USER: ", user)
-
-      if (!user) {
-        throw new Error("Utilisateur non trouvé");
-      }
 
       toast({
         title: "Connexion réussie",
-        description: `Vous êtes maintenant connecté en tant que ${user?.nomComplet || formData.email}.`,
-      })
+        description: `Bienvenue ${user.nomComplet} 👋`,
+      });
 
-      // Rediriger vers la page demandée ou le dashboard
       router.push("/admin");
-    } catch (error) {
-      console.error("Erreur de connexion:", error)
-      
-      // Gérer différents types d'erreurs
-      if (error?.response?.data?.message) {
-        // Erreur de l'API
-        setError(error.response.data.message)
-      } else if (error?.message) {
-        // Erreur JavaScript
-        setError(error.message)
-      } else {
-        // Erreur générique
-        setError("Une erreur est survenue lors de la connexion")
-      }
+    } catch (err: any) {
+      const message =
+        err?.message || "Identifiants incorrects. Veuillez réessayer.";
+
+      setError(message);
 
       toast({
         title: "Erreur de connexion",
-        description: "Identifiants incorrects. Veuillez réessayer.",
+        description: message,
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-200px)] items-center justify-center py-12">
+    <div className="flex h-screen items-center justify-center py-12">
       <div className="mx-auto w-full max-w-md px-4">
         <Card className="border-none shadow-lg">
           <CardHeader className="text-center">
@@ -86,6 +66,7 @@ export default function LoginPage() {
               Accédez à l'espace d'administration
             </p>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
@@ -106,8 +87,8 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  placeholder="admin@burningheart.com"
+                  className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  placeholder="admin@exemple.com"
                 />
               </div>
 
@@ -115,22 +96,38 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm font-medium">
                   Mot de passe
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  required
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="mt-2 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  placeholder="••••••••"
-                />
+
+                <div className="relative mt-2">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    required
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    className="w-full rounded-md border bg-background px-3 py-2 pr-10 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    placeholder="••••••••"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
-              <Button type="submit" className="w-full gap-2">
+              <Button
+                type="submit"
+                className="w-full gap-2"
+                disabled={isLoading}
+              >
                 <LogIn className="h-4 w-4" />
-                Se connecter
+                {isLoading ? "Connexion..." : "Se connecter"}
               </Button>
             </form>
 

@@ -8,19 +8,27 @@ export interface AuthPayload {
   password: string;
 }
 
-export const login = async (payload: AuthPayload) => {
-  const res = await api.post<AuthResponse>("/api/auth/login", payload);
+export const login = async (payload: AuthPayload): Promise<User> => {
+  try {
+    const res = await api.post<AuthResponse>("/api/auth/login", payload);
 
-  const { token, userInfo } = res.data.data;
+    const { token, userInfo } = res.data.data;
 
-  localStorage.setItem("token", token);
-  Cookies.set("token", token, {
-    expires: 7,
-    secure: true,
-  });
-  localStorage.setItem("user", JSON.stringify(userInfo));
+    localStorage.setItem("token", token);
+    Cookies.set("token", token, {
+      expires: 7,
+      secure: true,
+    });
+    localStorage.setItem("user", JSON.stringify(userInfo));
 
-  return userInfo;
+    return userInfo;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      "Erreur lors de la connexion";
+
+    throw new Error(message);
+  }
 };
 
 export const logout = async () => {
@@ -34,9 +42,12 @@ export const logout = async () => {
 };
 
 export const getProfile = async (): Promise<User> => {
-  const res = await api.get("/api/auth/profile", { headers: getAuthHeaders() });
+  const res = await api.get("/api/auth/profile", {
+    headers: getAuthHeaders(),
+  });
   return res.data.user;
 };
+
 
 /* import api from "@/lib/axios";
 import { Auth, GetAllAuthResponse } from "@/types/user";

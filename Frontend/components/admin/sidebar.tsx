@@ -1,7 +1,7 @@
-"use client"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
@@ -13,17 +13,33 @@ import {
   ChevronRight,
   UserCircle,
   LogOut,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { logout } from "@/actions/auth";
 
 interface SidebarProps {
-  isOpen: boolean
-  onToggle: () => void
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+
+      router.push("/connexion");
+      router.refresh();
+    } catch (error) {
+      console.error("Erreur de déconnexion :", error);
+      toast?.error("Impossible de se déconnecter");
+    }
+  };
 
   const routes = [
     {
@@ -74,7 +90,7 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       href: "/admin/settings",
       active: pathname === "/admin/settings",
     },
-  ]
+  ];
 
   return (
     <div
@@ -94,7 +110,12 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
           >
             <span className="text-primary font-bold">Burning Heart</span>
           </Link>
-          <Button onClick={onToggle} variant="ghost" size="icon" className="h-8 w-8">
+          <Button
+            onClick={onToggle}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+          >
             {isOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           </Button>
         </div>
@@ -106,24 +127,45 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
                 href={route.href}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all hover:bg-accent",
-                  route.active ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                  route.active
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground",
                 )}
               >
                 <route.icon size={20} />
-                <span className={cn("transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>{route.label}</span>
+                <span
+                  className={cn(
+                    "transition-opacity",
+                    isOpen ? "opacity-100" : "opacity-0",
+                  )}
+                >
+                  {route.label}
+                </span>
               </Link>
             ))}
           </nav>
         </ScrollArea>
         <div className="mt-auto border-t p-2">
-          <Link href="/auth/logout">
-            <Button variant="ghost" className={cn("w-full justify-start gap-3", isOpen ? "" : "justify-center")}>
-              <LogOut size={20} />
-              <span className={cn("transition-opacity", isOpen ? "opacity-100" : "opacity-0")}>Déconnexion</span>
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className={cn(
+              "w-full justify-start gap-3 text-destructive hover:text-destructive",
+              isOpen ? "" : "justify-center",
+            )}
+          >
+            <LogOut size={20} />
+            <span
+              className={cn(
+                "transition-opacity",
+                isOpen ? "opacity-100" : "opacity-0",
+              )}
+            >
+              Déconnexion
+            </span>
+          </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
