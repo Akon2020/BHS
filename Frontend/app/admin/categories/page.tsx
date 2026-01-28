@@ -19,12 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
-import {
-  Plus,
-  Pencil,
-  Trash,
-  Loader2,
-} from "lucide-react";
+import { Plus, Pencil, Trash, Loader2 } from "lucide-react";
 import DeleteCategorieModal from "@/components/modals/delete-categorie-modal";
 
 export default function CategoriesAdminPage() {
@@ -34,10 +29,10 @@ export default function CategoriesAdminPage() {
   const [editing, setEditing] = useState<Categorie | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] =
-    useState<Categorie | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] =
-    useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Categorie | null>(
+    null,
+  );
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -105,18 +100,14 @@ export default function CategoriesAdminPage() {
     await deleteCategorie(selectedCategory.idCategorie);
     toast({ title: "Catégorie supprimée" });
     setCategories((prev) =>
-      prev.filter(
-        (c) => c.idCategorie !== selectedCategory.idCategorie
-      )
+      prev.filter((c) => c.idCategorie !== selectedCategory.idCategorie),
     );
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">
-          Catégories de blog
-        </h1>
+        <h1 className="text-3xl font-bold">Catégories de blog</h1>
       </div>
 
       {/* Create */}
@@ -140,9 +131,7 @@ export default function CategoriesAdminPage() {
               <TableHead>Nom</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Date de création</TableHead>
-              <TableHead className="w-[120px]">
-                Actions
-              </TableHead>
+              <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
 

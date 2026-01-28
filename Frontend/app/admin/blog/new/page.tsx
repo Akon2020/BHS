@@ -1,8 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createBlog } from "@/actions/blog";
+import { getAllCategories } from "@/actions/categorie";
+import { Categorie } from "@/types/user";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +12,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { ArrowLeft, Save, ImageIcon, Upload } from "lucide-react";
 import Link from "next/link";
@@ -18,6 +27,8 @@ import BlogEditor from "@/components/admin/blog-editor";
 export default function NewBlogPostPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<Categorie[]>([]);
+  const [selectedCategorie, setSelectedCategorie] = useState<number | null>(null);
 
   const [postData, setPostData] = useState({
     title: "",
@@ -26,26 +37,47 @@ export default function NewBlogPostPage() {
     tags: "",
   });
 
+  // Récupérer les catégories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getAllCategories();
+        setCategories(res.categories);
+      } catch (error: any) {
+        toast({
+          title: "Erreur",
+          description: error.message || "Impossible de charger les catégories",
+          variant: "destructive",
+        });
+      }
+    };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    fetchCategories();
+  }, []);
+
+  // Gestionnaires d'événements mémoïsés
+  const handleChange = useCallback((
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setPostData((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleEditorChange = (content: string) => {
+  const handleEditorChange = useCallback((content: string) => {
     setPostData((prev) => ({ ...prev, content }));
-  };
+  }, []);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) setImageFile(file);
-  };
+  }, []);
 
+  const handleCategorieChange = useCallback((value: string) => {
+    setSelectedCategorie(value === "" ? null : Number(value));
+  }, []);
 
-  const handleSubmit = async (status: "brouillon" | "publie") => {
-    if (!postData.title || !postData.content) {
+  const handleSubmit = useCallback(async (status: "brouillon" | "publie") => {
+    if (!postData.title || !postData.content || !selectedCategorie) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir les champs obligatoires.",
@@ -64,20 +96,16 @@ export default function NewBlogPostPage() {
         tags: postData.tags,
         statut: status === "publie" ? "publie" : "brouillon",
         imageUne: imageFile ?? undefined,
-        idCategorie: 1,
+        idCategorie: selectedCategorie,
       });
 
       toast({
-        title:
-          status === "publie"
-            ? "Article publié"
-            : "Brouillon enregistré",
+        title: status === "publie" ? "Article publié" : "Brouillon enregistré",
         description:
           status === "publie"
             ? "Votre article a été publié avec succès."
             : "Votre brouillon a été enregistré.",
       });
-
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -87,7 +115,7 @@ export default function NewBlogPostPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [postData, selectedCategorie, imageFile]);
 
   return (
     <div className="space-y-6">
@@ -109,10 +137,7 @@ export default function NewBlogPostPage() {
           >
             Enregistrer comme brouillon
           </Button>
-          <Button
-            onClick={() => handleSubmit("publie")}
-            disabled={isLoading}
-          >
+          <Button onClick={() => handleSubmit("publie")} disabled={isLoading}>
             <Save className="h-4 w-4 mr-2" />
             Publier
           </Button>
@@ -185,6 +210,34 @@ export default function NewBlogPostPage() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          <Card>
+            <CardContent className="p-6 space-y-2">
+              <div className="space-y-2">
+                <Label>
+                  Catégorie <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={selectedCategorie ? String(selectedCategorie) : ""}
+                  onValueChange={handleCategorieChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choisir une catégorie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem
+                        key={cat.idCategorie}
+                        value={String(cat.idCategorie)}
+                      >
+                        {cat.nomCategorie}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardContent className="p-6 space-y-2">
               <Label htmlFor="tags">Tags</Label>
