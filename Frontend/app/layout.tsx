@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { Inter, Crimson_Pro } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+// import { Header } from "@/components/header";
+// import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/contexts/theme-context";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });

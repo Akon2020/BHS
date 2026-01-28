@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Menu, Bell, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { useState } from "react";
+import Link from "next/link";
+import { Menu, Bell, User, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,18 +12,38 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { logout } from "@/actions/auth";
 
 interface AdminHeaderProps {
-  toggleSidebar: () => void
+  toggleSidebar: () => void;
 }
 
 export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
-  const [notifications, setNotifications] = useState(3)
+  const [notifications, setNotifications] = useState(3);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/connexion");
+      router.refresh();
+    } catch (error) {
+      console.error("Erreur de déconnexion :", error);
+      toast?.error("Impossible de se déconnecter");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-      <Button variant="outline" size="icon" className="md:hidden" onClick={toggleSidebar}>
+      <Button
+        variant="outline"
+        size="icon"
+        className="md:hidden"
+        onClick={toggleSidebar}
+      >
         <Menu className="h-5 w-5" />
         <span className="sr-only">Toggle sidebar</span>
       </Button>
@@ -66,11 +86,13 @@ export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
             <DropdownMenuItem>Paramètres</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/auth/logout">Déconnexion</Link>
+              <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+                Déconnexion
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </header>
-  )
+  );
 }
