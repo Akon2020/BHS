@@ -110,6 +110,8 @@ export const getBlogBySlug = async (req, res, next) => {
       return res.status(404).json({ message: "Blog non trouvé" });
     }
 
+    await blog.update({ nombreVues: blog.nombreVues + 1 });
+
     return res.status(200).json({ blog });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });

@@ -42,10 +42,13 @@ export const getSingleBlog = async (
 export const getBlogBySlug = async (
   slug: string
 ): Promise<GetBlogBySlugResponse> => {
+  console.log("Requesting API with slug:", slug);
+  console.log("Full URL:", `/api/blogs/slug/${slug}`);
   try {
     const res = await api.get<GetBlogBySlugResponse>(
       `/api/blogs/slug/${slug}`
     );
+    console.log("Reponse blog's action: ", res)
     return res.data;
   } catch (error: any) {
     throw new Error(
@@ -55,7 +58,6 @@ export const getBlogBySlug = async (
   }
 };
 
-// actions/blog.ts
 export const createBlog = async (
   data: FormData | {
     titre: string;
@@ -72,7 +74,7 @@ export const createBlog = async (
 
     if (data instanceof FormData) {
       formData = data;
-      
+
       // Validation pour FormData
       const titre = formData.get("titre") as string;
       const contenu = formData.get("contenu") as string;
@@ -85,10 +87,10 @@ export const createBlog = async (
       // Cas où data est un objet
       formData = new FormData();
       const { titre, contenu, extrait, tags, idCategorie, statut, imageUne } = data;
-      
+
       formData.append("titre", titre);
       formData.append("contenu", contenu);
-      
+
       if (extrait) formData.append("extrait", extrait);
       if (tags) formData.append("tags", tags);
       formData.append("idCategorie", idCategorie.toString());
