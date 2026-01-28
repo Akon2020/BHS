@@ -150,8 +150,6 @@ export interface GetBlogBySlugResponse {
   commentaires?: BlogCommentaire[];
 }
 
-// types/categorie.ts
-
 export interface Categorie {
   idCategorie: number;
   nomCategorie: string;
