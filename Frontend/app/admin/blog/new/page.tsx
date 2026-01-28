@@ -1,71 +1,93 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useState } from "react";
+import { createBlog } from "@/actions/blog";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { toast } from "@/components/ui/use-toast"
-import { ArrowLeft, Save, ImageIcon, Upload } from "lucide-react"
-import Link from "next/link"
-import BlogEditor from "@/components/admin/blog-editor"
-
-// Catégories pour le filtre
-const categories = ["Spiritualité", "Étude Biblique", "Communauté", "Témoignages", "Louange", "Famille"]
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/components/ui/use-toast";
+import { ArrowLeft, Save, ImageIcon, Upload } from "lucide-react";
+import Link from "next/link";
+import BlogEditor from "@/components/admin/blog-editor";
 
 export default function NewBlogPostPage() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   const [postData, setPostData] = useState({
     title: "",
     excerpt: "",
     content: "",
-    category: "",
     tags: "",
-    featuredImage: null,
-  })
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setPostData((prev) => ({ ...prev, [name]: value }))
-  }
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setPostData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleEditorChange = (content: string) => {
-    setPostData((prev) => ({ ...prev, content }))
-  }
+    setPostData((prev) => ({ ...prev, content }));
+  };
 
-  const handleSelectChange = (name: string, value: string) => {
-    setPostData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setImageFile(file);
+  };
 
-  const handleSubmit = async (status: "draft" | "published") => {
-    if (!postData.title || !postData.content || !postData.category) {
+
+  const handleSubmit = async (status: "brouillon" | "publie") => {
+    if (!postData.title || !postData.content) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires.",
+        description: "Veuillez remplir les champs obligatoires.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await createBlog({
+        titre: postData.title,
+        extrait: postData.excerpt,
+        contenu: postData.content,
+        tags: postData.tags,
+        statut: status === "publie" ? "publie" : "brouillon",
+        imageUne: imageFile ?? undefined,
+        idCategorie: 1,
+      });
+
       toast({
-        title: status === "published" ? "Article publié!" : "Brouillon enregistré!",
+        title:
+          status === "publie"
+            ? "Article publié"
+            : "Brouillon enregistré",
         description:
-          status === "published"
+          status === "publie"
             ? "Votre article a été publié avec succès."
-            : "Votre brouillon a été enregistré avec succès.",
-      })
-      setIsLoading(false)
-    }, 1500)
-  }
+            : "Votre brouillon a été enregistré.",
+      });
+
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -78,11 +100,19 @@ export default function NewBlogPostPage() {
           </Button>
           <h1 className="text-3xl font-bold">Nouvel Article</h1>
         </div>
+
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => handleSubmit("draft")} disabled={isLoading}>
+          <Button
+            variant="outline"
+            onClick={() => handleSubmit("brouillon")}
+            disabled={isLoading}
+          >
             Enregistrer comme brouillon
           </Button>
-          <Button onClick={() => handleSubmit("published")} disabled={isLoading}>
+          <Button
+            onClick={() => handleSubmit("publie")}
+            disabled={isLoading}
+          >
             <Save className="h-4 w-4 mr-2" />
             Publier
           </Button>
@@ -90,37 +120,33 @@ export default function NewBlogPostPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
+        {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">
-                    Titre <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    placeholder="Entrez le titre de l'article"
-                    value={postData.title}
-                    onChange={handleChange}
-                  />
-                </div>
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">
+                  Titre <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Entrez le titre de l'article"
+                  value={postData.title}
+                  onChange={handleChange}
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="excerpt">
-                    Extrait <span className="text-red-500">*</span>
-                  </Label>
-                  <Textarea
-                    id="excerpt"
-                    name="excerpt"
-                    placeholder="Entrez un court extrait de l'article"
-                    rows={3}
-                    value={postData.excerpt}
-                    onChange={handleChange}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="excerpt">Extrait</Label>
+                <Textarea
+                  id="excerpt"
+                  name="excerpt"
+                  placeholder="Court extrait de l'article"
+                  rows={3}
+                  value={postData.excerpt}
+                  onChange={handleChange}
+                />
               </div>
             </CardContent>
           </Card>
@@ -132,15 +158,23 @@ export default function NewBlogPostPage() {
                   <TabsTrigger value="editor">Éditeur</TabsTrigger>
                   <TabsTrigger value="preview">Aperçu</TabsTrigger>
                 </TabsList>
+
                 <TabsContent value="editor">
                   <BlogEditor onChange={handleEditorChange} />
                 </TabsContent>
+
                 <TabsContent value="preview">
                   <div className="prose prose-lg max-w-none dark:prose-invert min-h-[300px] border rounded-md p-4">
                     {postData.content ? (
-                      <div dangerouslySetInnerHTML={{ __html: postData.content }} />
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: postData.content,
+                        }}
+                      />
                     ) : (
-                      <p className="text-muted-foreground">L'aperçu apparaîtra ici...</p>
+                      <p className="text-muted-foreground">
+                        L'aperçu apparaîtra ici...
+                      </p>
                     )}
                   </div>
                 </TabsContent>
@@ -152,39 +186,15 @@ export default function NewBlogPostPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium mb-4">Paramètres de l'article</h3>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">
-                    Catégorie <span className="text-red-500">*</span>
-                  </Label>
-                  <Select onValueChange={(value) => handleSelectChange("category", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez une catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tags">Tags</Label>
-                  <Input
-                    id="tags"
-                    name="tags"
-                    placeholder="Séparés par des virgules (ex: prière, foi, espoir)"
-                    value={postData.tags}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
+            <CardContent className="p-6 space-y-2">
+              <Label htmlFor="tags">Tags</Label>
+              <Input
+                id="tags"
+                name="tags"
+                placeholder="prière, foi, espérance"
+                value={postData.tags}
+                onChange={handleChange}
+              />
             </CardContent>
           </Card>
 
@@ -192,20 +202,26 @@ export default function NewBlogPostPage() {
             <CardContent className="p-6">
               <h3 className="text-lg font-medium mb-4">Image à la une</h3>
 
-              <div className="border-2 border-dashed rounded-md p-6 text-center">
+              <label className="border-2 border-dashed rounded-md p-6 text-center cursor-pointer block">
                 <ImageIcon className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground mb-2">
-                  Glissez-déposez une image ou cliquez pour parcourir
+                  Cliquez pour sélectionner une image
                 </p>
-                <Button variant="outline" size="sm">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+                <Button variant="outline" size="sm" type="button">
                   <Upload className="h-4 w-4 mr-2" />
                   Parcourir
                 </Button>
-              </div>
+              </label>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }

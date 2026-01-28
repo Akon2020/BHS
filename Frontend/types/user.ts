@@ -149,3 +149,30 @@ export interface GetBlogBySlugResponse {
   blog: Blog;
   commentaires?: BlogCommentaire[];
 }
+
+// types/categorie.ts
+
+export interface Categorie {
+  idCategorie: number;
+  nomCategorie: string;
+  slug: string;
+  createdAt: string;
+}
+
+export interface GetAllCategoriesResponse {
+  total: number;
+  categories: Categorie[];
+}
+
+export interface GetCategorieByIdResponse {
+  categorie: Categorie;
+}
+
+export interface GetCategorieBySlugResponse {
+  categorie: Categorie;
+}
+
+export interface CategorieMutationResponse {
+  message: string;
+  data: Categorie;
+}

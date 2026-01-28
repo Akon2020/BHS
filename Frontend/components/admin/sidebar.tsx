@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   UserCircle,
+  Folder,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,12 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       icon: Users,
       href: "/admin/users",
       active: pathname === "/admin/users",
+    },
+    {
+      label: "Catégories",
+      icon: Folder,
+      href: "/admin/categories",
+      active: pathname.startsWith("/admin/categories"),
     },
     {
       label: "Blog",

@@ -29,16 +29,13 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 
-/* =========================
-   UI mapping (sans toucher au design)
-========================= */
 interface UIBlogPost {
   id: number;
   title: string;
   excerpt: string;
   date: string;
   author: string;
-  status: "published" | "draft";
+  status: "publie" | "brouillon";
   category: string;
   views: number;
 }
@@ -52,9 +49,6 @@ export default function BlogAdminPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
-  /* =========================
-     Fetch blogs (ACTION)
-  ========================= */
   const fetchBlogs = async () => {
     try {
       setLoading(true);
@@ -64,18 +58,18 @@ export default function BlogAdminPage() {
       });
 
       const mapped: UIBlogPost[] = data.blogs.map((blog: Blog) => ({
-        id: blog.id,
+        id: blog.idBlog,
         title: blog.titre,
         excerpt: blog.extrait || "",
         date: new Date(blog.createdAt).toLocaleDateString(),
         author: blog.auteur?.nomComplet || "—",
-        status: blog.statut === "publie" ? "published" : "draft",
-        category: blog.categorie?.nom || "—",
-        views: blog.vues ?? 0,
+        status: blog.statut === "publie" ? "publie" : "brouillon",
+        category: blog.categorie?.nomCategorie ?? "—",
+        views: blog.nombreVues ?? 0,
       }));
 
       setPosts(mapped);
-      setTotal(data.total);
+      setTotal(mapped.length);
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -91,9 +85,6 @@ export default function BlogAdminPage() {
     fetchBlogs();
   }, [statusFilter]);
 
-  /* =========================
-     Delete blog (ACTION)
-  ========================= */
   const handleDelete = async (post: UIBlogPost) => {
     try {
       await deleteBlog(post.id);
@@ -112,9 +103,6 @@ export default function BlogAdminPage() {
     }
   };
 
-  /* =========================
-     Frontend filters (inchangés)
-  ========================= */
   const filteredPosts = posts.filter((post) => {
     const matchesSearch =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -127,9 +115,6 @@ export default function BlogAdminPage() {
     return matchesSearch && matchesCategory;
   });
 
-  /* =========================
-     Render (DESIGN INTACT)
-  ========================= */
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -162,8 +147,8 @@ export default function BlogAdminPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="published">Publié</SelectItem>
-              <SelectItem value="draft">Brouillon</SelectItem>
+              <SelectItem value="publie">Publié</SelectItem>
+              <SelectItem value="brouillon">Brouillon</SelectItem>
             </SelectContent>
           </Select>
 
@@ -226,10 +211,10 @@ export default function BlogAdminPage() {
                   <TableCell>
                     <Badge
                       variant={
-                        post.status === "published" ? "default" : "outline"
+                        post.status === "publie" ? "default" : "outline"
                       }
                     >
-                      {post.status === "published"
+                      {post.status === "publie"
                         ? "Publié"
                         : "Brouillon"}
                     </Badge>
