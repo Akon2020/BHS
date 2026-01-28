@@ -1,4 +1,7 @@
 export type UserRole = "admin" | "editeur" | "membre";
+export type ContactStatut = "nouveau" | "lu" | "traite" | "archive";
+export type AbonneStatut = "actif" | "inactif" | "desabonne";
+export type BlogStatut = "publie" | "brouillon";
 
 export interface User {
   idUtilisateur: number;
@@ -19,13 +22,11 @@ export interface AuthResponse {
   };
 }
 
-
 export interface GetAllUsersResponse {
   nombre: number;
   usersInfo: User[];
 }
 
-export type ContactStatut = "nouveau" | "lu" | "traite" | "archive";
 
 export interface Contact {
   idContact: number;
@@ -43,7 +44,6 @@ export interface GetAllContactsResponse {
   contactsInfo: Contact[];
 }
 
-export type AbonneStatut = "actif" | "inactif" | "desabonne";
 
 export interface Abonne {
   idAbonne: number;
@@ -85,4 +85,67 @@ export interface Auth {
   token: string;
   userInfo: User;
   data: any;
+}
+
+
+export interface BlogAuteur {
+  idUtilisateur?: number;
+  nomComplet: string;
+  email: string;
+  avatar?: string;
+  role?: string;
+}
+
+export interface BlogCategorie {
+  idCategorie: number;
+  nomCategorie: string;
+  slug: string;
+  createdAt: string;
+}
+
+export interface BlogCommentaire {
+  idCommentaire?: number;
+  contenu?: string;
+  dateCommentaire?: string;
+  utilisateur?: {
+    nomComplet: string;
+    avatar?: string;
+  };
+}
+
+export interface Blog {
+  idBlog: number;
+  titre: string;
+  slug: string;
+  extrait?: string;
+  contenu: string;
+  tags?: string;
+  imageUne: string;
+  statut: BlogStatut;
+  estimationLecture?: number;
+  idAuteur: number;
+  idCategorie: number;
+  nombreVues?: number;
+  createdAt: string;
+  updatedAt: string;
+
+  auteur: BlogAuteur;
+  categorie: BlogCategorie;
+  commentaires?: BlogCommentaire[];
+}
+
+export interface GetAllBlogsResponse {
+  nombre: number;
+  page: number;
+  totalPages: number;
+  blogs: Blog[];
+}
+export interface GetSingleBlogResponse {
+  blog: Blog;
+  commentaires: BlogCommentaire[];
+}
+
+export interface GetBlogBySlugResponse {
+  blog: Blog;
+  commentaires?: BlogCommentaire[];
 }

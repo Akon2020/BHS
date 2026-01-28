@@ -34,70 +34,53 @@ export default function AddUserModal({
   onSuccess,
 }: AddUserModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-    role: "membre",
-  });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
+  const [form, setForm] = useState({
+    nomComplet: "",
+    email: "",
+    role: "membre",
+  });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setUserData((prev) => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file)); // pour prévisualiser
+      setAvatarPreview(URL.createObjectURL(file));
     }
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setUserData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!userData.name || !userData.email) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const response = await createUser({
-        nomComplet: userData.name,
-        email: userData.email,
-        role: userData.role,
+      await createUser({
+        nomComplet: form.nomComplet,
+        email: form.email,
+        role: form.role,
         avatar: avatarFile || undefined,
       });
 
       toast({
         title: "Utilisateur créé",
-        description: `L'utilisateur ${response?.nomComplet || userData.name} a été créé avec succès.`,
+        description: `${form.nomComplet} a été ajouté avec succès.`,
       });
 
-      setUserData({ name: "", email: "", role: "membre" });
+      setForm({ nomComplet: "", email: "", role: "membre" });
       setAvatarFile(null);
       setAvatarPreview(null);
-
       onClose();
-      if (onSuccess) onSuccess();
+      onSuccess?.();
     } catch (error: any) {
       toast({
         title: "Erreur",
-        description:
-          error?.message ||
-          "Une erreur est survenue lors de la création de l'utilisateur.",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -110,56 +93,46 @@ export default function AddUserModal({
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
+            <DialogTitle>Ajouter un utilisateur</DialogTitle>
             <DialogDescription>
-              Créez un nouvel utilisateur en remplissant les informations
-              ci-dessous.
+              Renseignez les informations du nouvel utilisateur.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            {/* Nom */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Nom
-              </Label>
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Nom</Label>
               <Input
-                id="name"
-                name="name"
-                value={userData.name}
+                name="nomComplet"
+                value={form.nomComplet}
                 onChange={handleChange}
                 className="col-span-3"
                 required
               />
             </div>
 
-            {/* Email */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Email</Label>
               <Input
-                id="email"
                 name="email"
                 type="email"
-                value={userData.email}
+                value={form.email}
                 onChange={handleChange}
                 className="col-span-3"
                 required
               />
             </div>
 
-            {/* Rôle */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="role" className="text-right">
-                Rôle
-              </Label>
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Rôle</Label>
               <Select
-                value={userData.role}
-                onValueChange={(value) => handleSelectChange("role", value)}
+                value={form.role}
+                onValueChange={(value) =>
+                  setForm({ ...form, role: value })
+                }
               >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Sélectionner un rôle" />
+                <SelectTrigger className="col-span-3 w-full">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Administrateur</SelectItem>
@@ -169,44 +142,33 @@ export default function AddUserModal({
               </Select>
             </div>
 
-            {/* Avatar */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="avatar" className="text-right">
-                Avatar
-              </Label>
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Avatar</Label>
               <Input
-                id="avatar"
-                name="avatar"
                 type="file"
                 accept="image/*"
-                className="col-span-3"
                 onChange={handleAvatarChange}
+                className="col-span-3"
               />
             </div>
 
-            {/* Aperçu */}
             {avatarPreview && (
-              <div className="flex justify-center mt-2">
+              <div className="flex justify-center">
                 <img
                   src={avatarPreview}
                   alt="Preview"
-                  className="h-24 w-24 rounded-full object-cover border"
+                  className="h-20 w-20 rounded-full object-cover"
                 />
               </div>
             )}
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               Annuler
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Création en cours..." : "Créer l'utilisateur"}
+              {isLoading ? "Création..." : "Créer"}
             </Button>
           </DialogFooter>
         </form>

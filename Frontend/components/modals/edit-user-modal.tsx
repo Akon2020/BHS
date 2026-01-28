@@ -1,11 +1,9 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,108 +11,82 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/components/ui/use-toast"
-import { Switch } from "@/components/ui/switch"
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "@/components/ui/use-toast";
 import { updateUser } from "@/actions/users";
 
-interface User {
-  id: number
-  name: string
-  email: string
-  role: string
-  status: string
+interface UserUI {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
 }
 
 interface EditUserModalProps {
-  isOpen: boolean
-  onClose: () => void
-  user: User | null
-  onSuccess?: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  user: UserUI | null;
+  onSuccess?: () => void;
 }
 
-export default function EditUserModal({ isOpen, onClose, user, onSuccess }: EditUserModalProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-    role: "",
-    status: "",
-    resetPassword: false,
-  })
+export default function EditUserModal({
+  isOpen,
+  onClose,
+  user,
+  onSuccess,
+}: EditUserModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
+  const [form, setForm] = useState({
+    nomComplet: "",
+    email: "",
+    role: "",
+  });
+
   useEffect(() => {
     if (user) {
-      setUserData({
-        name: user.name,
+      setForm({
+        nomComplet: user.name,
         email: user.email,
         role: user.role,
-        status: user.status,
-        resetPassword: false,
-      })
+      });
     }
-  }, [user])
+  }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setUserData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setUserData((prev) => ({ ...prev, [name]: value }))
-  }
-
+  if (!user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!userData.name || !userData.email) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const response = await updateUser({
-        nomComplet: userData.name,
-        email: userData.email,
-        role: userData.role,
-        avatar: avatarFile || undefined,
-      });
+      const formData = new FormData();
+      formData.append("nomComplet", form.nomComplet);
+      formData.append("email", form.email);
+      formData.append("role", form.role);
+      if (avatarFile) formData.append("avatar", avatarFile);
+
+      await updateUser(user.id, formData);
 
       toast({
-        title: "Utilisateur créé",
-        description: `L'utilisateur ${response?.nomComplet || userData.name} a été créé avec succès.`,
+        title: "Utilisateur mis à jour",
       });
 
-      setUserData({ name: "", email: "", role: "membre" });
-      setAvatarFile(null);
-      setAvatarPreview(null);
-
       onClose();
-      if (onSuccess) onSuccess();
+      onSuccess?.();
     } catch (error: any) {
       toast({
         title: "Erreur",
-        description:
-          error?.message ||
-          "Une erreur est survenue lors de la création de l'utilisateur.",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -122,107 +94,92 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }: Edit
     }
   };
 
-  if (!user) return null
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Modifier l'utilisateur</DialogTitle>
-            <DialogDescription>Modifiez les informations de l'utilisateur ci-dessous.</DialogDescription>
+            <DialogDescription>
+              Mettez à jour les informations de l'utilisateur.
+            </DialogDescription>
           </DialogHeader>
+
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Nom
-              </Label>
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Nom</Label>
               <Input
-                id="name"
-                name="name"
-                value={userData.name}
-                onChange={handleChange}
+                value={form.nomComplet}
+                onChange={(e) =>
+                  setForm({ ...form, nomComplet: e.target.value })
+                }
                 className="col-span-3"
-                required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
+
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Email</Label>
               <Input
-                id="email"
-                name="email"
                 type="email"
-                value={userData.email}
-                onChange={handleChange}
+                value={form.email}
+                onChange={(e) =>
+                  setForm({ ...form, email: e.target.value })
+                }
                 className="col-span-3"
-                required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="role" className="text-right">
-                Rôle
-              </Label>
-              <Select value={userData.role} onValueChange={(value) => handleSelectChange("role", value)}>
+
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Rôle</Label>
+              <Select
+                value={form.role}
+                onValueChange={(value) =>
+                  setForm({ ...form, role: value })
+                }
+              >
                 <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Sélectionner un rôle" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Administrateur</SelectItem>
-                  <SelectItem value="editor">Éditeur</SelectItem>
-                  <SelectItem value="member">Membre</SelectItem>
+                  <SelectItem value="editeur">Éditeur</SelectItem>
+                  <SelectItem value="membre">Membre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Statut
-              </Label>
-              <Select value={userData.status} onValueChange={(value) => handleSelectChange("status", value)}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Sélectionner un statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Actif</SelectItem>
-                  <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="inactive">Inactif</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="avatar" className="text-right">
-                Avatar
-              </Label>
+
+            <div className="grid grid-cols-4 gap-4 items-center">
+              <Label className="text-right">Avatar</Label>
               <Input
-                id="avatar"
-                name="avatar"
                 type="file"
                 accept="image/*"
+                onChange={(e) =>
+                  setAvatarFile(e.target.files?.[0] || null)
+                }
                 className="col-span-3"
-                onChange={handleAvatarChange}
               />
             </div>
+
             {avatarPreview && (
-              <div className="flex justify-center mt-2">
+              <div className="flex justify-center">
                 <img
                   src={avatarPreview}
-                  alt="Preview"
-                  className="h-24 w-24 rounded-full object-cover border"
+                  className="h-20 w-20 rounded-full object-cover"
                 />
               </div>
             )}
           </div>
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Annuler
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Enregistrement..." : "Enregistrer les modifications"}
+              {isLoading ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

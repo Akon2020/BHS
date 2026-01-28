@@ -22,7 +22,7 @@ export const getAllBlogs = async (req, res, next) => {
         {
           model: Utilisateur,
           as: "auteur",
-          attributes: { exclude: ["motDePasse"] },
+          attributes: ["nomComplet", "email", "avatar"],
         },
         { model: Categorie, as: "categorie" },
         { model: Commentaire, as: "commentaires", required: false },

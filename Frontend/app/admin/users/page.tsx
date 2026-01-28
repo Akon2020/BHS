@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@/lib/axios";
+import { getAllUsers, deleteUser } from "@/actions/users";
+import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,48 +38,52 @@ import EditUserModal from "@/components/modals/edit-user-modal";
 import DeleteConfirmationModal from "@/components/modals/delete-confirmation-modal";
 import { toast } from "@/components/ui/use-toast";
 
+interface UIUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  lastLogin: string;
+  createdAt: string;
+  status: "active" | "pending";
+}
 
 export default function UsersPage() {
-  const [usersList, setUsersList] = useState<any[]>([]);
-  const [nombreUsers, setNombreUsers] = useState<number>(0);
+  const [users, setUsers] = useState<UIUser[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [search, setSearch] = useState("");
+  const [selectedUser, setSelectedUser] = useState<UIUser | null>(null);
+  const [modals, setModals] = useState({
+    add: false,
+    edit: false,
+    delete: false,
+  });
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/users");
-      const { usersInfo, nombre } = response.data;
-      setUsersList(
-        usersInfo.map((u: any) => {
-          const lastLogin = u.derniereConnexion
-            ? new Date(u.derniereConnexion).toLocaleString()
-            : "Jamais";
+      const { usersInfo, nombre } = await getAllUsers();
 
-          const createdAt = new Date(u.createdAt).toLocaleString()
+      const mapped: UIUser[] = usersInfo.map((u: User) => ({
+        id: u.idUtilisateur,
+        name: u.nomComplet,
+        email: u.email,
+        role: u.role,
+        avatar: u.avatar
+          ? `${process.env.NEXT_PUBLIC_API_URL}/${u.avatar}`
+          : undefined,
+        lastLogin: u.derniereConnexion
+          ? new Date(u.derniereConnexion).toLocaleString()
+          : "Jamais",
+        createdAt: new Date(u.createdAt).toLocaleString(),
+        status: u.derniereConnexion ? "active" : "pending",
+      }));
 
-          const status = lastLogin === "Jamais" ? "pending" : "active";
-
-          return {
-            id: u.idUtilisateur,
-            name: u.nomComplet,
-            email: u.email,
-            role: u.role,
-            avatar: `${process.env.NEXT_PUBLIC_API_URL}/${u.avatar}`,
-            lastLogin,
-            createdAt,
-            status,
-          };
-        })
-      );
-
-      setNombreUsers(nombre);
-    } catch (err) {
-      console.error("Erreur lors du chargement des utilisateurs :", err);
+      setUsers(mapped);
+      setTotal(nombre);
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible de charger les utilisateurs.",
@@ -92,29 +97,16 @@ export default function UsersPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
-  
-  const filteredUsers = usersList.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
-  const handleAddUser = () => setIsAddModalOpen(true);
-  const handleEditUser = (user: any) => {
-    setSelectedUser(user);
-    setIsEditModalOpen(true);
-  };
-  const handleDeleteUser = (user: any) => {
-    setSelectedUser(user);
-    setIsDeleteModalOpen(true);
-  };
-  const confirmDeleteUser = async () => {
+  const confirmDelete = async () => {
+    if (!selectedUser) return;
+
     try {
-      await api.delete(`/api/users/delete/${selectedUser.id}`);
-      setUsersList(usersList.filter((u) => u.id !== selectedUser.id));
+      await deleteUser(selectedUser.id);
+      setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
       toast({
         title: "Utilisateur supprimé",
-        description: `L'utilisateur ${selectedUser.name} a été supprimé.`,
+        description: `${selectedUser.name} a été supprimé.`,
       });
     } catch {
       toast({
@@ -125,11 +117,18 @@ export default function UsersPage() {
     }
   };
 
+  const filteredUsers = users.filter(
+    (u) =>
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Utilisateurs</h1>
-        <Button onClick={handleAddUser}>
+        <Button onClick={() => setModals({ ...modals, add: true })}>
           <Plus className="h-4 w-4 mr-2" />
           Nouvel utilisateur
         </Button>
@@ -143,8 +142,8 @@ export default function UsersPage() {
             type="search"
             placeholder="Rechercher un utilisateur..."
             className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <Button variant="outline">
@@ -163,13 +162,13 @@ export default function UsersPage() {
               <TableHead>Statut</TableHead>
               <TableHead>Dernière connexion</TableHead>
               <TableHead>Enregistré(e) le</TableHead>
-              <TableHead className="w-[80px]"></TableHead>
+              <TableHead className="w-[80px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6">
+                <TableCell colSpan={6} className="text-center py-6">
                   <Loader2 className="animate-spin h-8 w-8 mx-auto text-red-700" />
                 </TableCell>
               </TableRow>
@@ -179,10 +178,7 @@ export default function UsersPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage
-                          src={user.avatar || "/placeholder.svg"}
-                          alt={user.name}
-                        />
+                        <AvatarImage src={user.avatar} className="object-cover" />
                         <AvatarFallback>
                           {user.name.charAt(0)}
                         </AvatarFallback>
@@ -195,40 +191,29 @@ export default function UsersPage() {
                       </div>
                     </div>
                   </TableCell>
+
                   <TableCell>
-                    <Badge variant="outline">
-                      {user.role === "admin"
-                        ? "Administrateur"
-                        : user.role === "editeur"
-                        ? "Éditeur"
-                        : "Membre"}
-                    </Badge>
+                    <Badge variant="outline">{user.role}</Badge>
                   </TableCell>
+
                   <TableCell>
                     <Badge
                       variant={
-                        user.status === "active"
-                          ? "default"
-                          : user.status === "pending"
-                          ? "outline"
-                          : "secondary"
+                        user.status === "active" ? "default" : "outline"
                       }
                     >
-                      {user.status === "active"
-                        ? "Actif"
-                        : user.status === "pending"
-                        ? "En attente"
-                        : "Inactif"}
+                      {user.status === "active" ? "Actif" : "En attente"}
                     </Badge>
                   </TableCell>
+
                   <TableCell>{user.lastLogin}</TableCell>
                   <TableCell>{user.createdAt}</TableCell>
+
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Actions</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -239,14 +224,22 @@ export default function UsersPage() {
                             Voir le profil
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setModals({ ...modals, edit: true });
+                          }}
+                        >
                           <Pencil className="h-4 w-4 mr-2" />
                           Modifier
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-red-500 focus:text-red-500"
-                          onClick={() => handleDeleteUser(user)}
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setModals({ ...modals, delete: true });
+                          }}
                         >
                           <Trash className="h-4 w-4 mr-2" />
                           Supprimer
@@ -266,41 +259,30 @@ export default function UsersPage() {
         <p className="text-sm text-muted-foreground">
           Affichage de <strong>1</strong> à{" "}
           <strong>{filteredUsers.length}</strong> sur{" "}
-          <strong>{nombreUsers}</strong> utilisateurs
+          <strong>{total}</strong> utilisateurs
         </p>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled>
-            Précédent
-          </Button>
-          <Button variant="outline" size="sm">
-            1
-          </Button>
-          <Button variant="outline" size="sm">
-            Suivant
-          </Button>
-        </div>
       </div>
 
       {/* Modals */}
       <AddUserModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        isOpen={modals.add}
+        onClose={() => setModals({ ...modals, add: false })}
         onSuccess={fetchUsers}
       />
 
       <EditUserModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        isOpen={modals.edit}
+        onClose={() => setModals({ ...modals, edit: false })}
         user={selectedUser}
         onSuccess={fetchUsers}
       />
 
       <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={confirmDeleteUser}
+        isOpen={modals.delete}
+        onClose={() => setModals({ ...modals, delete: false })}
+        onConfirm={confirmDelete}
         title="Supprimer l'utilisateur"
-        description={`Êtes-vous sûr de vouloir supprimer l'utilisateur ${selectedUser?.name} ? Cette action est irréversible.`}
+        description={`Êtes-vous sûr de vouloir supprimer ${selectedUser?.name} ? Cette action est irréversible.`}
       />
     </div>
   );
