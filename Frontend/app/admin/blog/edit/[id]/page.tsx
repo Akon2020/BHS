@@ -543,7 +543,7 @@ export default function EditBlogPostPage() {
                   {currentImageUrl && !imagePreview && (
                     <div className="relative rounded-lg overflow-hidden border">
                       <Image
-                        src={currentImageUrl}
+                        src={`${process.env.NEXT_PUBLIC_API_URL}/${currentImageUrl}`}
                         alt="Image actuelle de l'article"
                         width={600}
                         height={400}

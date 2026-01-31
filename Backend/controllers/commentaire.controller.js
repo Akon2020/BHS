@@ -1,4 +1,4 @@
-import { Commentaire, Utilisateur, Blog } from "../models/index.model.js";
+import { Commentaire, Utilisateur } from "../models/index.model.js";
 // import { Op } from "sequelize";
 
 // Récupérer tous les commentaires (optionnellement filtrés)

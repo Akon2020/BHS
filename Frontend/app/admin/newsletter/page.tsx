@@ -161,7 +161,7 @@ export default function NewsletterAdminPage() {
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/newsletter/${newsletter.id}`}>
+                      <Link href={`/admin/newsletter/view/${newsletter.id}`}>
                         <Eye className="h-4 w-4" />
                         <span className="sr-only">Voir</span>
                       </Link>
