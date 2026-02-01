@@ -97,7 +97,18 @@ export default function NewsletterAdminPage() {
     fetchNewsletters();
   }, [statusFilter]);
 
+  // 🔒 PROTECTION : empêcher suppression si déjà envoyée
   const handleDelete = async (newsletter: UINewsletter) => {
+    if (newsletter.status === "envoye") {
+      toast({
+        title: "Action interdite",
+        description:
+          "Une newsletter déjà envoyée ne peut pas être supprimée.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await deleteNewsletter(newsletter.id);
       setNewsletters((prev) =>
@@ -147,6 +158,7 @@ export default function NewsletterAdminPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestion des Newsletters</h1>
         <Button asChild>
@@ -242,7 +254,9 @@ export default function NewsletterAdminPage() {
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/admin/newsletter/view/${newsletter.id}`}>
+                        <Link
+                          href={`/admin/newsletter/view/${newsletter.id}`}
+                        >
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
@@ -267,10 +281,16 @@ export default function NewsletterAdminPage() {
                         </>
                       )}
 
+                      {/* 🔒 Bouton suppression désactivé si envoyée */}
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-500 hover:text-red-600"
+                        className={`text-red-500 hover:text-red-600 ${
+                          newsletter.status === "envoye"
+                            ? "opacity-40 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={newsletter.status === "envoye"}
                         onClick={() => handleDelete(newsletter)}
                       >
                         <Trash className="h-4 w-4" />
