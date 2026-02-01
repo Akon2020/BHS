@@ -2,6 +2,8 @@ export type UserRole = "admin" | "editeur" | "membre";
 export type ContactStatut = "nouveau" | "lu" | "traite" | "archive";
 export type AbonneStatut = "actif" | "inactif" | "desabonne";
 export type BlogStatut = "publie" | "brouillon";
+export type NewsletterStatut = "brouillon" | "programme" | "envoye";
+export type NewsletterEnvoiStatut = "envoye" | "echec";
 
 export interface User {
   idUtilisateur: number;
@@ -27,7 +29,6 @@ export interface GetAllUsersResponse {
   usersInfo: User[];
 }
 
-
 export interface Contact {
   idContact: number;
   nomComplet: string;
@@ -43,7 +44,6 @@ export interface GetAllContactsResponse {
   nombre: number;
   contactsInfo: Contact[];
 }
-
 
 export interface Abonne {
   idAbonne: number;
@@ -86,7 +86,6 @@ export interface Auth {
   userInfo: User;
   data: any;
 }
-
 
 export interface BlogAuteur {
   idUtilisateur?: number;
@@ -173,4 +172,63 @@ export interface GetCategorieBySlugResponse {
 export interface CategorieMutationResponse {
   message: string;
   data: Categorie;
+}
+
+export interface NewsletterRedacteur {
+  idUtilisateur: number;
+  nomComplet: string;
+  email: string;
+}
+
+export interface NewsletterAbonne {
+  idNewsletterAbonne: number;
+  idNewsletter: number;
+  idAbonne: number;
+  statut: NewsletterEnvoiStatut;
+  dateEnvoi?: string;
+  abonne: {
+    idAbonne: number;
+    nomComplet: string;
+    email: string;
+    statut: AbonneStatut;
+    dateAbonnement: string;
+    dateDesabonnement?: string | null;
+  };
+}
+
+export interface Newsletter {
+  idNewsletter: number;
+  titreInterne: string;
+  objetMail: string;
+  contenu: string;
+  statut: NewsletterStatut;
+  dateProgrammee?: string | null;
+  dateEnvoi?: string | null;
+  writedBy: number;
+  createdAt: string;
+  updatedAt: string;
+
+  redacteur: NewsletterRedacteur;
+  envois?: NewsletterAbonne[];
+}
+
+export interface GetAllNewslettersResponse {
+  total: number;
+  page: number;
+  pages: number;
+  data: Newsletter[];
+}
+
+export type GetSingleNewsletterResponse = Newsletter;
+
+export interface NewsletterStatsResponse {
+  total: number;
+  envoye: number;
+  echec: number;
+  tauxSucces: number | string;
+}
+
+export interface NewsletterMutationResponse {
+  message: string;
+  data: Newsletter;
 }
