@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image"
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { UpcomingEventsSection } from "@/components/sections/upcoming-events";
 
 export default function HomePage() {
   return (
@@ -446,110 +447,7 @@ export default function HomePage() {
       </section>
 
       {/* Événements à Venir Section */}
-      <section className="py-24 bg-background">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="font-serif text-4xl font-bold tracking-tight">Événements à Venir</h2>
-              <p className="mt-3 text-muted-foreground leading-relaxed">
-                Rejoignez-nous pour ces moments spéciaux de communion, d'apprentissage et de célébration.
-              </p>
-            </div>
-            <Link href="/evenements">
-              <Button variant="outline" className="gap-2 hidden sm:flex bg-transparent">
-                Tous les événements
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Event 1 */}
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-video bg-muted flex items-center justify-center">
-                <Calendar className="h-16 w-16 text-muted-foreground/30" />
-              </div>
-              <CardContent className="p-6">
-                <h3 className="font-serif text-xl font-bold mb-3">Messe Chrismale</h3>
-                <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>15 Juin 2025</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>18:00 - 21:00</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>Cathédrale Notre Dame de la Paix</span>
-                  </div>
-                </div>
-                <Button className="w-full">En savoir plus</Button>
-              </CardContent>
-            </Card>
-
-            {/* Event 2 */}
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-video bg-muted flex items-center justify-center">
-                <Calendar className="h-16 w-16 text-muted-foreground/30" />
-              </div>
-              <CardContent className="p-6">
-                <h3 className="font-serif text-xl font-bold mb-3">Retraite de Carême</h3>
-                <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>10-12 Juillet 2025</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>Toute la journée</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>Centre Spirituel Saint-Ignace</span>
-                  </div>
-                </div>
-                <Button className="w-full">En savoir plus</Button>
-              </CardContent>
-            </Card>
-
-            {/* Event 3 */}
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-video bg-muted flex items-center justify-center">
-                <Calendar className="h-16 w-16 text-muted-foreground/30" />
-              </div>
-              <CardContent className="p-6">
-                <h3 className="font-serif text-xl font-bold mb-3">Veillée de Prière pour la Paix</h3>
-                <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>5 Août 2025</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>19:30 - 22:00</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>Paroisse Saint-Pierre Claver</span>
-                  </div>
-                </div>
-                <Button className="w-full">En savoir plus</Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8 sm:hidden">
-            <Link href="/evenements">
-              <Button variant="outline" className="w-full gap-2 bg-transparent">
-                Tous les événements
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <UpcomingEventsSection />
 
       {/* Témoignages Section */}
       <section className="py-24 bg-muted/30">

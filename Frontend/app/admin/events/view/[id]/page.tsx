@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import QRCode from "qrcode";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -93,123 +94,127 @@ export default function ViewEventAdminPage() {
   }, [event, search]);
 
   const handleExportPDF = async () => {
-    try {
-      if (!event) return;
+  try {
+    if (!event) return;
 
-      const doc = new jsPDF("p", "mm", "a4");
+    const doc = new jsPDF("p", "mm", "a4");
 
-      const PRIMARY = [148, 28, 38]; // Rouge Burning Heart
-      const TEXT_DARK = [40, 40, 40];
-      const MUTED = [120, 120, 120];
+    const PRIMARY = [148, 28, 38];
+    const TEXT_DARK = [40, 40, 40];
+    const MUTED = [120, 120, 120];
 
-      // Charger le logo
-      const logoUrl = "/images/logon.png";
-      const logoBase64 = await fetch(logoUrl)
-        .then((res) => res.blob())
-        .then(
-          (blob) =>
-            new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob);
-            }),
-        );
-
-      // === HEADER (sans bandeau rouge) ===
-      doc.addImage(logoBase64, "PNG", 95, 12, 20, 20); // centré
-
-      doc.setFontSize(14);
-      doc.setTextColor(...TEXT_DARK);
-      doc.text("BURNING HEART", 105, 38, { align: "center" });
-
-      doc.setFontSize(10);
-      doc.text("PÈLERINS AVEC LE CHRIST", 105, 44, { align: "center" });
-
-      doc.setFontSize(9);
-      doc.setTextColor(...MUTED);
-      doc.text("Email : contact@burningheartihs.org", 105, 50, {
-        align: "center",
-      });
-      doc.text("Tél : +243 970 000 000", 105, 55, { align: "center" });
-      doc.text("Adresse : Bukavu, RDC", 105, 60, { align: "center" });
-
-      // === TITRE DOCUMENT ===
-      doc.setTextColor(...TEXT_DARK);
-      doc.setFontSize(14);
-      doc.text("Liste des inscrits", 14, 75);
-
-      doc.setFontSize(11);
-      doc.text(event.titre, 14, 82);
-
-      doc.setFontSize(10);
-      doc.setTextColor(...MUTED);
-      doc.text(
-        `Événement prévu le : ${new Date(event.dateEvenement).toLocaleDateString("fr-FR")}`,
-        14,
-        88,
+    const logoUrl = "/images/logon.png";
+    const logoBase64 = await fetch(logoUrl)
+      .then((res) => res.blob())
+      .then(
+        (blob) =>
+          new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          }),
       );
 
-      // === TABLEAU ===
-      const rows = filteredInscriptions.map((ins: any, i: number) => [
-        i + 1,
-        ins.utilisateur?.nomComplet || ins.nomComplet || "-",
-        ins.utilisateur?.email || ins.email || "-",
-        ins.telephone || "-",
-        ins.sexe || "-",
-        ins.utilisateur ? "Utilisateur" : "Visiteur",
-      ]);
+    const eventUrl = `${window.location.origin}/events/${event.slug || event.idEvenement}`;
+    const qrBase64 = await QRCode.toDataURL(eventUrl, {
+      margin: 1,
+      width: 300,
+      color: {
+        dark: "#941C26",
+        light: "#FFFFFF",
+      },
+    });
 
-      autoTable(doc, {
-        head: [["#", "Nom", "Email", "Téléphone", "Sexe", "Type"]],
-        body: rows,
-        startY: 95,
-        theme: "grid",
-        headStyles: {
-          fillColor: PRIMARY, // 🔴 Bandeau rouge sur header du tableau
-          textColor: [255, 255, 255],
-          fontStyle: "bold",
-        },
-        bodyStyles: {
-          textColor: TEXT_DARK,
-        },
-        alternateRowStyles: {
-          fillColor: [245, 245, 245],
-        },
-        styles: {
-          fontSize: 9,
-          cellPadding: 3,
-        },
-        margin: { left: 14, right: 14 },
-      });
+    doc.addImage(logoBase64, "PNG", 95, 12, 20, 20);
+    doc.addImage(qrBase64, "PNG", 175, 12, 18, 18);
 
-      // === FOOTER ===
-      const pageCount = doc.getNumberOfPages();
-      const today = new Date().toLocaleDateString("fr-FR");
+    doc.setFontSize(14);
+    doc.setTextColor(...TEXT_DARK);
+    doc.text("BURNING HEART", 105, 38, { align: "center" });
 
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(9);
-        doc.setTextColor(...MUTED);
+    doc.setFontSize(10);
+    doc.text("PÈLERINS AVEC LE CHRIST", 105, 44, { align: "center" });
 
-        doc.text(`Généré par burningheartihs.org • ${today}`, 14, 290);
-        doc.text(`Page ${i} / ${pageCount}`, 190, 290, { align: "right" });
-      }
+    doc.setFontSize(9);
+    doc.setTextColor(...MUTED);
+    doc.text("Email : burningheartihs@gmail.com", 105, 50, { align: "center" });
+    doc.text("Tél : +243 849 005 240", 105, 55, { align: "center" });
+    doc.text("Adresse : 259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu", 105, 60, { align: "center" });
 
-      doc.save(`BHS-Event-${event.slug || event.idEvenement}.pdf`);
+    doc.setTextColor(...TEXT_DARK);
+    doc.setFontSize(14);
+    doc.text("Liste des inscrits", 14, 75);
 
-      toast({
-        title: "Export réussi",
-        description: "Le fichier PDF a été généré avec succès",
-      });
-    } catch (e) {
-      console.error(e);
-      toast({
-        title: "Erreur export PDF",
-        description: "Impossible de générer le PDF",
-        variant: "destructive",
-      });
+    doc.setFontSize(11);
+    doc.text(event.titre, 14, 82);
+
+    doc.setFontSize(10);
+    doc.setTextColor(...MUTED);
+    doc.text(
+      `Événement prévu le : ${new Date(event.dateEvenement).toLocaleDateString("fr-FR")}`,
+      14,
+      88,
+    );
+
+    const rows = filteredInscriptions.map((ins: any, i: number) => [
+      i + 1,
+      ins.utilisateur?.nomComplet || ins.nomComplet || "-",
+      ins.utilisateur?.email || ins.email || "-",
+      ins.telephone || "-",
+      ins.sexe || "-",
+      ins.utilisateur ? "Utilisateur" : "Visiteur",
+    ]);
+
+    autoTable(doc, {
+      head: [["#", "Nom", "Email", "Téléphone", "Sexe", "Type"]],
+      body: rows,
+      startY: 95,
+      theme: "grid",
+      headStyles: {
+        fillColor: PRIMARY,
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      bodyStyles: {
+        textColor: TEXT_DARK,
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    const pageCount = doc.getNumberOfPages();
+    const today = new Date().toLocaleDateString("fr-FR");
+
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(9);
+      doc.setTextColor(...MUTED);
+
+      doc.text(`Généré par burningheartihs.org • ${today}`, 14, 290);
+      doc.text(`Page ${i} / ${pageCount}`, 190, 290, { align: "right" });
     }
-  };
+
+    doc.save(`BHS-Event-${event.slug || event.idEvenement}.pdf`);
+
+    toast({
+      title: "Export réussi",
+      description: "Le fichier PDF a été généré avec succès",
+    });
+  } catch (e) {
+    console.error(e);
+    toast({
+      title: "Erreur export PDF",
+      description: "Impossible de générer le PDF",
+      variant: "destructive",
+    });
+  }
+};
 
   if (isLoading) {
     return (
