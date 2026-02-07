@@ -22,7 +22,7 @@ export default function EventsAdminPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState<Evenement | null>(null)
 
-  // 🔄 Charger les événements depuis l'API
+
   const fetchEvents = async () => {
     try {
       setIsLoading(true)
@@ -43,7 +43,6 @@ export default function EventsAdminPage() {
     fetchEvents()
   }, [statusFilter])
 
-  // 🔎 Filtre côté client (recherche texte)
   const filteredEvents = eventsList.filter((event) => {
     const q = searchQuery.toLowerCase()
 
@@ -195,13 +194,13 @@ export default function EventsAdminPage() {
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/admin/events/${event.idEvenement}`}>
+                        <Link href={`/admin/events/view/${event.idEvenement}`}>
                           <Eye className="h-4 w-4" />
                           <span className="sr-only">Voir</span>
                         </Link>
                       </Button>
                       <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/admin/events/${event.idEvenement}/edit`}>
+                        <Link href={`/admin/events/edit/${event.idEvenement}`}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Modifier</span>
                         </Link>

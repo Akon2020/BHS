@@ -74,7 +74,7 @@ export const getAllEventsAdmin = async (req, res, next) => {
   try {
     const {
       statut,
-      q, // recherche plein‑texte sur titre|description|lieu
+      q,
       startDate,
       endDate,
       limit = 20,
@@ -104,10 +104,7 @@ export const getAllEventsAdmin = async (req, res, next) => {
           attributes: ["idUtilisateur", "nomComplet", "email"],
         },
       ],
-      order: [
-        ["dateEvenement", "DESC"],
-        ["heureDebut", "DESC"],
-      ],
+      order: [["createdAt", "DESC"]],
       limit: +limit,
       offset: (+page - 1) * +limit,
     });
