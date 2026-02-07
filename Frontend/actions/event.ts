@@ -248,3 +248,21 @@ export const inscrireAUnEvenement = async (
     );
   }
 };
+
+export const registerToEvent = async (
+  slug: string,
+  data?: InscriptionEvenementBody
+): Promise<InscriptionEvenementResponse> => {
+  try {
+    const res = await api.post<InscriptionEvenementResponse>(
+      `/api/evenements/slug/${slug}/inscription`,
+      data || {}
+    );
+    return res.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Erreur lors de l'inscription à l'événement"
+    );
+  }
+};

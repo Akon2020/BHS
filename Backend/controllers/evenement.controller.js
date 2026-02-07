@@ -44,6 +44,7 @@ export const getAllEvents = async (req, res, next) => {
         },
       ],
       order: [
+        ["createdAt", "DESC"],
         ["dateEvenement", "ASC"],
         ["heureDebut", "ASC"],
       ],
@@ -496,6 +497,113 @@ export const inscrireAUnEvenement = async (req, res, next) => {
 
       dataInscription = {
         idEvenement: id,
+        nomComplet,
+        email,
+        sexe,
+        telephone,
+        typeInscription: "visiteur",
+      };
+    }
+
+    const inscription = await InscriptionEvenement.create(dataInscription);
+
+    event.nombreInscrits += 1;
+    await event.save();
+
+    return res.status(201).json({
+      message: "Inscription réussie 🎉",
+      inscription,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const registerToEvent = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const { nomComplet, email, sexe, telephone } = req.body;
+
+    const userId = req.user?.idUtilisateur || null;
+
+    const event = await Evenement.findOne({
+      where: { slug, statut: "publie" },
+    });
+    
+    if (!event)
+      return res.status(404).json({ message: "Événement introuvable." });
+
+    if (event.statut !== "publie")
+      return res
+        .status(400)
+        .json({ message: "Cet événement n'est pas ouvert aux inscriptions." });
+
+    const eventDate = new Date(event.dateEvenement);
+    const now = new Date();
+    if (eventDate < now)
+      return res.status(400).json({
+        message: "Impossible de s'inscrire à un événement déjà passé.",
+      });
+
+    if (event.nombreInscrits >= event.nombrePlaces)
+      return res
+        .status(400)
+        .json({ message: "Toutes les places sont déjà prises." });
+
+    if (userId) {
+      const dejaInscrit = await InscriptionEvenement.findOne({
+        where: {
+          idEvenement: event.idEvenement,
+          idUtilisateur: userId,
+        },
+      });
+
+      if (dejaInscrit)
+        return res
+          .status(409)
+          .json({ message: "Vous êtes déjà inscrit à cet événement." });
+    } else {
+      const dejaInscrit = await InscriptionEvenement.findOne({
+        where: {
+          idEvenement: event.idEvenement,
+          email,
+        },
+      });
+
+      if (dejaInscrit)
+        return res
+          .status(409)
+          .json({ message: "Cet email est déjà inscrit à cet événement." });
+    }
+
+    let dataInscription = {};
+
+    if (userId) {
+      const user = await Utilisateur.findByPk(userId, {
+        attributes: ["idUtilisateur", "nomComplet", "email"],
+      });
+      console.log("User found:", user);
+
+      if (!user)
+        return res.status(404).json({ message: "Utilisateur introuvable." });
+
+      dataInscription = {
+        idEvenement: event.idEvenement,
+        idUtilisateur: user.idUtilisateur,
+        nomComplet: user.nomComplet,
+        email: user.email,
+        sexe: sexe,
+        telephone: telephone,
+        typeInscription: "utilisateur",
+      };
+    } else {
+      if (!nomComplet || !email || !sexe || !telephone)
+        return res.status(400).json({
+          message: "Nom, email, sexe et téléphone sont obligatoires.",
+        });
+
+      dataInscription = {
+        idEvenement: event.idEvenement,
         nomComplet,
         email,
         sexe,

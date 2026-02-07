@@ -10,6 +10,7 @@ import {
   updateEvent,
   deleteEvent,
   inscrireAUnEvenement,
+  registerToEvent,
 } from "../controllers/evenement.controller.js";
 import {
   authenticationJWT,
@@ -331,5 +332,44 @@ evenementRouter.delete("/delete/:id", authenticationJWT, deleteEvent);
  *         description: Inscription réussie
  */
 evenementRouter.post("/:id/inscription", optionalAuthJWT, inscrireAUnEvenement);
+
+/**
+ * @swagger
+ * /api/evenements/slug/{slug}/inscription:
+ *   post:
+ *     summary: S'inscrire à un événement (connecté ou visiteur)
+ *     tags: [Événements]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nomComplet:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               sexe:
+ *                 type: string
+ *               telephone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Inscription réussie
+ */
+evenementRouter.post(
+  "/slug/:slug/inscription",
+  optionalAuthJWT,
+  registerToEvent,
+);
 
 export default evenementRouter;
