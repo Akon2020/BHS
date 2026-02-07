@@ -24,7 +24,6 @@ export default function BlogPostPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchBlog = async () => {
-    console.log("Fetching blog with slug:", slug);
     try {
       setLoading(true);
 
@@ -53,17 +52,13 @@ export default function BlogPostPage() {
   };
 
   useEffect(() => {
-    console.log("Current slug:", slug);
-    console.log("Full params:", params);
     
     if (slug) {
       fetchBlog();
     }
   }, [slug]);
 
-  /* =======================
-     LOADING
-  ======================= */
+
   if (loading) {
     return (
       <div className="flex flex-col">
@@ -104,9 +99,6 @@ if (!blog && !loading) {
   );
 }
 
-  /* =======================
-     PAGE
-  ======================= */
   return (
     <div className="flex flex-col">
       <Header />

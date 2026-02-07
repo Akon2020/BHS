@@ -75,7 +75,7 @@ export const checkAuthStatus = (req, res) => {
   } catch (error) {
     console.error(
       "Erreur lors de la vérification du statut d'authentification:",
-      error
+      error,
     );
     return res.status(500).json({ message: "Erreur serveur." });
   }
@@ -90,4 +90,49 @@ export const authorizeRoles = (...roles) => {
     }
     next();
   };
+};
+
+export const optionalAuthJWT = async (req, res, next) => {
+  try {
+    let token = null;
+
+    const authHeader = req.headers["authorization"];
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+
+    if (!token && req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) return next();
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (!decoded.email) return next();
+
+    const user = await Utilisateur.findOne({
+      where: { email: decoded.email },
+      attributes: { exclude: ["password"] },
+    });
+
+    if (user) {
+      req.user = user;
+    }
+
+    next();
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(401)
+        .json({
+          message:
+            "Jeton expiré. Veuillez vous reconnecter ou inscrivez-vous en tant que visiteur.",
+        });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Jeton invalide." });
+    }
+    next();
+  }
 };

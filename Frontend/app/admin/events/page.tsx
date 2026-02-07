@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -11,95 +11,79 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import DeleteConfirmationModal from "@/components/modals/delete-confirmation-modal"
 import { toast } from "@/components/ui/use-toast"
 
-// Exemple de données d'événements
-const events = [
-  {
-    id: 1,
-    title: "Conférence Annuelle",
-    description: "Notre conférence annuelle avec des intervenants de renom.",
-    date: "15 Juin 2025",
-    time: "18:00 - 21:00",
-    location: "Salle Principale",
-    status: "upcoming",
-    attendees: 120,
-  },
-  {
-    id: 2,
-    title: "Retraite Spirituelle",
-    description: "Un weekend de ressourcement spirituel et de communion fraternelle.",
-    date: "10-12 Juillet 2025",
-    time: "Tout le weekend",
-    location: "Centre de retraite",
-    status: "upcoming",
-    attendees: 45,
-  },
-  {
-    id: 3,
-    title: "Concert de Louange",
-    description: "Une soirée de louange avec notre équipe de musiciens.",
-    date: "5 Août 2025",
-    time: "19:30 - 22:00",
-    location: "Auditorium",
-    status: "upcoming",
-    attendees: 200,
-  },
-  {
-    id: 4,
-    title: "Journée des Familles",
-    description: "Une journée spéciale dédiée aux familles avec des activités pour tous les âges.",
-    date: "20 Mai 2025",
-    time: "10:00 - 17:00",
-    location: "Parc municipal",
-    status: "draft",
-    attendees: 0,
-  },
-  {
-    id: 5,
-    title: "Étude Biblique Spéciale",
-    description: "Une étude approfondie sur le livre des Actes.",
-    date: "12 Avril 2025",
-    time: "19:00 - 21:00",
-    location: "Salle d'étude",
-    status: "past",
-    attendees: 35,
-  },
-]
+import { getAllEventsAdmin, deleteEvent } from "@/actions/event"
+import type { Evenement } from "@/types/user"
 
 export default function EventsAdminPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [eventsList, setEventsList] = useState(events)
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [eventsList, setEventsList] = useState<Evenement[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedEvent, setSelectedEvent] = useState<any>(null)
+  const [selectedEvent, setSelectedEvent] = useState<Evenement | null>(null)
 
-  // Filtrer les événements en fonction de la recherche et des filtres
+  // 🔄 Charger les événements depuis l'API
+  const fetchEvents = async () => {
+    try {
+      setIsLoading(true)
+      const res = await getAllEventsAdmin({ statut: statusFilter !== "all" ? statusFilter : undefined })
+      setEventsList(res.events)
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de charger les événements",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchEvents()
+  }, [statusFilter])
+
+  // 🔎 Filtre côté client (recherche texte)
   const filteredEvents = eventsList.filter((event) => {
+    const q = searchQuery.toLowerCase()
+
     const matchesSearch =
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchQuery.toLowerCase())
+      event.titre.toLowerCase().includes(q) ||
+      event.description.toLowerCase().includes(q) ||
+      event.lieu.toLowerCase().includes(q)
 
-    const matchesStatus = statusFilter === "all" || event.status === statusFilter
-
-    return matchesSearch && matchesStatus
+    return matchesSearch
   })
 
-  const handleDeleteEvent = (event: any) => {
+  const handleDeleteEvent = (event: Evenement) => {
     setSelectedEvent(event)
     setIsDeleteModalOpen(true)
   }
 
   const confirmDeleteEvent = async () => {
-    // Simuler un appel API
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    if (!selectedEvent) return
 
-    // Supprimer l'événement de la liste
-    setEventsList(eventsList.filter((event) => event.id !== selectedEvent.id))
+    try {
+      await deleteEvent(selectedEvent.idEvenement)
 
-    toast({
-      title: "Événement supprimé",
-      description: `L'événement "${selectedEvent.title}" a été supprimé avec succès.`,
-    })
+      setEventsList((prev) =>
+        prev.filter((event) => event.idEvenement !== selectedEvent.idEvenement)
+      )
+
+      toast({
+        title: "Événement supprimé",
+        description: `L'événement "${selectedEvent.titre}" a été supprimé avec succès.`,
+      })
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de supprimer l'événement",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleteModalOpen(false)
+      setSelectedEvent(null)
+    }
   }
 
   return (
@@ -133,9 +117,10 @@ export default function EventsAdminPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="upcoming">À venir</SelectItem>
-              <SelectItem value="past">Passé</SelectItem>
-              <SelectItem value="draft">Brouillon</SelectItem>
+              <SelectItem value="publie">Publié</SelectItem>
+              <SelectItem value="brouillon">Brouillon</SelectItem>
+              <SelectItem value="annule">Annulé</SelectItem>
+              <SelectItem value="termine">Terminé</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -155,63 +140,91 @@ export default function EventsAdminPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredEvents.map((event) => (
-              <TableRow key={event.id}>
-                <TableCell>
-                  <div>
-                    <p className="font-medium">{event.title}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-1">{event.description}</p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div>
-                    <p>{event.date}</p>
-                    <p className="text-sm text-muted-foreground">{event.time}</p>
-                  </div>
-                </TableCell>
-                <TableCell>{event.location}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      event.status === "upcoming" ? "default" : event.status === "past" ? "secondary" : "outline"
-                    }
-                  >
-                    {event.status === "upcoming" ? "À venir" : event.status === "past" ? "Passé" : "Brouillon"}
-                  </Badge>
-                </TableCell>
-                <TableCell>{event.attendees}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/events/${event.id}`}>
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">Voir</span>
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/events/${event.id}/edit`}>
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Modifier</span>
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
-                      onClick={() => handleDeleteEvent(event)}
-                    >
-                      <Trash className="h-4 w-4" />
-                      <span className="sr-only">Supprimer</span>
-                    </Button>
-                  </div>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                  Chargement...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : filteredEvents.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                  Aucun événement trouvé
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredEvents.map((event) => (
+                <TableRow key={event.idEvenement}>
+                  <TableCell>
+                    <div>
+                      <p className="font-medium">{event.titre}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {event.description}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <p>{new Date(event.dateEvenement).toLocaleDateString()}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {event.heureDebut} - {event.heureFin}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>{event.lieu}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        event.statut === "publie"
+                          ? "default"
+                          : event.statut === "termine"
+                          ? "secondary"
+                          : "outline"
+                      }
+                    >
+                      {event.statut === "publie"
+                        ? "Publié"
+                        : event.statut === "brouillon"
+                        ? "Brouillon"
+                        : event.statut === "annule"
+                        ? "Annulé"
+                        : "Terminé"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{event.nombreInscrits}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/admin/events/${event.idEvenement}`}>
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">Voir</span>
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/admin/events/${event.idEvenement}/edit`}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Modifier</span>
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                        onClick={() => handleDeleteEvent(event)}
+                      >
+                        <Trash className="h-4 w-4" />
+                        <span className="sr-only">Supprimer</span>
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination (UI inchangé pour l’instant) */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Affichage de <strong>1</strong> à <strong>{filteredEvents.length}</strong> sur{" "}
@@ -236,7 +249,7 @@ export default function EventsAdminPage() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDeleteEvent}
         title="Supprimer l'événement"
-        description={`Êtes-vous sûr de vouloir supprimer l'événement "${selectedEvent?.title}" ? Cette action est irréversible.`}
+        description={`Êtes-vous sûr de vouloir supprimer l'événement "${selectedEvent?.titre}" ? Cette action est irréversible.`}
       />
     </div>
   )

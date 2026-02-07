@@ -4,6 +4,10 @@ export type AbonneStatut = "actif" | "inactif" | "desabonne";
 export type BlogStatut = "publie" | "brouillon";
 export type NewsletterStatut = "brouillon" | "programme" | "envoye";
 export type NewsletterEnvoiStatut = "envoye" | "echec";
+export type EvenementStatut = "brouillon" | "publie" | "annule" | "termine";
+export type Sexe = "homme" | "femme";
+export type TypeInscription = "utilisateur" | "visiteur";
+export type StatutInscription = "confirme" | "en_attente" | "annule";
 
 export interface User {
   idUtilisateur: number;
@@ -231,4 +235,110 @@ export interface NewsletterStatsResponse {
 export interface NewsletterMutationResponse {
   message: string;
   data: Newsletter;
+}
+
+export interface EvenementCreateur {
+  idUtilisateur: number;
+  nomComplet: string;
+  email: string;
+}
+
+export interface InscriptionEvenement {
+  idInscription: number;
+  nomComplet: string;
+  email: string;
+  sexe: Sexe;
+  telephone: string;
+  statut: StatutInscription;
+  typeInscription: TypeInscription;
+  dateInscription: string;
+  utilisateur: EvenementCreateur | null;
+}
+
+export interface Evenement {
+  idEvenement: number;
+  titre: string;
+  slug: string;
+  description: string;
+  dateEvenement: string;
+  heureDebut: string;
+  heureFin: string;
+  lieu: string;
+  nombrePlaces: number;
+  nombreInscrits: number;
+  imageEvenement: string;
+  statut: EvenementStatut;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
+  createur: EvenementCreateur;
+}
+
+export interface GetAllEventsResponse {
+  total: number;
+  page: number;
+  pageSize: number;
+  events: Evenement[];
+}
+
+export interface GetSingleEventResponse {
+  event: Evenement;
+}
+
+export interface EvenementAdmin extends Evenement {
+  inscriptions: InscriptionEvenement[];
+}
+
+export interface GetSingleEventAdminResponse {
+  event: EvenementAdmin;
+}
+
+export interface CreateEvenementBody {
+  titre: string;
+  description: string;
+  dateEvenement: string;
+  heureDebut: string;
+  heureFin: string;
+  lieu: string;
+  nombrePlaces?: number;
+  statut?: EvenementStatut;
+}
+
+export interface CreateEvenementResponse {
+  mailSend: string;
+  message: string;
+  data: Evenement;
+}
+
+export interface UpdateEvenementBody {
+  titre?: string;
+  slug?: string;
+  description?: string;
+  dateEvenement?: string;
+  heureDebut?: string;
+  heureFin?: string;
+  lieu?: string;
+  nombrePlaces?: number;
+  statut?: EvenementStatut;
+}
+
+export interface UpdateEvenementResponse {
+  message: string;
+  data: Evenement;
+}
+
+export interface DeleteEvenementResponse {
+  message: string;
+}
+
+export interface InscriptionEvenementBody {
+  nomComplet?: string;
+  email?: string;
+  sexe?: Sexe;
+  telephone?: string;
+}
+
+export interface InscriptionEvenementResponse {
+  message: string;
+  inscription: InscriptionEvenement;
 }

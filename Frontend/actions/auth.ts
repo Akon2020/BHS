@@ -67,7 +67,6 @@ export const login = async (data: AuthPayload): Promise<Auth> => {
       withCredentials: true,
     });
     const { token, userInfo } = res.data.data;
-    console.log(res.data)
     return { token, userInfo };
   } catch (error: any) {
     console.error(`Erreur lors de la connexion de l'utilisateur:`, error);

@@ -1,4 +1,5 @@
 import { Op, fn, col } from "sequelize";
+import slugify from "slugify";
 import {
   Abonne,
   Evenement,
@@ -20,7 +21,7 @@ const requiredFields = [
 
 const hasMissingFields = (obj) =>
   requiredFields.some(
-    (field) => !obj[field] || obj[field].toString().trim() === ""
+    (field) => !obj[field] || obj[field].toString().trim() === "",
   );
 
 export const getAllEvents = async (req, res, next) => {
@@ -167,6 +168,96 @@ export const getEventsByDate = async (req, res, next) => {
   }
 };
 
+export const getEventBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const event = await Evenement.findOne({
+      where: { slug, statut: "publie" },
+      include: [
+        {
+          model: Utilisateur,
+          as: "createur",
+          attributes: ["idUtilisateur", "nomComplet", "email"],
+        },
+        {
+          model: InscriptionEvenement,
+          as: "inscriptions",
+          attributes: ["idInscription"],
+        },
+      ],
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: "Événement non trouvé" });
+    }
+
+    const data = event.toJSON();
+    data.nombreInscrits = data.inscriptions?.length || 0;
+    delete data.inscriptions;
+
+    res.status(200).json({ event: data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSingleEventAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Evenement.findByPk(id, {
+      include: [
+        {
+          model: Utilisateur,
+          as: "createur",
+          attributes: ["idUtilisateur", "nomComplet", "email"],
+        },
+        {
+          model: InscriptionEvenement,
+          as: "inscriptions",
+          attributes: [
+            "idInscription",
+            "nomComplet",
+            "email",
+            "sexe",
+            "telephone",
+            "statut",
+            "typeInscription",
+            "dateInscription",
+          ],
+          include: [
+            {
+              model: Utilisateur,
+              as: "utilisateur",
+              attributes: ["idUtilisateur", "nomComplet", "email"],
+              required: false,
+            },
+          ],
+        },
+      ],
+      order: [
+        [
+          { model: InscriptionEvenement, as: "inscriptions" },
+          "dateInscription",
+          "DESC",
+        ],
+      ],
+      distinct: true,
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: "Événement non trouvé" });
+    }
+
+    const data = event.toJSON();
+    data.nombreInscrits = data.inscriptions?.length || 0;
+
+    res.status(200).json({ event: data });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createEvent = async (req, res, next) => {
   try {
     if (hasMissingFields(req.body))
@@ -176,18 +267,22 @@ export const createEvent = async (req, res, next) => {
 
     const {
       titre,
+      slug,
       description,
       dateEvenement,
       heureDebut,
       heureFin,
       lieu,
-      nombrePlaces = 100,
+      nombrePlaces,
       statut,
     } = req.body;
 
+    const generatedSlug = slugify(titre, { lower: true, strict: true });
+    const finalSlug = slug || generatedSlug;
+
     const existing = await Evenement.findOne({
       where: {
-        [Op.and]: [{ titre }, { dateEvenement }, { lieu }],
+        [Op.or]: [{ slug: finalSlug }, { titre, dateEvenement, lieu }],
       },
     });
     if (existing)
@@ -200,12 +295,13 @@ export const createEvent = async (req, res, next) => {
 
     const newEvent = await Evenement.create({
       titre,
+      slug: finalSlug,
       description,
       dateEvenement,
       heureDebut,
       heureFin,
       lieu,
-      nombrePlaces,
+      nombrePlaces: nombrePlaces || 100,
       imageEvenement,
       statut: statut || "brouillon",
       createdBy,
@@ -229,7 +325,7 @@ export const createEvent = async (req, res, next) => {
               newEvent.titre,
               newEvent.dateEvenement,
               newEvent.lieu,
-              `${FRONT_URL}/evenements/${newEvent.idEvenement}`
+              `${FRONT_URL}/evenements/${newEvent.idEvenement}`,
             ),
           };
 
@@ -237,7 +333,7 @@ export const createEvent = async (req, res, next) => {
         } catch (mailError) {
           console.error(
             `Erreur d'envoi email à ${abonne.email} →`,
-            mailError.message
+            mailError.message,
           );
           mailEnvoye = false;
         }
@@ -272,6 +368,7 @@ export const updateEvent = async (req, res, next) => {
 
     const updatableFields = [
       "titre",
+      "slug",
       "description",
       "dateEvenement",
       "heureDebut",
@@ -284,6 +381,10 @@ export const updateEvent = async (req, res, next) => {
     updatableFields.forEach((field) => {
       if (req.body[field] !== undefined) event[field] = req.body[field];
     });
+
+    if (req.body.titre && !req.body.slug) {
+      event.slug = slugify(req.body.titre, { lower: true, strict: true });
+    }
 
     if (req.file) event.imageEvenement = req.file.path;
 
@@ -316,181 +417,106 @@ export const deleteEvent = async (req, res, next) => {
   }
 };
 
-/* import { Evenement } from "../models/index.model.js";
-import { Op } from "sequelize";
-
-export const getAllEvents = async (req, res, next) => {
-  try {
-    const events = await Evenement.findAll({ where: { statut: "publie" } });
-    return res.status(200).json({ total: events.length, events });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
-    next(error);
-  }
-};
-
-export const getAllEventsAdmin = async (req, res, next) => {
-  try {
-    const events = await Evenement.findAll({ order: [["ordre", "ASC"]] });
-    return res.status(200).json({ total: events.length, events });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
-    next(error);
-  }
-};
-
-export const getSingleEvent = async (req, res, next) => {
+export const inscrireAUnEvenement = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { nomComplet, email, sexe, telephone } = req.body;
+
+    const userId = req.user?.idUtilisateur || null;
+
     const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement introuvable." });
 
-    if (!event) {
-      return res.status(404).json({ message: "Événement non trouvé" });
-    }
-
-    return res.status(200).json({ event });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
-    next(error);
-  }
-};
-
-export const getEventsByDate = async (req, res, next) => {
-  try {
-    const { date } = req.params;
-    const events = await Evenement.findAll({
-      where: {
-        dateEvenement: date,
-        statut: "publie",
-      },
-    });
-
-    return res.status(200).json({ total: events.length, events });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
-    next(error);
-  }
-};
-
-export const createEvent = async (req, res, next) => {
-  try {
-    const {
-      titre,
-      description,
-      dateEvenement,
-      heureDebut,
-      heureFin,
-      lieu,
-      nombrePlaces,
-      statut,
-    } = req.body;
-    const imageEvenement = req.file
-      ? req.file.path
-      : "https://placehold.co/600x400?text=Image+Evenement";
-    const createdBy = req.user?.idUtilisateur;
-    if ((titre, description, dateEvenement, heureDebut, heureFin, lieu)) {
+    if (event.statut !== "publie")
       return res
         .status(400)
-        .json({ message: "Veuillez remplir tout les champs obligatoires" });
-    }
+        .json({ message: "Cet événement n'est pas ouvert aux inscriptions." });
 
-    const existing = await Evenement.findOne({
-      where: {
-        [Op]: [{ titre }, { description }, { dateEvenement }, { lieu }],
-      },
-    });
-
-    if (existing) {
+    const eventDate = new Date(event.dateEvenement);
+    const now = new Date();
+    if (eventDate < now)
       return res.status(400).json({
-        message: "Un événement similaire existe déjà.",
+        message: "Impossible de s'inscrire à un événement déjà passé.",
       });
+
+    if (event.nombreInscrits >= event.nombrePlaces)
+      return res
+        .status(400)
+        .json({ message: "Toutes les places sont déjà prises." });
+
+    if (userId) {
+      const dejaInscrit = await InscriptionEvenement.findOne({
+        where: {
+          idEvenement: id,
+          idUtilisateur: userId,
+        },
+      });
+
+      if (dejaInscrit)
+        return res
+          .status(409)
+          .json({ message: "Vous êtes déjà inscrit à cet événement." });
+    } else {
+      const dejaInscrit = await InscriptionEvenement.findOne({
+        where: {
+          idEvenement: id,
+          email,
+        },
+      });
+
+      if (dejaInscrit)
+        return res
+          .status(409)
+          .json({ message: "Cet email est déjà inscrit à cet événement." });
     }
 
-    const newEvent = await Evenement.create({
-      titre,
-      description,
-      dateEvenement,
-      heureDebut,
-      heureFin,
-      lieu,
-      nombrePlaces: nombrePlaces || 100,
-      imageEvenement,
-      createdBy,
-      statut: statut || "publie",
-    });
+    let dataInscription = {};
+
+    if (userId) {
+      const user = await Utilisateur.findByPk(userId, {
+        attributes: ["idUtilisateur", "nomComplet", "email"],
+      });
+      console.log("User found:", user);
+
+      if (!user)
+        return res.status(404).json({ message: "Utilisateur introuvable." });
+
+      dataInscription = {
+        idEvenement: id,
+        idUtilisateur: user.idUtilisateur,
+        nomComplet: user.nomComplet,
+        email: user.email,
+        sexe: sexe,
+        telephone: telephone,
+        typeInscription: "utilisateur",
+      };
+    } else {
+      if (!nomComplet || !email || !sexe || !telephone)
+        return res.status(400).json({
+          message: "Nom, email, sexe et téléphone sont obligatoires.",
+        });
+
+      dataInscription = {
+        idEvenement: id,
+        nomComplet,
+        email,
+        sexe,
+        telephone,
+        typeInscription: "visiteur",
+      };
+    }
+
+    const inscription = await InscriptionEvenement.create(dataInscription);
+
+    event.nombreInscrits += 1;
+    await event.save();
 
     return res.status(201).json({
-      message: `L'événement ${titre} a été crée avec succès`,
-      data: newEvent,
+      message: "Inscription réussie 🎉",
+      inscription,
     });
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
     next(error);
   }
 };
-
-export const updateEvent = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const champsModifiables = [
-      "titre",
-      "description",
-      "dateEvenement",
-      "heureDebut",
-      "heureFin",
-      "lieu",
-      "nombrePlaces",
-      "statut",
-      "imageEvenement",
-    ];
-    const donneesAMettreAJour = {};
-
-    champsModifiables.forEach((champ) => {
-      if (req.body[champ] !== undefined) {
-        donneesAMettreAJour[champ] = req.body[champ];
-      }
-    });
-
-    if (req.file) {
-      donneesAMettreAJour.imageEvenement = req.file.path;
-    }
-
-
-    const event = await Evenement.findByPk(id);
-    if (!event) {
-      return res.status(404).json({ message: "Evenement non trouvé" });
-    }
-
-    await event.update(donneesAMettreAJour);
-
-    const eventMisAJour = await Evenement.findByPk(id);
-
-    return res.status(200).json({
-      message: `L'événement "${event.titre}" mis à jour avec succès.`,
-      event: eventMisAJour,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
-    next(error);
-  }
-};
-
-export const deleteEvent = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const event = await Evenement.findByPk(id);
-
-    if (!event) {
-      return res.status(404).json({ message: "Evénement non trouvé" });
-    }
-
-    await event.destroy();
-
-    return res
-      .status(200)
-      .json({ message: `Evénement "${event.titre}" supprimé avec succès.` });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
-    next(error);
-  }
-}; */

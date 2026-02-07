@@ -2,13 +2,19 @@ import { Router } from "express";
 import {
   getAllEvents,
   getSingleEvent,
+  getEventBySlug,
   getEventsByDate,
   getAllEventsAdmin,
+  getSingleEventAdmin,
   createEvent,
   updateEvent,
   deleteEvent,
+  inscrireAUnEvenement,
 } from "../controllers/evenement.controller.js";
-import { authenticationJWT } from "../middlewares/auth.middleware.js";
+import {
+  authenticationJWT,
+  optionalAuthJWT,
+} from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 import { normalizeUploadPaths } from "../utils/normalizeUploadPaths.js";
 
@@ -108,6 +114,27 @@ evenementRouter.get("/:id", getSingleEvent);
 
 /**
  * @swagger
+ * /api/evenements/slug/{slug}:
+ *   get:
+ *     summary: Récupérer un événement par son slug
+ *     tags: [Événements]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Slug de l'événement
+ *     responses:
+ *       200:
+ *         description: Événement trouvé
+ *       404:
+ *         description: Événement non trouvé
+ */
+evenementRouter.get("/slug/:slug", getEventBySlug);
+
+/**
+ * @swagger
  * /api/evenements/date/{date}:
  *   get:
  *     summary: Récupérer les événements à une date donnée
@@ -125,6 +152,17 @@ evenementRouter.get("/:id", getSingleEvent);
  *         description: Événements trouvés
  */
 evenementRouter.get("/date/:date", getEventsByDate);
+
+/**
+ * @swagger
+ * /api/evenements/admin/{id}:
+ *   get:
+ *     summary: Récupérer un événement avec la liste complète des inscrits (admin)
+ *     tags: [Événements]
+ *     security:
+ *       - bearerAuth: []
+ */
+evenementRouter.get("/admin/:id", authenticationJWT, getSingleEventAdmin);
 
 /**
  * @swagger
@@ -177,7 +215,7 @@ evenementRouter.post(
   authenticationJWT,
   upload.single("imageEvenement"),
   normalizeUploadPaths,
-  createEvent
+  createEvent,
 );
 
 /**
@@ -233,7 +271,7 @@ evenementRouter.patch(
   authenticationJWT,
   upload.single("imageEvenement"),
   normalizeUploadPaths,
-  updateEvent
+  updateEvent,
 );
 
 /**
@@ -258,5 +296,40 @@ evenementRouter.patch(
  *         description: Événement non trouvé
  */
 evenementRouter.delete("/delete/:id", authenticationJWT, deleteEvent);
+
+/**
+ * @swagger
+ * /api/evenements/{id}/inscription:
+ *   post:
+ *     summary: S'inscrire à un événement (connecté ou visiteur)
+ *     tags: [Événements]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nomComplet:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               sexe:
+ *                 type: string
+ *               telephone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Inscription réussie
+ */
+evenementRouter.post("/:id/inscription", optionalAuthJWT, inscrireAUnEvenement);
 
 export default evenementRouter;

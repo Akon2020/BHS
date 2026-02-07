@@ -4,7 +4,6 @@ import { Equipe, GetAllEquipesResponse } from '@/types/user';
 export const getAllEquipes = async (): Promise<GetAllEquipesResponse[]> => {
   try {
     const res = await api.get<GetAllEquipesResponse[]>('/api/equipes');
-    console.log(res);
     return res.data;
   } catch (error: any) {
     console.error('Erreur lors de la récupération des utilisateurs :', error);

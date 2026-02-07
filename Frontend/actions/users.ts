@@ -66,7 +66,6 @@ import { User, GetAllUsersResponse } from '@/types/user';
 export const getAllUsers = async (): Promise<GetAllUsersResponse[]> => {
   try {
     const res = await api.get<GetAllUsersResponse[]>('/api/users');
-    console.log(res);
     return res.data;
   } catch (error: any) {
     console.error('Erreur lors de la récupération des utilisateurs :', error);

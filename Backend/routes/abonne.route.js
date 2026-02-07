@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { subscribeNewsletter } from "../controllers/abonne.controller.js";
+import { getAllAbonnes, getAllActifAbonnes, subscribeNewsletter } from "../controllers/abonne.controller.js";
 
 /**
  * @swagger
@@ -9,6 +9,30 @@ import { subscribeNewsletter } from "../controllers/abonne.controller.js";
  */
 
 const abonneRouter = Router();
+
+/**
+ * @swagger
+ * /api/abonnes:
+ *   get:
+ *     summary: Récupérer tous les abonnés à la newsletter
+ *     tags: [Abonnes]
+ *     responses:
+ *       200:
+ *         description: Liste des abonnés récupérée avec succès
+ */
+abonneRouter.get("/", getAllAbonnes);
+
+/**
+ * @swagger
+ * /api/abonnes/actifs:
+ *   get:
+ *     summary: Récupérer tous les abonnés actifs à la newsletter
+ *     tags: [Abonnes]
+ *     responses:
+ *       200:
+ *         description: Liste des abonnés récupérée avec succès
+ */
+abonneRouter.get("/actifs", getAllActifAbonnes);
 
 /**
  * @swagger

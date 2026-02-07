@@ -42,13 +42,10 @@ export const getSingleBlog = async (
 export const getBlogBySlug = async (
   slug: string
 ): Promise<GetBlogBySlugResponse> => {
-  console.log("Requesting API with slug:", slug);
-  console.log("Full URL:", `/api/blogs/slug/${slug}`);
   try {
     const res = await api.get<GetBlogBySlugResponse>(
       `/api/blogs/slug/${slug}`
     );
-    console.log("Reponse blog's action: ", res)
     return res.data;
   } catch (error: any) {
     throw new Error(

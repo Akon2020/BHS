@@ -13,6 +13,11 @@ const Evenement = db.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    slug: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -48,15 +53,15 @@ const Evenement = db.define(
       allowNull: true,
     },
     statut: {
-      type: DataTypes.ENUM('brouillon', 'publie', 'annule', 'termine'),
-      defaultValue: 'brouillon',
+      type: DataTypes.ENUM("brouillon", "publie", "annule", "termine"),
+      defaultValue: "brouillon",
     },
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'utilisateurs',
-        key: 'idUtilisateur',
+        model: "utilisateurs",
+        key: "idUtilisateur",
       },
     },
     createdAt: {
@@ -71,7 +76,7 @@ const Evenement = db.define(
   {
     tableName: "evenements",
     timestamps: true,
-  }
+  },
 );
 
 export default Evenement;

@@ -4,6 +4,26 @@ import { valideEmail } from "../middlewares/email.middleware.js";
 import { Abonne } from "../models/index.model.js";
 import { newsletterSubscriptionConfirmationTemplate } from "../utils/email.template.js";
 
+export const getAllAbonnes = async (_, res, next) => {
+  try {
+    const abonnes = await Abonne.findAll();
+    return res.status(200).json({ nombre: abonnes.length, abonnes });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
+export const getAllActifAbonnes = async (_, res, next) => {
+  try {
+    const abonnes = await Abonne.findAll({ where: { statut: "actif" } });
+    return res.status(200).json({ nombre: abonnes.length, abonnes });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
 export const subscribeNewsletter = async (req, res, next) => {
   try {
     const { nomComplet, email } = req.body;
@@ -30,15 +50,14 @@ export const subscribeNewsletter = async (req, res, next) => {
       from: `"BurningHeart IHS" <${EMAIL}>`,
       to: email,
       subject: "Confirmation d'abonnement à la newsletter",
-      html: newsletterSubscriptionConfirmationTemplate (
+      html: newsletterSubscriptionConfirmationTemplate(
         nouveauAbonne.nomComplet,
-        `${FRONT_URL}/blog`
+        `${FRONT_URL}/blog`,
       ),
     };
 
     await transporter.sendMail(mailOptions, (err) => {
       if (err) {
-        console.log(err);
         return res.status(400).json({
           message:
             "Erreur lors de l'envoi de l'accusé de reception mais vous avez été bien abonné",
