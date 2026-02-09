@@ -1,7 +1,12 @@
-import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import type { Blog } from "@/types/user";
 
-const recentPosts = [
+interface Props {
+  posts?: Blog[] | undefined;
+}
+
+const fallbackPosts = [
   {
     id: 1,
     title: "La puissance de la prière dans la vie quotidienne",
@@ -37,21 +42,37 @@ const recentPosts = [
     status: "draft",
     date: "10 Avril 2025",
   },
-]
+];
 
-export default function AdminRecentPosts() {
+export default function AdminRecentPosts({ posts }: Props) {
+  const list =
+    posts && posts.length > 0
+      ? posts.map((p) => ({
+          id: p.idBlog,
+          title: p.titre,
+          author: (p as any).auteur?.nomComplet || `ID ${p.idAuteur}`,
+          status: p.statut === "publie" ? "published" : "draft",
+          date: new Date(p.createdAt).toLocaleDateString(),
+        }))
+      : fallbackPosts;
+
   return (
     <div className="space-y-4">
-      {recentPosts.map((post) => (
+      {list.map((post) => (
         <div key={post.id} className="flex items-center justify-between">
           <div>
-            <Link href={`/admin/blog/${post.id}`} className="font-medium hover:text-primary transition-colors">
+            <Link
+              href={`/admin/blog/${post.id}`}
+              className="font-medium hover:text-primary transition-colors"
+            >
               {post.title}
             </Link>
             <p className="text-sm text-muted-foreground">Par {post.author}</p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant={post.status === "published" ? "default" : "outline"}>
+            <Badge
+              variant={post.status === "published" ? "default" : "outline"}
+            >
               {post.status === "published" ? "Publié" : "Brouillon"}
             </Badge>
             <span className="text-xs text-muted-foreground">{post.date}</span>
@@ -59,5 +80,5 @@ export default function AdminRecentPosts() {
         </div>
       ))}
     </div>
-  )
+  );
 }

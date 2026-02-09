@@ -1,7 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import type { User } from "@/types/user";
 
-const recentUsers = [
+interface Props {
+  users?: User[] | undefined;
+}
+
+const fallbackUsers = [
   {
     id: 1,
     name: "Samuel Diambu",
@@ -44,10 +49,22 @@ const recentUsers = [
   },
 ];
 
-export default function AdminRecentUsers() {
+export default function AdminRecentUsers({ users }: Props) {
+  const list =
+    users && users.length > 0
+      ? users.map((u) => ({
+          id: u.idUtilisateur,
+          name: u.nomComplet,
+          email: u.email,
+          avatar: `${process.env.NEXT_PUBLIC_API_URL}/${u.avatar}` || "/placeholder.svg",
+          status: "active",
+          date: new Date(u.createdAt).toLocaleString(),
+        }))
+      : fallbackUsers;
+
   return (
     <div className="space-y-4">
-      {recentUsers.map((user) => (
+      {list.map((user) => (
         <div key={user.id} className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar>

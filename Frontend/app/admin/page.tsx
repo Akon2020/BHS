@@ -1,15 +1,47 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Users, FileText, Calendar, Mail, ArrowUpRight, ArrowDownRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import AdminRecentUsers from "@/components/admin/recent-users"
-import AdminRecentPosts from "@/components/admin/recent-posts"
-import AdminChart from "@/components/admin/chart"
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Users,
+  FileText,
+  Calendar,
+  Mail,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import AdminRecentUsers from "@/components/admin/recent-users";
+import AdminRecentPosts from "@/components/admin/recent-posts";
+import AdminChart from "@/components/admin/chart";
+import { getDashboard } from "@/actions/dashboard";
+import type { DashboardResponse } from "@/types/dashboard";
 
 export default function AdminDashboard() {
+  const [data, setData] = useState<DashboardResponse | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    getDashboard()
+      .then((res) => {
+        if (mounted) setData(res);
+      })
+      .catch(() => {
+        // ignore errors silently for now
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -32,11 +64,19 @@ export default function AdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,248</div>
+            <div className="text-2xl font-bold">
+              {data ? data.users.nombre : "0"}
+            </div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
-              <span className="text-green-500 flex items-center mr-1">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                12%
+              <span
+                className={`flex items-center mr-1 ${data?.users.stat.startsWith("-") ? "text-red-500" : "text-green-500"}`}
+              >
+                {data?.users.stat.startsWith("-") ? (
+                  <ArrowDownRight className="h-3 w-3 mr-1" />
+                ) : (
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                )}
+                {data ? data.users.stat : "0%"}
               </span>
               depuis le mois dernier
             </p>
@@ -49,11 +89,19 @@ export default function AdminDashboard() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">84</div>
+            <div className="text-2xl font-bold">
+              {data ? data.blogs.nombre : "0"}
+            </div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
-              <span className="text-green-500 flex items-center mr-1">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                8%
+              <span
+                className={`flex items-center mr-1 ${data?.blogs.stat.startsWith("-") ? "text-red-500" : "text-green-500"}`}
+              >
+                {data?.blogs.stat.startsWith("-") ? (
+                  <ArrowDownRight className="h-3 w-3 mr-1" />
+                ) : (
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                )}
+                {data ? data.blogs.stat : "0%"}
               </span>
               depuis le mois dernier
             </p>
@@ -66,11 +114,19 @@ export default function AdminDashboard() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">
+              {data ? data.evenements.nombre : "0"}
+            </div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
-              <span className="text-green-500 flex items-center mr-1">
-                <ArrowUpRight className="h-3 w-3 mr-1" />
-                24%
+              <span
+                className={`flex items-center mr-1 ${data?.evenements.stat.startsWith("-") ? "text-red-500" : "text-green-500"}`}
+              >
+                {data?.evenements.stat.startsWith("-") ? (
+                  <ArrowDownRight className="h-3 w-3 mr-1" />
+                ) : (
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                )}
+                {data ? data.evenements.stat : "0%"}
               </span>
               depuis le mois dernier
             </p>
@@ -79,15 +135,25 @@ export default function AdminDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Abonnés Newsletter</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Abonnés Newsletter
+            </CardTitle>
             <Mail className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">573</div>
+            <div className="text-2xl font-bold">
+              {data ? data.abonnes.nombre : "0"}
+            </div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
-              <span className="text-red-500 flex items-center mr-1">
-                <ArrowDownRight className="h-3 w-3 mr-1" />
-                3%
+              <span
+                className={`flex items-center mr-1 ${data?.abonnes.stat.startsWith("-") ? "text-red-500" : "text-green-500"}`}
+              >
+                {data?.abonnes.stat.startsWith("-") ? (
+                  <ArrowDownRight className="h-3 w-3 mr-1" />
+                ) : (
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                )}
+                {data ? data.abonnes.stat : "0%"}
               </span>
               depuis le mois dernier
             </p>
@@ -99,7 +165,9 @@ export default function AdminDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Analyse des visites</CardTitle>
-          <CardDescription>Nombre de visites sur le site au cours des 30 derniers jours</CardDescription>
+          <CardDescription>
+            Nombre de visites sur le site au cours des 30 derniers jours
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <AdminChart />
@@ -116,10 +184,12 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Nouveaux utilisateurs</CardTitle>
-              <CardDescription>Les 5 derniers utilisateurs inscrits sur la plateforme</CardDescription>
+              <CardDescription>
+                Les 5 derniers utilisateurs inscrits sur la plateforme
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <AdminRecentUsers />
+              <AdminRecentUsers users={data?.users.data} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -127,14 +197,16 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Articles récents</CardTitle>
-              <CardDescription>Les 5 derniers articles publiés sur le blog</CardDescription>
+              <CardDescription>
+                Les 5 derniers articles publiés sur le blog
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <AdminRecentPosts />
+              <AdminRecentPosts posts={data?.blogs.data} />
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
