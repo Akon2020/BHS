@@ -17,6 +17,7 @@ import commentaireRouter from "./routes/commentaire.route.js";
 import evenementRouter from "./routes/evenement.route.js";
 import abonneRouter from "./routes/abonne.route.js";
 import newsletterRouter from "./routes/newsletter.route.js";
+import dashboardRouter from "./routes/dashboard.route.js";
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use("/api/commentaires", commentaireRouter);
 app.use("/api/evenements", evenementRouter);
 app.use("/api/abonnes", abonneRouter);
 app.use("/api/newsletters", newsletterRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);
