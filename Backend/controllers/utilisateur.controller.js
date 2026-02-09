@@ -1,4 +1,9 @@
-import { Utilisateur } from "../models/index.model.js";
+import {
+  Utilisateur,
+  Blog,
+  InscriptionEvenement,
+  Commentaire,
+} from "../models/index.model.js";
 import { Op } from "sequelize";
 import bcrypt from "bcryptjs";
 import { DEFAULT_PASSWD, EMAIL, FRONT_URL } from "../config/env.js";
@@ -31,8 +36,37 @@ export const getSingleUtilisateur = async (req, res, next) => {
         .status(400)
         .json({ message: "Cet utilisateur n'existe pas dans notre système" });
     }
+
+    // Récupérer les blogs écrits par l'utilisateur
+    const blogs = await Blog.findAll({
+      where: { idAuteur: id },
+    });
+
+    // Récupérer les inscriptions aux événements
+    const inscriptions = await InscriptionEvenement.findAll({
+      where: { idUtilisateur: id },
+    });
+
+    // Récupérer les commentaires de l'utilisateur
+    const commentaires = await Commentaire.findAll({
+      where: { idUtilisateur: id },
+    });
+
     const userWithoutPassword = getUserWithoutPassword(user);
-    return res.status(200).json({ user: userWithoutPassword });
+
+    return res.status(200).json({
+      user: {
+        ...userWithoutPassword,
+        stats: {
+          blogsEcrits: blogs.length,
+          evenementsInscrits: inscriptions.length,
+          commentairesEcrits: commentaires.length,
+        },
+        blogs: blogs.slice(0, 5),
+        inscriptions: inscriptions.slice(0, 5),
+        commentaires: commentaires.slice(0, 5),
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
     next(error);
@@ -97,19 +131,23 @@ export const createUtilisateur = async (req, res, next) => {
     });
 
     let mailEnvoye = true;
-    try{
+    try {
       const mailOptions = {
         from: `"BurningHeart IHS" <${EMAIL}>`,
         to: email,
         subject: "Bienvenue dans BurningHeart",
-        html: newUserEmailTemplate(nomComplet, email, DEFAULT_PASSWD, FRONT_URL),
+        html: newUserEmailTemplate(
+          nomComplet,
+          email,
+          DEFAULT_PASSWD,
+          FRONT_URL,
+        ),
       };
       await transporter.sendMail(mailOptions);
     } catch (mailError) {
       console.error("Erreur lors de l'envoi du mail :", mailError.message);
       mailEnvoye = false;
     }
-
 
     const userWithoutPassword = getUserWithoutPassword(newUser);
 
@@ -211,7 +249,7 @@ export const updateUtilisateurPassword = async (req, res, next) => {
 
     await Utilisateur.update(
       { password: hashedPassword },
-      { where: { idUtilisateur: id } }
+      { where: { idUtilisateur: id } },
     );
 
     return res
@@ -235,7 +273,7 @@ export const deleteUtilisateur = async (req, res, next) => {
         .json({ message: "Cet utilisateur n'exite pas dans notre système" });
     }
 
-    if(userExist){
+    if (userExist) {
       await deleteFile(userExist.avatar);
     }
 

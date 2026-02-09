@@ -18,6 +18,14 @@ export interface User {
   derniereConnexion?: string;
   createdAt: string;
   updatedAt: string;
+  stats?: {
+    blogsEcrits: number;
+    evenementsInscrits: number;
+    commentairesEcrits: number;
+  };
+  blogs?: Blog[];
+  inscriptions?: InscriptionEvenement[];
+  commentaires?: BlogCommentaire[];
 }
 
 export interface AuthResponse {
