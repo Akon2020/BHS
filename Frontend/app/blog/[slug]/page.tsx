@@ -1,5 +1,6 @@
 "use client";
 
+import type { Metadata } from "next"
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -17,8 +18,6 @@ import { Blog } from "@/types/user";
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params?.slug as string;
-
-  console.log("Slug from params:", slug);
 
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);

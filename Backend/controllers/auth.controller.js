@@ -5,7 +5,6 @@ import {
   DEFAULT_PASSWD,
   EMAIL,
   FRONT_URL,
-  HOST_URL,
   JWT_SECRET,
 } from "../config/env.js";
 import transporter from "../config/nodemailer.js";
@@ -158,7 +157,7 @@ export const resetPassword = async (req, res, next) => {
       html: resetPasswordEmailTemplate(
         user.nomComplet,
         email,
-        HOST_URL,
+        FRONT_URL,
         resetToken
       ),
     };
@@ -168,7 +167,7 @@ export const resetPassword = async (req, res, next) => {
       message:
         "Un email de réinitialisation vous a été envoyé! Consultez votre boîte mail",
       dev: {
-        resetUrl: `${HOST_URL}/auth/resetpassword?token=${resetToken}`,
+        resetUrl: `${FRONT_URL}/auth/resetpassword?token=${resetToken}`,
       },
     });
   } catch (error) {
