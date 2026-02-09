@@ -62,7 +62,7 @@ export default function AdminRecentPosts({ posts }: Props) {
         <div key={post.id} className="flex items-center justify-between">
           <div>
             <Link
-              href={`/admin/blog/edit/${post.id}`}
+              href={`/admin/blog/view/${post.id}`}
               className="font-medium hover:text-primary transition-colors"
             >
               {post.title}

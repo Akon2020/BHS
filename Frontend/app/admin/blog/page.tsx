@@ -225,7 +225,7 @@ export default function BlogAdminPage() {
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/blog/${post.id}/`}>
+                        <Link href={`/admin/blog/view/${post.id}/`}>
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
