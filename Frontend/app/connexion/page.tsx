@@ -131,7 +131,13 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center space-y-2">
+              <Link
+                href="/connexion/reset-request"
+                className="text-sm block text-muted-foreground hover:text-foreground"
+              >
+                Mot de passe oublié ?
+              </Link>
               <Link
                 href="/"
                 className="text-sm text-muted-foreground hover:text-foreground"

@@ -24,8 +24,7 @@ export const login = async (payload: AuthPayload): Promise<User> => {
     return userInfo;
   } catch (error: any) {
     const message =
-      error?.response?.data?.message ||
-      "Erreur lors de la connexion";
+      error?.response?.data?.message || "Erreur lors de la connexion";
 
     throw new Error(message);
   }
@@ -46,4 +45,45 @@ export const getProfile = async (): Promise<User> => {
     headers: getAuthHeaders(),
   });
   return res.data.user;
+};
+
+/**
+ * Request a password reset (send email with reset link)
+ */
+export const requestPasswordReset = async (
+  email: string,
+): Promise<{ message: string; dev?: { resetUrl?: string } }> => {
+  try {
+    const res = await api.post<{
+      message: string;
+      dev?: { resetUrl?: string };
+    }>("/api/auth/reset-password", { email });
+    return res.data;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      "Erreur lors de la demande de réinitialisation";
+    throw new Error(message);
+  }
+};
+
+/**
+ * Reset password using token from email
+ */
+export const resetPassword = async (
+  token: string,
+  newPassword: string,
+): Promise<{ message: string }> => {
+  try {
+    const res = await api.post<{ message: string }>(
+      `/api/auth/resetpassword?token=${encodeURIComponent(token)}`,
+      { newPassword },
+    );
+    return res.data;
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      "Erreur lors de la mise à jour du mot de passe";
+    throw new Error(message);
+  }
 };
