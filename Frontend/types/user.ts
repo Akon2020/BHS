@@ -8,6 +8,7 @@ export type EvenementStatut = "brouillon" | "publie" | "annule" | "termine";
 export type Sexe = "homme" | "femme";
 export type TypeInscription = "utilisateur" | "visiteur";
 export type StatutInscription = "confirme" | "en_attente" | "annule";
+export type CommentaireStatut = "attente" | "approuve" | "refuse";
 
 export interface User {
   idUtilisateur: number;
@@ -122,6 +123,60 @@ export interface BlogCommentaire {
     nomComplet: string;
     avatar?: string;
   };
+}
+
+export interface Commentaire {
+  idCommentaire: number;
+  idBlog: number;
+  idUtilisateur: number | null;
+  idCommentaireParent: number | null;
+  nomComplet: string;
+  email: string;
+  siteWeb?: string;
+  contenu: string;
+  statut: CommentaireStatut;
+  ipAddress?: string;
+  userAgent?: string;
+  dateCommentaire: string;
+  modereBy?: number;
+  createdAt: string;
+  updatedAt: string;
+  utilisateur?: {
+    idUtilisateur?: number;
+    nomComplet: string;
+    avatar?: string;
+  };
+  reponses?: Commentaire[];
+}
+
+export interface CreateCommentairePayload {
+  idBlog: number;
+  idUtilisateur?: number | null;
+  idCommentaireParent?: number | null;
+  nomComplet: string;
+  email: string;
+  siteWeb?: string;
+  contenu: string;
+}
+
+export interface GetCommentairesResponse {
+  total: number;
+  commentaires: Commentaire[];
+}
+
+export interface GetCommentairesParBlogResponse {
+  total: number;
+  commentaires: Commentaire[];
+}
+
+export interface CreateCommentaireResponse {
+  message: string;
+  data: Commentaire;
+}
+
+export interface ModererCommentairePayload {
+  statut: CommentaireStatut;
+  modereBy: number;
 }
 
 export interface Blog {

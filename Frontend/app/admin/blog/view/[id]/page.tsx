@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -34,10 +35,19 @@ import {
   Edit,
   Trash2,
   Search,
+  Check,
+  X,
+  Reply,
 } from "lucide-react";
 import { getSingleBlog } from "@/actions/blog";
 import { deleteBlog } from "@/actions/blog";
-import { Blog, BlogCommentaire } from "@/types/user";
+import {
+  getCommentairesParBlog,
+  modererCommentaire,
+  deleteCommentaire,
+  createCommentaire,
+} from "@/actions/comment";
+import { Blog, Commentaire } from "@/types/user";
 
 export default function BlogViewAdminPage() {
   const params = useParams();
@@ -49,6 +59,11 @@ export default function BlogViewAdminPage() {
   const [searchComments, setSearchComments] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [comments, setComments] = useState<Commentaire[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [replyingToId, setReplyingToId] = useState<number | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [isModerating, setIsModerating] = useState<number | null>(null);
 
   const fetchBlog = async () => {
     try {
@@ -66,12 +81,6 @@ export default function BlogViewAdminPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!isNaN(id)) {
-      fetchBlog();
-    }
-  }, [id]);
 
   const filteredComments = useMemo(() => {
     if (!blog?.commentaires) return [];
@@ -103,6 +112,90 @@ export default function BlogViewAdminPage() {
       setIsDeleting(false);
     }
   };
+
+  const fetchComments = async () => {
+    try {
+      setCommentsLoading(true);
+      const response = await getCommentairesParBlog(id, true); // true pour includeAll
+      setComments(response.commentaires);
+    } catch (error: any) {
+      console.error("Erreur lors du chargement des commentaires:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les commentaires",
+        variant: "destructive",
+      });
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  const handleApproveComment = async (commentId: number) => {
+    try {
+      setIsModerating(commentId);
+      await modererCommentaire(commentId, { statut: "approuve", modereBy: 1 });
+      toast({
+        title: "Succès",
+        description: "Commentaire approuvé",
+      });
+      await fetchComments();
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de l'approbation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsModerating(null);
+    }
+  };
+
+  const handleRefuseComment = async (commentId: number) => {
+    try {
+      setIsModerating(commentId);
+      await modererCommentaire(commentId, { statut: "refuse", modereBy: 1 });
+      toast({
+        title: "Succès",
+        description: "Commentaire refusé",
+      });
+      await fetchComments();
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors du refus",
+        variant: "destructive",
+      });
+    } finally {
+      setIsModerating(null);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      setIsModerating(commentId);
+      await deleteCommentaire(commentId);
+      toast({
+        title: "Succès",
+        description: "Commentaire supprimé",
+      });
+      await fetchComments();
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la suppression",
+        variant: "destructive",
+      });
+    } finally {
+      setIsModerating(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!isNaN(id)) {
+      fetchBlog();
+      fetchComments();
+    }
+  }, [id]);
 
   if (loading) {
     return (
@@ -242,87 +335,300 @@ export default function BlogViewAdminPage() {
         />
       </div>
 
-      {/* Commentaires Section */}
-      {blog.commentaires && blog.commentaires.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              Commentaires ({blog.commentaires.length})
-            </CardTitle>
-            <CardDescription>
-              Les commentaires approuvés sur cet article
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un commentaire..."
-                value={searchComments}
-                onChange={(e) => setSearchComments(e.target.value)}
-              />
-            </div>
-
+      {/* Modération des Commentaires */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
+            Modération des Commentaires ({comments.length})
+          </CardTitle>
+          <CardDescription>
+            Gérez l'approbation et les réponses aux commentaires
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {commentsLoading ? (
             <div className="space-y-4">
-              {filteredComments.map((comment) => (
-                <div
-                  key={comment.idCommentaire}
-                  className="p-4 border rounded-md space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {comment.utilisateur?.avatar ? (
-                        <img
-                          src={`${process.env.NEXT_PUBLIC_API_URL}/${comment.utilisateur.avatar}`}
-                          alt={comment.utilisateur.nomComplet}
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-xs font-medium">
-                            {comment.utilisateur?.nomComplet?.charAt(0) || "?"}
-                          </span>
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-medium text-sm">
-                          {comment.utilisateur?.nomComplet ||
-                            "Utilisateur inconnu"}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {comment.dateCommentaire
-                        ? new Date(comment.dateCommentaire).toLocaleString(
-                            "fr-FR",
-                          )
-                        : "Date inconnue"}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {comment.contenu}
-                  </p>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-4 border rounded-md space-y-2">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-12 w-full" />
                 </div>
               ))}
-              {filteredComments.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Aucun commentaire trouvé
-                </p>
+            </div>
+          ) : comments.length > 0 ? (
+            <div className="space-y-6">
+              {/* En attente d'approbation */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">En Attente</Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {comments.filter((c) => c.statut === "attente").length}
+                  </span>
+                </div>
+                {comments
+                  .filter((c) => c.statut === "attente")
+                  .map((comment) => (
+                    <div
+                      key={comment.idCommentaire}
+                      className="p-4 border rounded-md space-y-3 bg-amber-50 dark:bg-amber-950/20"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1">
+                          {comment.utilisateur?.avatar ? (
+                            <img
+                              src={
+                                comment.utilisateur.avatar.startsWith("http")
+                                  ? comment.utilisateur.avatar
+                                  : `${process.env.NEXT_PUBLIC_API_URL}/${comment.utilisateur.avatar}`
+                              }
+                              alt={comment.utilisateur.nomComplet}
+                              className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-medium">
+                                {comment.nomComplet?.charAt(0) || "?"}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">
+                              {comment.nomComplet}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(
+                                comment.dateCommentaire,
+                              ).toLocaleDateString("fr-FR", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                            <p className="text-sm mt-2 text-foreground">
+                              {comment.contenu}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={() =>
+                            handleApproveComment(comment.idCommentaire)
+                          }
+                          disabled={isModerating === comment.idCommentaire}
+                        >
+                          <Check className="h-4 w-4" />
+                          Approuver
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="gap-2"
+                          onClick={() =>
+                            handleRefuseComment(comment.idCommentaire)
+                          }
+                          disabled={isModerating === comment.idCommentaire}
+                        >
+                          <X className="h-4 w-4" />
+                          Refuser
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={() =>
+                            setReplyingToId(
+                              replyingToId === comment.idCommentaire
+                                ? null
+                                : comment.idCommentaire,
+                            )
+                          }
+                        >
+                          <Reply className="h-4 w-4" />
+                          Répondre
+                        </Button>
+                      </div>
+
+                      {/* Reply form */}
+                      {replyingToId === comment.idCommentaire && (
+                        <div className="mt-4 p-4 bg-white dark:bg-slate-900 rounded border space-y-3">
+                          <Textarea
+                            placeholder="Écrivez votre réponse..."
+                            value={replyContent}
+                            onChange={(
+                              e: React.ChangeEvent<HTMLTextAreaElement>,
+                            ) => setReplyContent(e.target.value)}
+                            rows={3}
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setReplyingToId(null);
+                                setReplyContent("");
+                              }}
+                            >
+                              Annuler
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={async () => {
+                                if (!replyContent.trim()) return;
+                                try {
+                                  setIsModerating(comment.idCommentaire);
+                                  await createCommentaire({
+                                    idBlog: id,
+                                    nomComplet: "Admin",
+                                    email: "admin@burningheart.org",
+                                    contenu: replyContent,
+                                    idCommentaireParent: comment.idCommentaire,
+                                  });
+                                  toast({
+                                    title: "Succès",
+                                    description: "Réponse envoyée",
+                                  });
+                                  setReplyingToId(null);
+                                  setReplyContent("");
+                                  await fetchComments();
+                                } catch (error: any) {
+                                  toast({
+                                    title: "Erreur",
+                                    description: error.message,
+                                    variant: "destructive",
+                                  });
+                                } finally {
+                                  setIsModerating(null);
+                                }
+                              }}
+                              disabled={
+                                !replyContent.trim() ||
+                                isModerating === comment.idCommentaire
+                              }
+                            >
+                              Envoyer la réponse
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                {comments.filter((c) => c.statut === "attente").length ===
+                  0 && (
+                  <p className="text-sm text-muted-foreground py-4">
+                    Aucun commentaire en attente d'approbation
+                  </p>
+                )}
+              </div>
+
+              {/* Commentaires approuvés */}
+              {comments.filter((c) => c.statut === "approuve").length > 0 && (
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">Approuvés</Badge>
+                    <span className="text-sm text-muted-foreground">
+                      {comments.filter((c) => c.statut === "approuve").length}
+                    </span>
+                  </div>
+                  {comments
+                    .filter((c) => c.statut === "approuve")
+                    .map((comment) => (
+                      <div
+                        key={comment.idCommentaire}
+                        className="p-4 border rounded-md space-y-2"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-start gap-3 flex-1">
+                            {comment.utilisateur?.avatar ? (
+                              <img
+                                src={
+                                  comment.utilisateur.avatar.startsWith("http")
+                                    ? comment.utilisateur.avatar
+                                    : `${process.env.NEXT_PUBLIC_API_URL}/${comment.utilisateur.avatar}`
+                                }
+                                alt={comment.utilisateur.nomComplet}
+                                className="h-8 w-8 rounded-full object-cover flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                <span className="text-xs font-medium">
+                                  {comment.nomComplet?.charAt(0) || "?"}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm">
+                                {comment.nomComplet}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(
+                                  comment.dateCommentaire,
+                                ).toLocaleDateString("fr-FR", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
+                              </p>
+                              <p className="text-sm mt-1 text-muted-foreground">
+                                {comment.contenu}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              handleDeleteComment(comment.idCommentaire)
+                            }
+                            disabled={isModerating === comment.idCommentaire}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {/* Afficher les réponses */}
+                        {comment.reponses && comment.reponses.length > 0 && (
+                          <div className="ml-8 space-y-2 border-l-2 pl-4 pt-2">
+                            {comment.reponses.map((reply) => (
+                              <div
+                                key={reply.idCommentaire}
+                                className="text-sm space-y-1"
+                              >
+                                <p className="font-medium">
+                                  {reply.utilisateur?.nomComplet ||
+                                    reply.nomComplet}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    reply.dateCommentaire,
+                                  ).toLocaleDateString("fr-FR")}
+                                </p>
+                                <p className="text-muted-foreground">
+                                  {reply.contenu}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
               )}
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {(!blog.commentaires || blog.commentaires.length === 0) && (
-        <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
-            <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-20" />
-            <p>Aucun commentaire pour cet article</p>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p>Aucun commentaire pour cet article</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
       {/* Confirm Deletion Modal */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
