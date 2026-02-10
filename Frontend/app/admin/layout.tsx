@@ -18,7 +18,10 @@ export default function AdminLayout({
   };
 
   return (
-    <ProtectedRoute allowedRoles={["admin", "editeur"]}>
+    <ProtectedRoute
+      allowedRoles={["admin", "editeur"]}
+      checkPagePermissions={true}
+    >
       <div className="flex h-screen">
         <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
         <div className="flex-1 flex flex-col overflow-hidden">

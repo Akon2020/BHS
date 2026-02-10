@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { hasAccessToPage } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -29,6 +31,7 @@ interface SidebarProps {
 export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -42,7 +45,7 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
     }
   };
 
-  const routes = [
+  const allRoutes = [
     {
       label: "Tableau de bord",
       icon: LayoutDashboard,
@@ -98,6 +101,12 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       active: pathname === "/admin/settings",
     },
   ];
+
+  // Filtrer les routes selon le rôle de l'utilisateur
+  const routes = allRoutes.filter((route) => {
+    if (!user) return false;
+    return hasAccessToPage(user.role, route.href);
+  });
 
   return (
     <div
