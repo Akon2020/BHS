@@ -32,7 +32,6 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
-      "http://127.0.0.1:58248",
       "https://burningheartihs.org",
       "https://api.burningheartihs.org",
     ],

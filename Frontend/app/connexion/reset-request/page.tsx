@@ -13,7 +13,6 @@ export default function ResetRequestPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sentUrl, setSentUrl] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +20,6 @@ export default function ResetRequestPage() {
     try {
       const res = await requestPasswordReset(email);
       toast({ title: "Email envoyé", description: res.message });
-      if (res.dev?.resetUrl) setSentUrl(res.dev.resetUrl);
     } catch (err: any) {
       toast({
         title: "Erreur",
@@ -60,7 +58,6 @@ export default function ResetRequestPage() {
                 </Button>
               </div>
             </form>
-
             <div className="mt-6 text-center">
               <Link
                 href="/connexion"

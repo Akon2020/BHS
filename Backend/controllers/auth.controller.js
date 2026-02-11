@@ -167,7 +167,7 @@ export const resetPassword = async (req, res, next) => {
       message:
         "Un email de réinitialisation vous a été envoyé! Consultez votre boîte mail",
       dev: {
-        resetUrl: `${FRONT_URL}/auth/resetpassword?token=${resetToken}`,
+        resetUrl: `${FRONT_URL}/connexion/reset?token=${resetToken}`,
       },
     });
   } catch (error) {
@@ -205,7 +205,7 @@ export const updatePassword = async (req, res, next) => {
 
     await Utilisateur.update(
       { password: hashedPassword },
-      { where: { idUser: user.idUser } }
+      { where: { idUtilisateur: user.idUtilisateur } }
     );
 
     res.status(200).json({
