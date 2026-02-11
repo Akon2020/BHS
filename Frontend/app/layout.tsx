@@ -6,6 +6,7 @@ import "./globals.css";
 // import { Header } from "@/components/header";
 // import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/contexts/theme-context";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const crimsonPro = Crimson_Pro({
@@ -57,9 +58,8 @@ export default function RootLayout({
         className={`${inter.variable} ${crimsonPro.variable} font-sans antialiased`}
       >
         <ThemeProvider>
-          {/* <Header /> */}
           <main className="min-h-screen">{children}</main>
-          {/* <Footer /> */}
+          <Toaster />
         </ThemeProvider>
         <Analytics />
       </body>
