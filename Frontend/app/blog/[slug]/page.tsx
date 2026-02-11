@@ -292,12 +292,6 @@ export default function BlogPostPage() {
 
           {/* Content */}
           <div className="prose prose-lg mt-12 max-w-none dark:prose-invert">
-            {blog!.extrait && (
-              <p className="lead text-xl text-muted-foreground leading-relaxed">
-                {blog!.extrait}
-              </p>
-            )}
-
             <div
               className="mt-8"
               dangerouslySetInnerHTML={{ __html: blog!.contenu }}

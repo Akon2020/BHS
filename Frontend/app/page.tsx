@@ -8,6 +8,7 @@ import Image from "next/image"
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { UpcomingEventsSection } from "@/components/sections/upcoming-events";
+import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form";
 
 export default function HomePage() {
   return (
@@ -513,16 +514,7 @@ export default function HomePage() {
               Inscrivez-vous à notre newsletter pour recevoir les dernières nouvelles, événements et enseignements
               directement dans votre boîte mail.
             </p>
-            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="Votre adresse email"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60 focus-visible:ring-white"
-              />
-              <Button type="submit" variant="secondary" className="bg-white text-primary hover:bg-white/90 shrink-0">
-                Inscription
-              </Button>
-            </form>
+            <NewsletterSubscribeForm variant="home" />
             <p className="text-sm text-white/70 mt-4">
               Nous respectons votre vie privée. Vous pouvez vous désabonner à tout moment.
             </p>

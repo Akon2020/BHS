@@ -213,9 +213,10 @@ export default function EventDetailsPage() {
 
           {/* Content */}
           <div className="prose prose-lg mt-12 max-w-none dark:prose-invert">
-            <p className="lead text-xl text-muted-foreground leading-relaxed">
+            <div className="lead text-xl text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: event!.description }}/>
+            {/* <p className="lead text-xl text-muted-foreground leading-relaxed">
               {event!.description}
-            </p>
+            </p> */}
           </div>
 
           {/* CTA */}

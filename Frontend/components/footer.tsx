@@ -1,18 +1,18 @@
-import Link from "next/link"
-import { Facebook, Instagram, Youtube, MapPin, Phone, Mail } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
+import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from "lucide-react"
+import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form"
 
 export function Footer() {
   return (
     <footer className="border-t bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-4">
-          {/* Brand section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center">
               <Image src="/images/logon.png" alt="Burning Heart" width={100} height={100} className="h-16 w-auto" />
             </Link>
-            <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               Communauté dédiée à raviver la flamme de l'espérance dans vos coeur. Rejoignez notre communauté pour
               grandir spirituellement, trouver du soutien et discerner la volonté de Dieu dans votre vie.
             </p>
@@ -44,7 +44,6 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h3 className="text-sm font-semibold">Liens Rapides</h3>
             <ul className="mt-4 space-y-3">
@@ -76,7 +75,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h3 className="text-sm font-semibold">Contact</h3>
             <ul className="mt-4 space-y-3">
@@ -86,18 +84,18 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2 text-sm">
                 <Phone className="h-5 w-5 shrink-0 text-primary" />
-                <a 
+                <a
                   href="tel:+243849005240"
-                  className="text-muted-foreground hover:text-primary hover:underline transition-colors duration-200"
+                  className="text-muted-foreground transition-colors duration-200 hover:text-primary hover:underline"
                 >
                   +243 849 005 240
                 </a>
               </li>
               <li className="flex items-center gap-2 text-sm">
                 <Mail className="h-5 w-5 shrink-0 text-primary" />
-                <a 
+                <a
                   href="mailto:burningheartihs@gmail.com"
-                  className="text-muted-foreground hover:text-primary hover:underline transition-colors duration-200"
+                  className="text-muted-foreground transition-colors duration-200 hover:text-primary hover:underline"
                 >
                   burningheartihs@gmail.com
                 </a>
@@ -105,25 +103,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Newsletter */}
           <div>
             <h3 className="text-sm font-semibold">Newsletter</h3>
             <p className="mt-4 text-sm text-muted-foreground">
               Inscrivez-vous pour recevoir nos dernières nouvelles et événements.
             </p>
-            <form className="mt-4 flex flex-col gap-2">
-              <input
-                type="email"
-                placeholder="Votre email"
-                className="rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              <button
-                type="submit"
-                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Inscription
-              </button>
-            </form>
+            <NewsletterSubscribeForm variant="footer" />
           </div>
         </div>
 

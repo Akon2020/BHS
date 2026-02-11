@@ -2,54 +2,70 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react"
 import { Mail, CheckCircle } from "lucide-react"
 import { addAbonne } from "@/actions/abonne"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toast } from "@/components/ui/use-toast"
 
 interface NewsletterModalProps {
   isOpen: boolean
   onClose: () => void
   initialEmail?: string
+  onSuccess?: () => void
 }
 
-export function NewsletterModal({ isOpen, onClose, initialEmail = "" }: NewsletterModalProps) {
+export function NewsletterModal({
+  isOpen,
+  onClose,
+  initialEmail = "",
+  onSuccess,
+}: NewsletterModalProps) {
   const [formData, setFormData] = useState({
-    name: "",
+    nomComplet: "",
     email: initialEmail,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  // Auto-fill email when modal opens
   useEffect(() => {
-    if (isOpen && initialEmail) {
-      setFormData((prev) => ({ ...prev, email: initialEmail }))
-    }
+    if (!isOpen) return
+    setFormData((prev) => ({ ...prev, email: initialEmail || "" }))
   }, [isOpen, initialEmail])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulation de l'envoi
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    try {
+      await addAbonne({
+        nomComplet: formData.nomComplet.trim(),
+        email: formData.email.trim(),
+      })
 
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+      setIsSubmitted(true)
+      onSuccess?.()
 
-    // Auto-close after success
-    setTimeout(() => {
-      setIsSubmitted(false)
-      onClose()
-    }, 2000)
+      setTimeout(() => {
+        setIsSubmitted(false)
+        onClose()
+      }, 1500)
+    } catch (error) {
+      toast({
+        title: "Erreur d'inscription",
+        description: error instanceof Error ? error.message : "Une erreur est survenue.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleClose = () => {
-    setFormData({ name: "", email: "" })
+    setFormData({ nomComplet: "", email: "" })
     setIsSubmitted(false)
     onClose()
   }
@@ -58,13 +74,13 @@ export function NewsletterModal({ isOpen, onClose, initialEmail = "" }: Newslett
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
-          <div className="text-center py-6">
-            <div className="w-16 h-16 bg-[#1E7555] rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="py-6 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary">
               <CheckCircle className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Inscription Réussie !</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Merci {formData.name} ! Vous recevrez bientôt nos dernières actualités.
+            <h3 className="mb-2 text-xl font-semibold">Inscription réussie !</h3>
+            <p className="text-muted-foreground">
+              Merci {formData.nomComplet} ! Vous recevrez bientôt nos dernières actualités.
             </p>
           </div>
         </DialogContent>
@@ -77,7 +93,7 @@ export function NewsletterModal({ isOpen, onClose, initialEmail = "" }: Newslett
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-br bg-primary rounded-full flex items-center justify-center mr-3">
+            <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary">
               <Mail className="h-5 w-5 text-white" />
             </div>
             Abonnez-vous à notre Newsletter
@@ -85,8 +101,8 @@ export function NewsletterModal({ isOpen, onClose, initialEmail = "" }: Newslett
         </DialogHeader>
 
         <div className="py-4">
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Recevez les dernières annonces immobilières et actualités directement dans votre boîte mail.
+          <p className="mb-6 text-muted-foreground">
+            Recevez les dernières nouvelles, événements et enseignements directement dans votre boîte mail.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -94,8 +110,8 @@ export function NewsletterModal({ isOpen, onClose, initialEmail = "" }: Newslett
               <Label htmlFor="newsletter-name">Nom complet *</Label>
               <Input
                 id="newsletter-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={formData.nomComplet}
+                onChange={(e) => setFormData({ ...formData, nomComplet: e.target.value })}
                 placeholder="Votre nom complet"
                 required
                 className="mt-1"
@@ -119,17 +135,13 @@ export function NewsletterModal({ isOpen, onClose, initialEmail = "" }: Newslett
               <Button type="button" variant="outline" onClick={handleClose} className="flex-1" disabled={isSubmitting}>
                 Annuler
               </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-primary hover:bg-[#911a0f] text-white"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
                 {isSubmitting ? "Inscription..." : "S'abonner"}
               </Button>
             </div>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              Pas de spam, désabonnement possible à tout moment
+            <p className="text-center text-xs text-muted-foreground">
+              Pas de spam, désabonnement possible à tout moment.
             </p>
           </form>
         </div>
