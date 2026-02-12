@@ -19,6 +19,7 @@ interface BlogPost {
   imageUne: string;
   statut: string;
   createdAt: string;
+  estimationLecture: number;
   auteur?: {
     nomComplet: string;
   };
@@ -142,13 +143,6 @@ export default function BlogPage() {
       month: "long",
       year: "numeric",
     });
-  };
-
-  // Temps de lecture estimé
-  const calculateReadTime = (content: string) => {
-    const words = content.split(/\s+/).length;
-    const minutes = Math.ceil(words / 200);
-    return `${minutes} min`;
   };
 
   // Toutes les catégories disponibles
@@ -300,7 +294,7 @@ export default function BlogPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            <span>{calculateReadTime(post.extrait || "")}</span>
+                            <span>{post.estimationLecture ?? 1} min</span>
                           </div>
                         </div>
                       </CardContent>

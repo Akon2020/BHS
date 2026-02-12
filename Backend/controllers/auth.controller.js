@@ -103,13 +103,13 @@ export const login = async (req, res, next) => {
       user.password
     );
 
-    if (isDefaultPassword) {
-      return res.status(403).json({
-        message:
-          "Vous utilisez le mot de passe par défaut. Veuillez le modifier pour continuer.",
-        requiresPasswordChange: true,
-      });
-    }
+    // if (isDefaultPassword) {
+    //   return res.status(403).json({
+    //     message:
+    //       "Vous utilisez le mot de passe par défaut. Veuillez le modifier pour continuer.",
+    //     requiresPasswordChange: true,
+    //   });
+    // }
 
     user.derniereConnexion = new Date();
     await user.save();

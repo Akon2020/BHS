@@ -265,7 +265,7 @@ export default function ViewEventAdminPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-2">
           <CardContent className="p-6 space-y-4">
-            <p className="text-muted-foreground">{event.description}</p>
+            <div className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: event!.description }} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center gap-2">
