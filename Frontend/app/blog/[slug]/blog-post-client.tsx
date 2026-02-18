@@ -37,7 +37,6 @@ interface BlogPostClientProps {
 }
 
 export default function BlogPostClient({ slug }: BlogPostClientProps) {
-
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState<Commentaire[]>([]);
@@ -260,7 +259,16 @@ export default function BlogPostClient({ slug }: BlogPostClientProps) {
 
             <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
+                {/* <User className="h-4 w-4" /> */}
+                <Avatar>
+                  <AvatarImage
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/${blog!.auteur?.avatar}`}
+                    className="object-cover"
+                  />
+                  <AvatarFallback>
+                    {blog!.auteur?.nomComplet.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <span>{blog!.auteur?.nomComplet}</span>
               </div>
 

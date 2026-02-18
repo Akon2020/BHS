@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { dashboard } from "../controllers/dashboard.controller.js";
-import { authenticationJWT } from "../middlewares/auth.middleware.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
@@ -58,6 +61,11 @@ const dashboardRouter = Router();
  *       500:
  *         description: Erreur serveur
  */
-dashboardRouter.get("/", authenticationJWT, dashboard);
+dashboardRouter.get(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  dashboard,
+);
 
 export default dashboardRouter;

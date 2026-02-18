@@ -1,5 +1,7 @@
 import { Book, Users, Heart, Music, Baby, HandHeart } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export const metadata = {
   title: "Services - Burning Heart",
@@ -51,6 +53,7 @@ const services = [
 export default function ServicesPage() {
   return (
     <div className="flex flex-col">
+      <Header />
       {/* Hero */}
       <section className="bg-muted/30 py-24">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -107,6 +110,7 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }

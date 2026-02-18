@@ -9,6 +9,10 @@ import {
 } from "../controllers/equipe.controller.js";
 import upload from "../middlewares/upload.middleware.js";
 import { normalizeUploadPaths } from "../utils/normalizeUploadPaths.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 
 const equipeRouter = Router();
 
@@ -29,7 +33,12 @@ const equipeRouter = Router();
  *       200:
  *         description: Liste des membres récupérée avec succès
  */
-equipeRouter.get("/", getAllEquipes);
+equipeRouter.get(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAllEquipes,
+);
 
 /**
  * @swagger
@@ -50,7 +59,12 @@ equipeRouter.get("/", getAllEquipes);
  *       404:
  *         description: Membre non trouvé
  */
-equipeRouter.get("/:id", getSingleEquipe);
+equipeRouter.get(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getSingleEquipe,
+);
 
 /**
  * @swagger
@@ -71,7 +85,12 @@ equipeRouter.get("/:id", getSingleEquipe);
  *       404:
  *         description: Membre non trouvé
  */
-equipeRouter.get("/fonction/:fonction", getEquipeByFonction);
+equipeRouter.get(
+  "/fonction/:fonction",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getEquipeByFonction,
+);
 
 /**
  * @swagger
@@ -108,7 +127,14 @@ equipeRouter.get("/fonction/:fonction", getEquipeByFonction);
  *       400:
  *         description: Données invalides ou membre existant
  */
-equipeRouter.post("/add", upload.single("photoProfil"), normalizeUploadPaths, createEquipe);
+equipeRouter.post(
+  "/add",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  upload.single("photoProfil"),
+  normalizeUploadPaths,
+  createEquipe,
+);
 
 /**
  * @swagger
@@ -149,7 +175,14 @@ equipeRouter.post("/add", upload.single("photoProfil"), normalizeUploadPaths, cr
  *       404:
  *         description: Membre non trouvé
  */
-equipeRouter.patch("/update/:id", upload.single("photoProfil"), normalizeUploadPaths, updateEquipe);
+equipeRouter.patch(
+  "/update/:id",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  upload.single("photoProfil"),
+  normalizeUploadPaths,
+  updateEquipe,
+);
 
 /**
  * @swagger
@@ -170,6 +203,11 @@ equipeRouter.patch("/update/:id", upload.single("photoProfil"), normalizeUploadP
  *       404:
  *         description: Membre non trouvé
  */
-equipeRouter.delete("/delete/:id", deleteEquipe);
+equipeRouter.delete(
+  "/delete/:id",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  deleteEquipe,
+);
 
 export default equipeRouter;

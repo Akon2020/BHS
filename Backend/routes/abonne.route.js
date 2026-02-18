@@ -1,5 +1,13 @@
 import { Router } from "express";
-import { getAllAbonnes, getAllActifAbonnes, subscribeNewsletter } from "../controllers/abonne.controller.js";
+import {
+  getAllAbonnes,
+  getAllActifAbonnes,
+  subscribeNewsletter,
+} from "../controllers/abonne.controller.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
@@ -20,7 +28,12 @@ const abonneRouter = Router();
  *       200:
  *         description: Liste des abonnés récupérée avec succès
  */
-abonneRouter.get("/", getAllAbonnes);
+abonneRouter.get(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAllAbonnes,
+);
 
 /**
  * @swagger
@@ -32,7 +45,12 @@ abonneRouter.get("/", getAllAbonnes);
  *       200:
  *         description: Liste des abonnés récupérée avec succès
  */
-abonneRouter.get("/actifs", getAllActifAbonnes);
+abonneRouter.get(
+  "/actifs",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAllActifAbonnes,
+);
 
 /**
  * @swagger

@@ -9,7 +9,10 @@ import {
   updateBlog,
   deleteBlog,
 } from "../controllers/blog.controller.js";
-import { authenticationJWT } from "../middlewares/auth.middleware.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 import { normalizeUploadPaths } from "../utils/normalizeUploadPaths.js";
 
@@ -78,7 +81,12 @@ blogRouter.get("/", getAllBlogs);
  *       404:
  *         description: Blog non trouvé
  */
-blogRouter.get("/:id", getSingleBlog);
+blogRouter.get(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getSingleBlog,
+);
 
 /**
  * @swagger
@@ -177,7 +185,14 @@ blogRouter.get("/statut/:statut", getBlogsByStatut);
  *       201:
  *         description: Blog créé avec succès
  */
-blogRouter.post("/add", authenticationJWT, upload.single("imageUne"), normalizeUploadPaths, createBlog);
+blogRouter.post(
+  "/add",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  upload.single("imageUne"),
+  normalizeUploadPaths,
+  createBlog,
+);
 
 /**
  * @swagger
@@ -222,7 +237,14 @@ blogRouter.post("/add", authenticationJWT, upload.single("imageUne"), normalizeU
  *       404:
  *         description: Blog non trouvé
  */
-blogRouter.patch("/update/:id", authenticationJWT, upload.single("imageUne"), normalizeUploadPaths, updateBlog);
+blogRouter.patch(
+  "/update/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  upload.single("imageUne"),
+  normalizeUploadPaths,
+  updateBlog,
+);
 
 /**
  * @swagger
@@ -243,6 +265,11 @@ blogRouter.patch("/update/:id", authenticationJWT, upload.single("imageUne"), no
  *       404:
  *         description: Blog non trouvé
  */
-blogRouter.delete("/delete/:id", deleteBlog);
+blogRouter.delete(
+  "/delete/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  deleteBlog,
+);
 
 export default blogRouter;

@@ -8,6 +8,10 @@ import {
   updateUtilisateurPassword,
   updateUtilisateur,
 } from "../controllers/utilisateur.controller.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 import { normalizeUploadPaths } from "../utils/normalizeUploadPaths.js";
 
@@ -25,7 +29,12 @@ const userRouter = Router();
  *       500:
  *         description: Erreur serveur
  */
-userRouter.get("/", getAllUtilisateurs);
+userRouter.get(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  getAllUtilisateurs,
+);
 
 /**
  * @swagger
@@ -46,7 +55,12 @@ userRouter.get("/", getAllUtilisateurs);
  *       400:
  *         description: Utilisateur non trouvé
  */
-userRouter.get("/:id", getSingleUtilisateur);
+userRouter.get(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getSingleUtilisateur,
+);
 
 /**
  * @swagger
@@ -69,7 +83,12 @@ userRouter.get("/:id", getSingleUtilisateur);
  *       404:
  *         description: Utilisateur non trouvé
  */
-userRouter.get("/email/:email", getUtilisateurByEmail);
+userRouter.get(
+  "/email/:email",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  getUtilisateurByEmail,
+);
 
 /**
  * @swagger
@@ -107,9 +126,11 @@ userRouter.get("/email/:email", getUtilisateurByEmail);
  */
 userRouter.post(
   "/add",
+  authenticationJWT,
+  authorizeRoles("admin"),
   upload.single("avatar"),
   normalizeUploadPaths,
-  createUtilisateur
+  createUtilisateur,
 );
 
 /**
@@ -151,9 +172,11 @@ userRouter.post(
  */
 userRouter.patch(
   "/update/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
   upload.single("avatar"),
   normalizeUploadPaths,
-  updateUtilisateur
+  updateUtilisateur,
 );
 
 /**
@@ -191,7 +214,9 @@ userRouter.patch(
  */
 userRouter.patch(
   "/update/:id/password",
-  updateUtilisateurPassword
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  updateUtilisateurPassword,
 );
 
 /**

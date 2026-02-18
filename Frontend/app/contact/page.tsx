@@ -84,6 +84,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold">Email</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">contact@burningheartihs.org</p>
                       <p className="mt-1 text-sm text-muted-foreground">burningheartihs@gmail.com</p>
                     </div>
                   </CardContent>

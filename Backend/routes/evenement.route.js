@@ -14,6 +14,7 @@ import {
 } from "../controllers/evenement.controller.js";
 import {
   authenticationJWT,
+  authorizeRoles,
   optionalAuthJWT,
 } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
@@ -90,7 +91,12 @@ evenementRouter.get("/", getAllEvents);
  *       200:
  *         description: Liste des événements (admin) récupérée
  */
-evenementRouter.get("/admin", getAllEventsAdmin);
+evenementRouter.get(
+  "/admin",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAllEventsAdmin,
+);
 
 /**
  * @swagger
@@ -111,7 +117,12 @@ evenementRouter.get("/admin", getAllEventsAdmin);
  *       404:
  *         description: Événement non trouvé
  */
-evenementRouter.get("/:id", getSingleEvent);
+evenementRouter.get(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getSingleEvent,
+);
 
 /**
  * @swagger
@@ -163,7 +174,12 @@ evenementRouter.get("/date/:date", getEventsByDate);
  *     security:
  *       - bearerAuth: []
  */
-evenementRouter.get("/admin/:id", authenticationJWT, getSingleEventAdmin);
+evenementRouter.get(
+  "/admin/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getSingleEventAdmin,
+);
 
 /**
  * @swagger
@@ -214,6 +230,7 @@ evenementRouter.get("/admin/:id", authenticationJWT, getSingleEventAdmin);
 evenementRouter.post(
   "/add",
   authenticationJWT,
+  authorizeRoles("admin", "editeur"),
   upload.single("imageEvenement"),
   normalizeUploadPaths,
   createEvent,
@@ -270,6 +287,7 @@ evenementRouter.post(
 evenementRouter.patch(
   "/update/:id",
   authenticationJWT,
+  authorizeRoles("admin", "editeur"),
   upload.single("imageEvenement"),
   normalizeUploadPaths,
   updateEvent,
@@ -296,7 +314,12 @@ evenementRouter.patch(
  *       404:
  *         description: Événement non trouvé
  */
-evenementRouter.delete("/delete/:id", authenticationJWT, deleteEvent);
+evenementRouter.delete(
+  "/delete/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  deleteEvent,
+);
 
 /**
  * @swagger
@@ -331,7 +354,12 @@ evenementRouter.delete("/delete/:id", authenticationJWT, deleteEvent);
  *       201:
  *         description: Inscription réussie
  */
-evenementRouter.post("/:id/inscription", optionalAuthJWT, inscrireAUnEvenement);
+evenementRouter.post(
+  "/:id/inscription",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  inscrireAUnEvenement,
+);
 
 /**
  * @swagger

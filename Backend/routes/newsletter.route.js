@@ -8,7 +8,10 @@ import {
   deleteNewsletter,
   getSingleNewsletter,
 } from "../controllers/newsletter.controller.js";
-import { authenticationJWT } from "../middlewares/auth.middleware.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
@@ -43,7 +46,12 @@ const newsletterRouter = Router();
  *       200:
  *         description: Liste des newsletters
  */
-newsletterRouter.get("/", getAllNewsletters);
+newsletterRouter.get(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAllNewsletters,
+);
 
 /**
  * @swagger
@@ -63,7 +71,12 @@ newsletterRouter.get("/", getAllNewsletters);
  *       404:
  *         description: Newsletter introuvable
  */
-newsletterRouter.get("/:id", getSingleNewsletter);
+newsletterRouter.get(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getSingleNewsletter,
+);
 
 /**
  * @swagger
@@ -81,7 +94,12 @@ newsletterRouter.get("/:id", getSingleNewsletter);
  *       200:
  *         description: Statistiques récupérées
  */
-newsletterRouter.get("/:id/stats", getNewsletterStats);
+newsletterRouter.get(
+  "/:id/stats",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getNewsletterStats,
+);
 
 /**
  * @swagger
@@ -119,7 +137,12 @@ newsletterRouter.get("/:id/stats", getNewsletterStats);
  *       201:
  *         description: Newsletter créée avec succès
  */
-newsletterRouter.post("/", authenticationJWT, createNewsletter);
+newsletterRouter.post(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  createNewsletter,
+);
 
 /**
  * @swagger
@@ -137,7 +160,12 @@ newsletterRouter.post("/", authenticationJWT, createNewsletter);
  *       200:
  *         description: Newsletter envoyée avec succès
  */
-newsletterRouter.post("/:id/send", sendNewsletter);
+newsletterRouter.post(
+  "/:id/send",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  sendNewsletter,
+);
 
 /**
  * @swagger
@@ -161,7 +189,12 @@ newsletterRouter.post("/:id/send", sendNewsletter);
  *       200:
  *         description: Newsletter mise à jour
  */
-newsletterRouter.put("/:id", updateNewsletter);
+newsletterRouter.put(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  updateNewsletter,
+);
 
 /**
  * @swagger
@@ -179,6 +212,11 @@ newsletterRouter.put("/:id", updateNewsletter);
  *       200:
  *         description: Newsletter supprimée
  */
-newsletterRouter.delete("/:id", deleteNewsletter);
+newsletterRouter.delete(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  deleteNewsletter,
+);
 
 export default newsletterRouter;

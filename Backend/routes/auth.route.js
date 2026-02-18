@@ -9,6 +9,7 @@ import {
 import {
   authenticationJWT,
   checkAuthStatus,
+  authorizeRoles,
 } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 import { normalizeUploadPaths } from "../utils/normalizeUploadPaths.js";
@@ -79,7 +80,14 @@ authRouter.get("/profile", authenticationJWT, (req, res) => {
  *       400:
  *         description: Données manquantes ou utilisateur déjà existant
  */
-authRouter.post("/register", upload.single("avatar"), normalizeUploadPaths, register);
+authRouter.post(
+  "/register",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  upload.single("avatar"),
+  normalizeUploadPaths,
+  register,
+);
 
 /**
  * @swagger

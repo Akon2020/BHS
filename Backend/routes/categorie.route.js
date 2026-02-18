@@ -7,6 +7,10 @@ import {
   updateCategorie,
   deleteCategorie,
 } from "../controllers/categorie.controller.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 
 const categorieRouter = Router();
 
@@ -27,7 +31,10 @@ const categorieRouter = Router();
  *       200:
  *         description: Liste des catégories récupérée avec succès
  */
-categorieRouter.get("/", getAllCategories);
+categorieRouter.get(
+  "/",
+  getAllCategories,
+);
 
 /**
  * @swagger
@@ -48,7 +55,10 @@ categorieRouter.get("/", getAllCategories);
  *       404:
  *         description: Catégorie non trouvée
  */
-categorieRouter.get("/:id", getCategorieById);
+categorieRouter.get(
+  "/:id",
+  getCategorieById,
+);
 
 /**
  * @swagger
@@ -69,7 +79,10 @@ categorieRouter.get("/:id", getCategorieById);
  *       404:
  *         description: Catégorie non trouvée
  */
-categorieRouter.get("/slug/:slug", getCategorieBySlug);
+categorieRouter.get(
+  "/slug/:slug",
+  getCategorieBySlug,
+);
 
 /**
  * @swagger
@@ -95,7 +108,12 @@ categorieRouter.get("/slug/:slug", getCategorieBySlug);
  *       400:
  *         description: Données invalides ou catégorie existante
  */
-categorieRouter.post("/add", createCategorie);
+categorieRouter.post(
+  "/add",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  createCategorie,
+);
 
 /**
  * @swagger
@@ -126,7 +144,12 @@ categorieRouter.post("/add", createCategorie);
  *       404:
  *         description: Catégorie non trouvée
  */
-categorieRouter.patch("/update/:id", updateCategorie);
+categorieRouter.patch(
+  "/update/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  updateCategorie,
+);
 
 /**
  * @swagger
@@ -147,6 +170,11 @@ categorieRouter.patch("/update/:id", updateCategorie);
  *       404:
  *         description: Catégorie non trouvée
  */
-categorieRouter.delete("/delete/:id", deleteCategorie);
+categorieRouter.delete(
+  "/delete/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  deleteCategorie,
+);
 
 export default categorieRouter;

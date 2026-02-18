@@ -94,10 +94,10 @@ export function Footer() {
               <li className="flex items-center gap-2 text-sm">
                 <Mail className="h-5 w-5 shrink-0 text-primary" />
                 <a
-                  href="mailto:burningheartihs@gmail.com"
+                  href="mailto:contact@burningheartihs.org"
                   className="text-muted-foreground transition-colors duration-200 hover:text-primary hover:underline"
                 >
-                  burningheartihs@gmail.com
+                  contact@burningheartihs.org
                 </a>
               </li>
             </ul>
@@ -113,7 +113,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 border-t pt-8 text-center">
-          <p className="text-sm text-muted-foreground">© 2025 Burning Heart. Tous droits réservés.</p>
+          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Burning Heart. Tous droits réservés.</p>
           <div className="mt-2 flex justify-center gap-4 text-sm">
             <Link href="#" className="text-muted-foreground hover:text-foreground">
               Mentions légales

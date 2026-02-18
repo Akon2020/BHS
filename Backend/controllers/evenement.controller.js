@@ -9,6 +9,7 @@ import {
 import { EMAIL, FRONT_URL } from "../config/env.js";
 import transporter from "../config/nodemailer.js";
 import { eventPublishedNotificationTemplate } from "../utils/email.template.js";
+import { valideEmail } from "../middlewares/email.middleware.js";
 
 const requiredFields = [
   "titre",
@@ -73,14 +74,7 @@ export const getAllEvents = async (req, res, next) => {
 
 export const getAllEventsAdmin = async (req, res, next) => {
   try {
-    const {
-      statut,
-      q,
-      startDate,
-      endDate,
-      limit = 20,
-      page = 1,
-    } = req.query;
+    const { statut, q, startDate, endDate, limit = 20, page = 1 } = req.query;
 
     const filters = {};
     if (statut) filters.statut = statut;
@@ -422,6 +416,10 @@ export const inscrireAUnEvenement = async (req, res, next) => {
 
     const userId = req.user?.idUtilisateur || null;
 
+    if (!valideEmail(email)) {
+      return res.status(400).json({ message: "Adresse email invalide" });
+    }
+
     const event = await Evenement.findByPk(id);
     if (!event)
       return res.status(404).json({ message: "Événement introuvable." });
@@ -510,6 +508,17 @@ export const inscrireAUnEvenement = async (req, res, next) => {
     event.nombreInscrits += 1;
     await event.save();
 
+    const dejaAbonne = await Abonne.findOne({ where: { email } });
+    if (dejaAbonne) next();
+
+    await Abonne.create({
+      nomComplet,
+      email,
+      statut: "actif",
+      dateAbonnement: new Date(),
+      dateDesabonnement: null,
+    });
+
     return res.status(201).json({
       message: "Inscription réussie 🎉",
       inscription,
@@ -526,10 +535,14 @@ export const registerToEvent = async (req, res, next) => {
 
     const userId = req.user?.idUtilisateur || null;
 
+    if (!valideEmail(email)) {
+      return res.status(400).json({ message: "Adresse email invalide" });
+    }
+
     const event = await Evenement.findOne({
       where: { slug, statut: "publie" },
     });
-    
+
     if (!event)
       return res.status(404).json({ message: "Événement introuvable." });
 
@@ -582,7 +595,6 @@ export const registerToEvent = async (req, res, next) => {
       const user = await Utilisateur.findByPk(userId, {
         attributes: ["idUtilisateur", "nomComplet", "email"],
       });
-      console.log("User found:", user);
 
       if (!user)
         return res.status(404).json({ message: "Utilisateur introuvable." });
@@ -613,9 +625,19 @@ export const registerToEvent = async (req, res, next) => {
     }
 
     const inscription = await InscriptionEvenement.create(dataInscription);
-
     event.nombreInscrits += 1;
     await event.save();
+
+    const dejaAbonne = await Abonne.findOne({ where: { email } });
+    if (dejaAbonne) next();
+
+    await Abonne.create({
+      nomComplet,
+      email,
+      statut: "actif",
+      dateAbonnement: new Date(),
+      dateDesabonnement: null,
+    });
 
     return res.status(201).json({
       message: "Inscription réussie 🎉",

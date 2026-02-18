@@ -7,6 +7,10 @@ import {
   deleteContact,
   repondreContact,
 } from "../controllers/contact.controller.js";
+import {
+  authenticationJWT,
+  authorizeRoles,
+} from "../middlewares/auth.middleware.js";
 
 /**
  * @swagger
@@ -27,7 +31,12 @@ const contactRouter = Router();
  *       200:
  *         description: Liste des messages récupérée avec succès
  */
-contactRouter.get("/", getAllContacts);
+contactRouter.get(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAllContacts,
+);
 
 /**
  * @swagger
@@ -48,7 +57,12 @@ contactRouter.get("/", getAllContacts);
  *       404:
  *         description: Message non trouvé
  */
-contactRouter.get("/:id", getContactById);
+contactRouter.get(
+  "/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getContactById,
+);
 
 /**
  * @swagger
@@ -69,7 +83,12 @@ contactRouter.get("/:id", getContactById);
  *       404:
  *         description: Aucun message trouvé avec cet email
  */
-contactRouter.get("/search/email/:email", getContactsByEmail);
+contactRouter.get(
+  "/search/email/:email",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getContactsByEmail,
+);
 
 /**
  * @swagger
@@ -141,7 +160,12 @@ contactRouter.post("/add", createContact);
  *       500:
  *         description: Erreur serveur
  */
-contactRouter.post("/repondre/:id", repondreContact);
+contactRouter.post(
+  "/repondre/:id",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  repondreContact,
+);
 
 /**
  * @swagger
@@ -162,6 +186,11 @@ contactRouter.post("/repondre/:id", repondreContact);
  *       404:
  *         description: Message non trouvé
  */
-contactRouter.delete("/delete/:id", deleteContact)
+contactRouter.delete(
+  "/delete/:id",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  deleteContact,
+);
 
 export default contactRouter;

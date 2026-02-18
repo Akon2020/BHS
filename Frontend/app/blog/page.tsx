@@ -6,6 +6,7 @@ import { User, Calendar, Clock, Loader2, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getAllBlogs } from "@/actions/blog";
 import { getAllCategories } from "@/actions/categorie";
 import { Header } from "@/components/header";
@@ -21,6 +22,7 @@ interface BlogPost {
   createdAt: string;
   estimationLecture: number;
   auteur?: {
+    avatar?: string;
     nomComplet: string;
   };
   categorie?: {
@@ -64,7 +66,7 @@ export default function BlogPage() {
       const params: any = {
         page: pageNum,
         limit,
-        statut: "publie", // SEULEMENT les articles publiés
+        statut: "publie",
       };
 
       if (activeCategory !== "Tous") {
@@ -283,7 +285,16 @@ export default function BlogPage() {
                         {/* Métadonnées */}
                         <div className="flex flex-wrap items-center gap-4 border-t pt-4 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
+                            {/* <User className="h-3 w-3" /> */}
+                            <Avatar>
+                              <AvatarImage
+                                src={`${process.env.NEXT_PUBLIC_API_URL}/${post.auteur?.avatar}`}
+                                className="object-cover"
+                              />
+                              <AvatarFallback>
+                                {post.auteur?.nomComplet.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
                             <span>
                               {post.auteur?.nomComplet || "Auteur inconnu"}
                             </span>

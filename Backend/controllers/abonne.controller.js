@@ -38,6 +38,13 @@ export const subscribeNewsletter = async (req, res, next) => {
       return res.status(400).json({ message: "Adresse email invalide" });
     }
 
+    const dejaInscrit = await Abonne.findOne({ where: { email } });
+
+    if (dejaInscrit)
+      return res
+        .status(400)
+        .json({ message: "Vous vous êtes déjà abonné(e) à la newsletter" });
+
     const nouveauAbonne = await Abonne.create({
       nomComplet,
       email,
