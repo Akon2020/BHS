@@ -629,7 +629,12 @@ export const registerToEvent = async (req, res, next) => {
     await event.save();
 
     const dejaAbonne = await Abonne.findOne({ where: { email } });
-    if (dejaAbonne) next();
+    if (dejaAbonne) {
+      return res.status(201).json({
+        message: "Inscription réussie 🎉",
+        inscription,
+      });
+    }
 
     await Abonne.create({
       nomComplet,
