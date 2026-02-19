@@ -72,8 +72,6 @@ export function RegisterEventModal({
           "Vous êtes bien inscrit à l'événement et votre billet est prêt au téléchargement.",
       });
 
-      console.log("Response registration: ", res);
-
       if (res.pdfUrl) {
         window.open(res.pdfUrl, "_blank");
       }

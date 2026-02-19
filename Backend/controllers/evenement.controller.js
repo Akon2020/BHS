@@ -512,8 +512,39 @@ export const inscrireAUnEvenement = async (req, res, next) => {
     event.nombreInscrits += 1;
     await event.save();
 
+    const pdf = await generateEventTicketPDF({
+      event,
+      inscription,
+    });
+
+    await transporter.sendMail({
+      from: `"BurningHeart IHS" <${EMAIL}>`,
+      to: inscription.email,
+      subject: `Confirmation d’inscription - ${event.titre}`,
+      html: eventRegistrationWithPDFTemplate(
+        inscription.nomComplet,
+        event.titre,
+        new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
+        event.lieu,
+        `${FRONT_URL}/events/${event.slug}`,
+      ),
+      attachments: [
+        {
+          filename: pdf.fileName,
+          path: pdf.filePath,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
     const dejaAbonne = await Abonne.findOne({ where: { email } });
-    if (dejaAbonne) next();
+    if (dejaAbonne) {
+      return res.status(201).json({
+        message: "Inscription réussie 🎉",
+        inscription,
+        pdfUrl: `${HOST_URL}${pdf.url}`,
+      });
+    }
 
     await Abonne.create({
       nomComplet,
@@ -526,6 +557,7 @@ export const inscrireAUnEvenement = async (req, res, next) => {
     return res.status(201).json({
       message: "Inscription réussie 🎉",
       inscription,
+      pdfUrl: `${HOST_URL}${pdf.url}`,
     });
   } catch (error) {
     next(error);
@@ -656,8 +688,6 @@ export const registerToEvent = async (req, res, next) => {
         },
       ],
     });
-
-    console.log("PDF Généré: ", pdf);
 
     const dejaAbonne = await Abonne.findOne({ where: { email } });
     if (dejaAbonne) {
