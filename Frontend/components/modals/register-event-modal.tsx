@@ -59,7 +59,7 @@ export function RegisterEventModal({
     try {
       setLoading(true);
 
-      await registerToEvent(slug, {
+      const res = await registerToEvent(slug, {
         nomComplet: form.nomComplet,
         email: form.email,
         telephone: form.telephone,
@@ -68,8 +68,15 @@ export function RegisterEventModal({
 
       toast({
         title: "Inscription réussie 🎉",
-        description: "Vous êtes bien inscrit à l'événement.",
+        description:
+          "Vous êtes bien inscrit à l'événement et votre billet est prêt au téléchargement.",
       });
+
+      console.log("Response registration: ", res);
+
+      if (res.pdfUrl) {
+        window.open(res.pdfUrl, "_blank");
+      }
 
       onOpenChange(false);
       onSuccess?.();

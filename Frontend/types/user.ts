@@ -404,4 +404,5 @@ export interface InscriptionEvenementBody {
 export interface InscriptionEvenementResponse {
   message: string;
   inscription: InscriptionEvenement;
+  pdfUrl: string;
 }

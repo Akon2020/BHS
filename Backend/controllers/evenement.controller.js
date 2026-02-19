@@ -6,10 +6,14 @@ import {
   Utilisateur,
   InscriptionEvenement,
 } from "../models/index.model.js";
-import { EMAIL, FRONT_URL } from "../config/env.js";
+import { EMAIL, FRONT_URL, HOST_URL } from "../config/env.js";
 import transporter from "../config/nodemailer.js";
-import { eventPublishedNotificationTemplate } from "../utils/email.template.js";
+import {
+  eventPublishedNotificationTemplate,
+  eventRegistrationWithPDFTemplate,
+} from "../utils/email.template.js";
 import { valideEmail } from "../middlewares/email.middleware.js";
+import { generateEventTicketPDF } from "../utils/event-pdf.js";
 
 const requiredFields = [
   "titre",
@@ -628,11 +632,39 @@ export const registerToEvent = async (req, res, next) => {
     event.nombreInscrits += 1;
     await event.save();
 
+    const pdf = await generateEventTicketPDF({
+      event,
+      inscription,
+    });
+
+    await transporter.sendMail({
+      from: `"BurningHeart IHS" <${EMAIL}>`,
+      to: inscription.email,
+      subject: `Confirmation d’inscription - ${event.titre}`,
+      html: eventRegistrationWithPDFTemplate(
+        inscription.nomComplet,
+        event.titre,
+        new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
+        event.lieu,
+        `${FRONT_URL}/events/${event.slug}`,
+      ),
+      attachments: [
+        {
+          filename: pdf.fileName,
+          path: pdf.filePath,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    console.log("PDF Généré: ", pdf);
+
     const dejaAbonne = await Abonne.findOne({ where: { email } });
     if (dejaAbonne) {
       return res.status(201).json({
         message: "Inscription réussie 🎉",
         inscription,
+        pdfUrl: `${HOST_URL}${pdf.url}`,
       });
     }
 
@@ -647,6 +679,7 @@ export const registerToEvent = async (req, res, next) => {
     return res.status(201).json({
       message: "Inscription réussie 🎉",
       inscription,
+      pdfUrl: `${HOST_URL}${pdf.url}`,
     });
   } catch (error) {
     next(error);

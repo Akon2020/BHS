@@ -645,3 +645,123 @@ export const eventRegistrationConfirmationTemplate = (nom, nomEvenement, dateEve
   </table>
   `;
 };
+
+export const eventRegistrationWithPDFTemplate = (
+  nom,
+  nomEvenement,
+  dateEvenement,
+  lieuEvenement,
+  url
+) => {
+  return `
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9f9f9; padding: 40px 1rem;">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" 
+          style="max-width: 600px; background-color: #ffffff; padding: 24px; border-radius: 8px; 
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05); font-family: Arial, sans-serif;">
+          
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding-bottom: 20px;">
+              <img src="https://burningheart.netlify.app/img/NavLogo.png" 
+                   alt="BurningHeart Logo" 
+                   style="max-width: 100%; width: auto; height: 5rem;">
+            </td>
+          </tr>
+
+          <!-- Title -->
+          <tr>
+            <td align="center" style="color: #a42223; font-size: 24px; font-weight: bold; padding-bottom: 16px;">
+              Inscription Confirmée 🎉
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="color: #333333; font-size: 16px; padding-bottom: 16px;">
+              Bonjour ${nom},
+            </td>
+          </tr>
+
+          <!-- Message -->
+          <tr>
+            <td style="color: #555555; font-size: 15px; line-height: 1.5; padding-bottom: 16px;">
+              Votre inscription à l’événement <strong>${nomEvenement}</strong> a été confirmée avec succès.
+            </td>
+          </tr>
+
+          <!-- Event details -->
+          <tr>
+            <td style="color: #555555; font-size: 15px; padding-bottom: 24px;">
+              <strong>Détails de l'événement :</strong><br>
+              📅 <strong>Date :</strong> ${dateEvenement}<br>
+              📍 <strong>Lieu :</strong> ${lieuEvenement}
+            </td>
+          </tr>
+
+          <!-- PDF Info -->
+          <tr>
+            <td style="color: #555555; font-size: 15px; padding-bottom: 24px;">
+              Votre billet de participation est joint à cet email au format PDF.<br>
+              Vous pourrez le présenter le jour de l’événement (version imprimée ou sur votre téléphone).
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding: 20px 0;">
+              <a href="${url}" 
+                style="background-color: #a42223; color: #ffffff; text-decoration: none; 
+                padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">
+                Voir l'événement
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer text -->
+          <tr>
+            <td style="color: #555555; font-size: 15px; padding-bottom: 4px;">
+              À très bientôt 🙏,
+            </td>
+          </tr>
+          <tr>
+            <td style="color: #555555; font-size: 15px; padding-bottom: 16px;">
+              L'équipe BurningHeart
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 20px 0;" />
+            </td>
+          </tr>
+
+          <!-- Social Icons -->
+          <tr>
+            <td align="center" style="padding: 10px 0;">
+              <a href="https://facebook.com/burningheart87" style="margin: 0 8px;">
+                <img src="https://cdn-icons-png.flaticon.com/24/733/733547.png" alt="Facebook" style="vertical-align: middle;">
+              </a>
+              <a href="https://instagram.com/burningheart87" style="margin: 0 8px;">
+                <img src="https://cdn-icons-png.flaticon.com/24/2111/2111463.png" alt="Instagram" style="vertical-align: middle;">
+              </a>
+              <a href="https://youtube.com/@burningheart-bhis" style="margin: 0 8px;">
+                <img src="https://cdn-icons-png.flaticon.com/24/1384/1384060.png" alt="YouTube" style="vertical-align: middle;">
+              </a>
+            </td>
+          </tr>
+
+          <!-- Copyright -->
+          <tr>
+            <td align="center" style="color: #999999; font-size: 12px; padding-top: 20px;">
+              &copy; ${currentYear} BurningHeart – Tous droits réservés
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+  `;
+};
