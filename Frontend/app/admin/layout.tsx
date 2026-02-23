@@ -19,7 +19,7 @@ export default function AdminLayout({
 
   return (
     <ProtectedRoute
-      allowedRoles={["admin", "editeur"]}
+      allowedRoles={["admin", "editeur", "membre"]}
       checkPagePermissions={true}
     >
       <div className="flex h-screen">

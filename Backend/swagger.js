@@ -11,6 +11,21 @@ const options = {
       description: "Documentation de l'API BurningHeart",
     },
     servers: [{ url: HOST_URL }],
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Entrez votre token JWT",
+        },
+      },
+    },
+    security: [
+      {
+        BearerAuth: [],
+      },
+    ],
   },
   apis: ["./routes/*.js"],
 };
