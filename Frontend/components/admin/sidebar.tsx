@@ -16,6 +16,7 @@ import {
   UserCircle,
   Folder,
   LogOut,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -69,6 +70,12 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       icon: FileText,
       href: "/admin/blog",
       active: pathname.startsWith("/admin/blog"),
+    },
+    {
+      label: "Messages",
+      icon: Phone,
+      href: "/admin/contact",
+      active: pathname.startsWith("/admin/contact"),
     },
     {
       label: "Newsletter",

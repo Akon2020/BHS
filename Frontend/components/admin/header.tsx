@@ -1,28 +1,36 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Menu, Bell, User, LogOut } from "lucide-react";
+import { Menu, Bell, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { logout } from "@/actions/auth";
+import {
+  getCurrentUser,
+  getRoleLabel,
+  getUserDisplayName,
+  getUserInitials,
+} from "@/lib/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminHeaderProps {
   toggleSidebar: () => void;
 }
 
 export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
-  const [notifications, setNotifications] = useState(3);
+  const notifications = 3;
+  const currentUser = getCurrentUser();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -74,21 +82,57 @@ export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <User className="h-5 w-5" />
-              <span className="sr-only">Profil</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              aria-label="Mon compte"
+            >
+              <Avatar className="size-9 border">
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_API_URL}/${currentUser?.avatar || undefined}`}
+                  alt={getUserDisplayName(currentUser)}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-xs font-semibold">
+                  {getUserInitials(currentUser)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="sr-only">Mon compte</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-72">
+            <DropdownMenuLabel>
+              Mon compte
+            </DropdownMenuLabel>
+            <div className="space-y-2 px-2 py-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="truncate text-sm font-semibold">
+                  {getUserDisplayName(currentUser)}
+                </p>
+                <Badge variant="secondary">{getRoleLabel(currentUser?.role)}</Badge>
+              </div>
+              <p className="truncate text-xs text-muted-foreground">
+                {currentUser?.email || "Email inconnu"}
+              </p>
+            </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profil</DropdownMenuItem>
-            <DropdownMenuItem>Paramètres</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/admin/profil" className="flex items-center gap-2">
+                <User className="mr-2 h-4 w-4" />
+                Profil
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/admin/settings" className="flex items-center gap-2">
+                <Settings className="mr-2 h-4 w-4" />
+                Paramètres
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
-                Déconnexion
-              </Button>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Déconnexion
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
