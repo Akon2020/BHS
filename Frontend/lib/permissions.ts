@@ -8,7 +8,6 @@ export type UserRole = "admin" | "editeur" | "membre";
 export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
   admin: [
     "/admin",
-    "/admin/dashboard",
     "/admin/blog",
     "/admin/categories",
     "/admin/events",
@@ -20,13 +19,21 @@ export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
   ],
   editeur: [
     "/admin",
-    "/admin/dashboard",
     "/admin/blog",
     "/admin/categories",
     "/admin/events",
     "/admin/profile",
   ],
-  membre: [],
+  membre: [
+    "/admin",
+    "/admin/blog",
+    "/admin/categories",
+    "/admin/events",
+    "/admin/profile",
+    "/admin/newsletter",
+    "/admin/team",
+    "/admin/users",
+  ],
 };
 
 /**

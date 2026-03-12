@@ -1,23 +1,102 @@
-import Link from "next/link"
-import { ArrowRight, Calendar, Clock, MapPin, Mail, Phone, ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import Image from "next/image"
+"use client";
+
+import type React from "react";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  Calendar,
+  Clock,
+  MapPin,
+  Mail,
+  Phone,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import Image from "next/image";
+import { toast } from "@/components/ui/use-toast";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { UpcomingEventsSection } from "@/components/sections/upcoming-events";
 import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form";
+import { createContact } from "@/actions/contact";
 
 export default function HomePage() {
+  const [formData, setFormData] = useState({
+    nomComplet: "",
+    email: "",
+    sujet: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { id, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [id === "name"
+        ? "nomComplet"
+        : id === "email"
+          ? "email"
+          : id === "subject"
+            ? "sujet"
+            : "message"]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      await createContact(formData);
+
+      setFormData({
+        nomComplet: "",
+        email: "",
+        sujet: "",
+        message: "",
+      });
+
+      toast({
+        title: "Message envoyé",
+        description: "Merci pour votre message. Nous vous répondrons bientôt.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description:
+          error.message ||
+          "Une erreur est survenue lors de l'envoi du message.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="flex flex-col">
       <Header />
       {/* Hero Section with Background Image */}
       <section className="relative h-[100vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <Image src="/images/bg.jpg" alt="Burning Heart Hero" fill className="object-cover brightness-50" priority />
+          <Image
+            src="/images/bg.jpg"
+            alt="Burning Heart Hero"
+            fill
+            className="object-cover brightness-50"
+            priority
+          />
           <div className="absolute inset-0 from-black/60 via-black/40 to-background" />
         </div>
 
@@ -26,8 +105,9 @@ export default function HomePage() {
             Ravivez la flamme de votre foi
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-gray-200">
-            Rejoignez une communauté spirituelle dédiée à grandir dans la foi, trouver du soutien et discerner la
-            volonté de Dieu dans votre vie quotidienne.
+            Rejoignez une communauté spirituelle dédiée à grandir dans la foi,
+            trouver du soutien et discerner la volonté de Dieu dans votre vie
+            quotidienne.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/a-propos">
@@ -66,13 +146,18 @@ export default function HomePage() {
 
             {/* Content */}
             <div className="space-y-6">
-              <h2 className="font-serif text-4xl font-bold tracking-tight text-primary">À Propos de Nous</h2>
+              <h2 className="font-serif text-4xl font-bold tracking-tight text-primary">
+                À Propos de Nous
+              </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  <span className="font-semibold text-foreground">Burning Heart - Pèlerins avec le Christ</span> est un
-                  apostolat spirituel et médiatique à but non lucratif désirant soutenir les préférences apostoliques
-                  universelles de la Compagnie de Jésus concernant l'aide à porter aux âmes, à trouver Jésus-Christ et à
-                  le suivre.
+                  <span className="font-semibold text-foreground">
+                    Burning Heart - Pèlerins avec le Christ
+                  </span>{" "}
+                  est un apostolat spirituel et médiatique à but non lucratif
+                  désirant soutenir les préférences apostoliques universelles de
+                  la Compagnie de Jésus concernant l'aide à porter aux âmes, à
+                  trouver Jésus-Christ et à le suivre.
                 </p>
                 <p>
                   Il se veut un outil pour la{" "}
@@ -81,7 +166,8 @@ export default function HomePage() {
                   </span>{" "}
                   et devra{" "}
                   <span className="font-semibold text-foreground">
-                    cheminer avec les jeunes, les accompagner dans la création d'un avenir plein d'espoir.
+                    cheminer avec les jeunes, les accompagner dans la création
+                    d'un avenir plein d'espoir.
                   </span>
                 </p>
               </div>
@@ -90,20 +176,26 @@ export default function HomePage() {
               <div className="grid gap-6 sm:grid-cols-2 mt-8">
                 <Card className="bg-muted/30 border-none">
                   <CardContent className="p-6">
-                    <h3 className="font-serif text-xl font-bold mb-3">Notre Mission</h3>
+                    <h3 className="font-serif text-xl font-bold mb-3">
+                      Notre Mission
+                    </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Ouvrir l'accès aux exercices spirituels à tous les hommes assoiffés de Dieu pour qu'ils en
-                      jouissent et s'attachent au créateur de toute chose.
+                      Ouvrir l'accès aux exercices spirituels à tous les hommes
+                      assoiffés de Dieu pour qu'ils en jouissent et s'attachent
+                      au créateur de toute chose.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card className="bg-muted/30 border-none">
                   <CardContent className="p-6">
-                    <h3 className="font-serif text-xl font-bold mb-3">Notre Vision</h3>
+                    <h3 className="font-serif text-xl font-bold mb-3">
+                      Notre Vision
+                    </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Devenir un outil de rayonnement spirituel et une référence pour l'expansion évangélique à travers
-                      les Exercices Spirituels.
+                      Devenir un outil de rayonnement spirituel et une référence
+                      pour l'expansion évangélique à travers les Exercices
+                      Spirituels.
                     </p>
                   </CardContent>
                 </Card>
@@ -126,9 +218,12 @@ export default function HomePage() {
       <section className="py-24 bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-4xl font-bold tracking-tight">Nos Départements</h2>
+            <h2 className="font-serif text-4xl font-bold tracking-tight">
+              Nos Départements
+            </h2>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-muted-foreground leading-relaxed">
-              Découvrez les différentes façons dont nous nous impliquons dans la communauté et la faisons grandir.
+              Découvrez les différentes façons dont nous nous impliquons dans la
+              communauté et la faisons grandir.
             </p>
           </div>
 
@@ -153,8 +248,9 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Coordination</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Pilote central de l'organisation, le coordinateur supervise les départements, définit les
-                  responsabilités, veille à la mission spirituelle et forme les accompagnateurs.
+                  Pilote central de l'organisation, le coordinateur supervise
+                  les départements, définit les responsabilités, veille à la
+                  mission spirituelle et forme les accompagnateurs.
                 </p>
               </CardContent>
             </Card>
@@ -177,10 +273,13 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Spiritual Supervisor</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Spiritual Supervisor
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Responsable de la qualité des enseignements spirituels, il accompagne les membres dans leur foi et
-                  veille à l'unité avec la tradition ignatienne.
+                  Responsable de la qualité des enseignements spirituels, il
+                  accompagne les membres dans leur foi et veille à l'unité avec
+                  la tradition ignatienne.
                 </p>
               </CardContent>
             </Card>
@@ -205,8 +304,9 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Supervision</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Composée des accompagnateurs, cette équipe suit les âmes, forme les membres et transmet la tradition
-                  spirituelle et ignatienne.
+                  Composée des accompagnateurs, cette équipe suit les âmes,
+                  forme les membres et transmet la tradition spirituelle et
+                  ignatienne.
                 </p>
               </CardContent>
             </Card>
@@ -231,8 +331,9 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Assistant</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Appuie le coordination, supervise les départements, gère les ressources humaines et les relations
-                  extérieures, et modère les rencontres.
+                  Appuie le coordination, supervise les départements, gère les
+                  ressources humaines et les relations extérieures, et modère
+                  les rencontres.
                 </p>
               </CardContent>
             </Card>
@@ -257,8 +358,9 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">HR Manager</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Responsable des ressources humaines et du bon fonctionnement des équipes, il assure le lien entre la
-                  gestion humaine et opérationnelle.
+                  Responsable des ressources humaines et du bon fonctionnement
+                  des équipes, il assure le lien entre la gestion humaine et
+                  opérationnelle.
                 </p>
               </CardContent>
             </Card>
@@ -281,10 +383,13 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Administrator Manager</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Administrator Manager
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Gère la logistique, contrôle le matériel, prépare les espaces de réunion, assure l'inventaire, les
-                  déplacements, la sonorisation et les installations techniques.
+                  Gère la logistique, contrôle le matériel, prépare les espaces
+                  de réunion, assure l'inventaire, les déplacements, la
+                  sonorisation et les installations techniques.
                 </p>
               </CardContent>
             </Card>
@@ -307,9 +412,12 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Accountant & Treasury</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Accountant & Treasury
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Gère les finances : budgets, entrées et sorties, rapports financiers, et inventaire économique.
+                  Gère les finances : budgets, entrées et sorties, rapports
+                  financiers, et inventaire économique.
                 </p>
               </CardContent>
             </Card>
@@ -334,8 +442,9 @@ export default function HomePage() {
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Secrétariat</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Planifie les activités, gère les convocations, rédige les PV, s'occupe des archives, de la propreté
-                  des lieux, des fournitures et des supports pour les rencontres.
+                  Planifie les activités, gère les convocations, rédige les PV,
+                  s'occupe des archives, de la propreté des lieux, des
+                  fournitures et des supports pour les rencontres.
                 </p>
               </CardContent>
             </Card>
@@ -358,10 +467,14 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Médias & Communication Office</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Médias & Communication Office
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  S'occupe de la communication interne et externe, crée les supports visuels, gère les réseaux sociaux,
-                  assure la visibilité et la diffusion du message via la presse et les plateformes numériques.
+                  S'occupe de la communication interne et externe, crée les
+                  supports visuels, gère les réseaux sociaux, assure la
+                  visibilité et la diffusion du message via la presse et les
+                  plateformes numériques.
                 </p>
               </CardContent>
             </Card>
@@ -384,10 +497,12 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Vocation Promotor</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Vocation Promotor
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Accompagne les membres à discerner et vivre leur appel personnel, en accord avec la mission de Burning
-                  Heart.
+                  Accompagne les membres à discerner et vivre leur appel
+                  personnel, en accord avec la mission de Burning Heart.
                 </p>
               </CardContent>
             </Card>
@@ -410,10 +525,13 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Spiritual Officer</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Spiritual Officer
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Organise les activités liturgiques et spirituelles : retraites, veillées, prières communautaires, et
-                  animation pastorale.
+                  Organise les activités liturgiques et spirituelles :
+                  retraites, veillées, prières communautaires, et animation
+                  pastorale.
                 </p>
               </CardContent>
             </Card>
@@ -436,10 +554,12 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Social & Well-being</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Social & Well-being
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Responsable de l'accueil, de la convivialité, des sorties, fêtes, approvisionnement alimentaire et du
-                  protocole.
+                  Responsable de l'accueil, de la convivialité, des sorties,
+                  fêtes, approvisionnement alimentaire et du protocole.
                 </p>
               </CardContent>
             </Card>
@@ -454,7 +574,9 @@ export default function HomePage() {
       <section className="py-24 bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-4xl font-bold tracking-tight">Témoignages</h2>
+            <h2 className="font-serif text-4xl font-bold tracking-tight">
+              Témoignages
+            </h2>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-muted-foreground leading-relaxed">
               Découvrez comment Burning Heart a impacté la vie de nos membres.
             </p>
@@ -465,7 +587,9 @@ export default function HomePage() {
               <CardContent className="p-8 sm:p-12">
                 <div className="flex justify-center mb-6">
                   <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                    <span className="text-3xl font-serif text-muted-foreground">SD</span>
+                    <span className="text-3xl font-serif text-muted-foreground">
+                      SD
+                    </span>
                   </div>
                 </div>
                 <div className="text-center mb-6">
@@ -478,19 +602,30 @@ export default function HomePage() {
                     <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
                   </svg>
                   <p className="text-lg leading-relaxed text-foreground italic">
-                    Burning Heart a complètement transformé ma vie spirituelle. J'ai trouvé ici une famille qui me
-                    soutient dans tous les aspects de ma vie.
+                    Burning Heart a complètement transformé ma vie spirituelle.
+                    J'ai trouvé ici une famille qui me soutient dans tous les
+                    aspects de ma vie.
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="font-semibold text-lg">Samuel Diambu</p>
-                  <p className="text-sm text-muted-foreground">Membre depuis 2018</p>
+                  <p className="text-sm text-muted-foreground">
+                    Membre depuis 2018
+                  </p>
                 </div>
                 <div className="flex items-center justify-center gap-4 mt-8">
-                  <Button variant="outline" size="icon" className="rounded-full bg-transparent">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full bg-transparent"
+                  >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" className="rounded-full bg-transparent">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full bg-transparent"
+                  >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -509,14 +644,18 @@ export default function HomePage() {
                 <Mail className="h-8 w-8 text-white" />
               </div>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-4">Restez Informé</h2>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-4">
+              Restez Informé
+            </h2>
             <p className="text-lg text-white/90 leading-relaxed mb-8">
-              Inscrivez-vous à notre newsletter pour recevoir les dernières nouvelles, événements et enseignements
-              directement dans votre boîte mail.
+              Inscrivez-vous à notre newsletter pour recevoir les dernières
+              nouvelles, événements et enseignements directement dans votre
+              boîte mail.
             </p>
             <NewsletterSubscribeForm variant="home" />
             <p className="text-sm text-white/70 mt-4">
-              Nous respectons votre vie privée. Vous pouvez vous désabonner à tout moment.
+              Nous respectons votre vie privée. Vous pouvez vous désabonner à
+              tout moment.
             </p>
           </div>
         </div>
@@ -526,9 +665,12 @@ export default function HomePage() {
       <section className="py-24 bg-background">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-4xl font-bold tracking-tight">Contactez-Nous</h2>
+            <h2 className="font-serif text-4xl font-bold tracking-tight">
+              Contactez-Nous
+            </h2>
             <p className="mx-auto mt-4 max-w-2xl text-pretty text-muted-foreground leading-relaxed">
-              Nous sommes là pour répondre à vos questions et vous accueillir dans notre communauté.
+              Nous sommes là pour répondre à vos questions et vous accueillir
+              dans notre communauté.
             </p>
           </div>
 
@@ -536,7 +678,9 @@ export default function HomePage() {
             {/* Contact Info */}
             <div className="lg:col-span-2 space-y-8">
               <div>
-                <h3 className="font-semibold text-lg mb-4">Plusieurs façons de nous contacter</h3>
+                <h3 className="font-semibold text-lg mb-4">
+                  Plusieurs façons de nous contacter
+                </h3>
 
                 <div className="space-y-6">
                   {/* Address */}
@@ -547,7 +691,8 @@ export default function HomePage() {
                     <div>
                       <h4 className="font-medium mb-1">Adresse</h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu, République Democratique du Congo
+                        259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu,
+                        République Democratique du Congo
                       </p>
                     </div>
                   </div>
@@ -559,7 +704,10 @@ export default function HomePage() {
                     </div>
                     <div>
                       <h4 className="font-medium mb-1">Téléphone</h4>
-                      <a href="tel:+243849005240" className="text-sm text-primary hover:underline">
+                      <a
+                        href="tel:+243849005240"
+                        className="text-sm text-primary hover:underline"
+                      >
                         +243 849 005 240
                       </a>
                     </div>
@@ -572,9 +720,22 @@ export default function HomePage() {
                     </div>
                     <div>
                       <h4 className="font-medium mb-1">Email</h4>
-                      <a href="mailto:burningheartihs@gmail.com" className="text-sm text-primary hover:underline">
+                      <p>
+                      <a
+                        href="mailto:contact@burningheartihs.org"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        contact@burningheartihs.org
+                      </a>
+                      </p>
+                      <p>
+                      <a
+                        href="mailto:burningheartihs@gmail.com"
+                        className="text-sm text-primary hover:underline"
+                      >
                         burningheartihs@gmail.com
                       </a>
+                      </p>
                     </div>
                   </div>
 
@@ -614,39 +775,74 @@ export default function HomePage() {
             <div className="lg:col-span-3">
               <Card className="border-none shadow-lg">
                 <CardContent className="p-8">
-                  <h3 className="font-serif text-2xl font-bold mb-2">Envoyez-nous un message</h3>
+                  <h3 className="font-serif text-2xl font-bold mb-2">
+                    Envoyez-nous un message
+                  </h3>
                   <p className="text-sm text-muted-foreground mb-6">
-                    Remplissez le formulaire ci-dessous et nous vous répondrons rapidement
+                    Remplissez le formulaire ci-dessous et nous vous répondrons
+                    rapidement
                   </p>
-                  <form className="space-y-6">
+                  <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="grid gap-6 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label htmlFor="name" className="text-sm font-medium">
-                          Nom complet <span className="text-destructive">*</span>
+                          Nom complet{" "}
+                          <span className="text-destructive">*</span>
                         </label>
-                        <Input id="name" placeholder="Votre nom" required />
+                        <Input
+                          id="name"
+                          placeholder="Votre nom et prénom"
+                          required
+                          value={formData.nomComplet}
+                          onChange={handleChange}
+                        />
                       </div>
                       <div className="space-y-2">
                         <label htmlFor="email" className="text-sm font-medium">
                           Email <span className="text-destructive">*</span>
                         </label>
-                        <Input id="email" type="email" placeholder="votre@email.com" required />
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="votre@email.com"
+                          required
+                          value={formData.email}
+                          onChange={handleChange}
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="subject" className="text-sm font-medium">
                         Sujet
                       </label>
-                      <Input id="subject" placeholder="Sujet de votre message" />
+                      <Input
+                        id="subject"
+                        placeholder="Sujet de votre message"
+                        value={formData.sujet}
+                        onChange={handleChange}
+                      />
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="message" className="text-sm font-medium">
                         Message <span className="text-destructive">*</span>
                       </label>
-                      <Textarea id="message" name="message" placeholder="Écrivez votre message ici..." rows={15} required />
+                      <Textarea
+                        id="message"
+                        name="message"
+                        placeholder="Écrivez votre message ici..."
+                        rows={15}
+                        required
+                        value={formData.message}
+                        onChange={handleChange}
+                      />
                     </div>
-                    <Button type="submit" className="w-full" size="lg">
-                      Envoyer le message
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      size="lg"
+                      disabled={loading}
+                    >
+                      {loading ? "Envoi..." : "Envoyer le message"}
                     </Button>
                   </form>
                 </CardContent>
@@ -657,5 +853,5 @@ export default function HomePage() {
       </section>
       <Footer />
     </div>
-  )
+  );
 }

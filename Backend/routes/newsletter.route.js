@@ -140,7 +140,7 @@ newsletterRouter.get(
 newsletterRouter.post(
   "/",
   authenticationJWT,
-  authorizeRoles("admin", "editeur"),
+  authorizeRoles("admin", "editeur", "membre"),
   createNewsletter,
 );
 
@@ -163,7 +163,7 @@ newsletterRouter.post(
 newsletterRouter.post(
   "/:id/send",
   authenticationJWT,
-  authorizeRoles("admin", "editeur"),
+  authorizeRoles("admin", "editeur", "membre"),
   sendNewsletter,
 );
 
@@ -192,7 +192,7 @@ newsletterRouter.post(
 newsletterRouter.put(
   "/:id",
   authenticationJWT,
-  authorizeRoles("admin", "editeur"),
+  authorizeRoles("admin", "editeur", "membre"),
   updateNewsletter,
 );
 

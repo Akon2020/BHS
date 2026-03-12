@@ -32,7 +32,7 @@ const userRouter = Router();
 userRouter.get(
   "/",
   authenticationJWT,
-  authorizeRoles("admin"),
+  authorizeRoles("admin", "membre"),
   getAllUtilisateurs,
 );
 
@@ -240,6 +240,11 @@ userRouter.patch(
  *       500:
  *         description: Erreur serveur
  */
-userRouter.delete("/delete/:id", deleteUtilisateur);
+userRouter.delete(
+  "/delete/:id",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  deleteUtilisateur,
+);
 
 export default userRouter;
