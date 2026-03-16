@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,22 +12,32 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { ArrowLeft, Save, Upload, ImageIcon } from "lucide-react";
 import Link from "next/link";
+import { createEquipe } from "@/actions/equipe";
 
 export default function NewTeamMemberPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [memberData, setMemberData] = useState({
     name: "",
     role: "",
     bio: "",
     order: 0,
-    image: null,
+    image: null as File | null,
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setMemberData((prev) => ({ ...prev, [name]: value }));
+    setMemberData((prev) => ({
+      ...prev,
+      [name]: name === "order" ? Number(value) || 0 : value,
+    }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setMemberData((prev) => ({ ...prev, image: file }));
   };
 
   const handleSubmit = async () => {
@@ -39,17 +50,39 @@ export default function NewTeamMemberPage() {
       return;
     }
 
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
+      await createEquipe({
+        nomComplet: memberData.name,
+        fonction: memberData.role,
+        biographie: memberData.bio,
+        ordre: memberData.order,
+        photoProfil: memberData.image || undefined,
+        actif: true,
+      });
 
-    // Simulate API call
-    setTimeout(() => {
       toast({
         title: "Membre ajouté!",
         description: "Le membre a été ajouté à l'équipe avec succès.",
       });
+
+      router.push("/admin/team");
+      router.refresh();
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description:
+          error.message || "Impossible d'ajouter le membre à l'équipe.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
+
+  const previewUrl = memberData.image
+    ? URL.createObjectURL(memberData.image)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -144,9 +177,18 @@ export default function NewTeamMemberPage() {
                 <div className="border-2 border-dashed rounded-md p-6 text-center">
                   <div className="mb-4">
                     <div className="relative mx-auto w-32 h-32 rounded-full overflow-hidden bg-secondary">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="h-10 w-10 text-muted-foreground" />
-                      </div>
+                      {previewUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={previewUrl}
+                          alt="Aperçu du membre"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -156,9 +198,18 @@ export default function NewTeamMemberPage() {
                   <p className="text-xs text-muted-foreground mb-4">
                     JPG, PNG ou GIF. Taille recommandée 300x300px.
                   </p>
-                  <Button variant="outline" size="sm">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Parcourir
+                  <Input
+                    id="photoProfil"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                  <Button variant="outline" size="sm" asChild>
+                    <Label htmlFor="photoProfil" className="cursor-pointer">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Parcourir
+                    </Label>
                   </Button>
                 </div>
               </div>

@@ -18,7 +18,7 @@ interface UIEvent {
   heureFin?: string;
   lieu: string;
   imageEvenement?: string;
-  statut: "publie" | "brouillon";
+  statut: string;
 }
 
 export function UpcomingEventsSection() {
@@ -33,12 +33,23 @@ export function UpcomingEventsSection() {
 
         const publishedSorted =
           res.events
-            ?.filter((e: UIEvent) => e.statut === "publie")
-            ?.sort(
-              (a: UIEvent, b: UIEvent) =>
-                new Date(a.dateEvenement).getTime() -
-                new Date(b.dateEvenement).getTime(),
-            ) || [];
+            ?.filter((e) => e.statut === "publie")
+            ?.sort((a, b) => {
+              const now = Date.now();
+              const aTime = new Date(a.dateEvenement).getTime();
+              const bTime = new Date(b.dateEvenement).getTime();
+
+              const aUpcoming = aTime >= now;
+              const bUpcoming = bTime >= now;
+
+              // Upcoming events first.
+              if (aUpcoming !== bUpcoming) {
+                return aUpcoming ? -1 : 1;
+              }
+
+              // Upcoming: nearest first. Past: most recent first.
+              return aUpcoming ? aTime - bTime : bTime - aTime;
+            }) || [];
 
         const nextThree = publishedSorted.slice(0, 3);
 
