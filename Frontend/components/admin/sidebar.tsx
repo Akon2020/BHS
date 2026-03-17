@@ -10,6 +10,7 @@ import {
   FileText,
   Mail,
   Calendar,
+  Home,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -171,9 +172,30 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
         <div className="mt-auto border-t p-2">
           <Button
             variant="ghost"
+            asChild
+            className={cn(
+              "mb-1 w-full justify-start gap-3",
+              isOpen ? "" : "justify-center",
+            )}
+          >
+            <Link href="/">
+              <Home size={20} />
+              <span
+                className={cn(
+                  "transition-opacity",
+                  isOpen ? "opacity-100" : "opacity-0",
+                )}
+              >
+                Retour à l'accueil
+              </span>
+            </Link>
+          </Button>
+
+          <Button
+            variant="ghost"
             onClick={handleLogout}
             className={cn(
-              "w-full justify-start gap-3 text-destructive hover:text-destructive",
+              "w-full justify-start gap-3 text-destructive hover:text-destructive border-t",
               isOpen ? "" : "justify-center",
             )}
           >

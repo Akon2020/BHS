@@ -7,14 +7,9 @@ import { Footer } from "@/components/footer";
 
 export default function DonationPage() {
   return (
-    <div className="min-h-screen py-16">
+    <div className="flex flex-col">
       <Header />
-      <div className="mx-auto max-w-4xl px-4 lg:px-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8">
-          <ArrowLeft className="h-4 w-4" />
-          Retour à l'accueil
-        </Link>
-
+      <div className="mx-auto max-w-4xl px-4 lg:px-8 py-7">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
             <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
