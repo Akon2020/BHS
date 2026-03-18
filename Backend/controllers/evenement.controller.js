@@ -14,6 +14,7 @@ import {
 } from "../utils/email.template.js";
 import { valideEmail } from "../middlewares/email.middleware.js";
 import { generateEventTicketPDF } from "../utils/event-pdf.js";
+import { deleteFile } from "../utils/deletefile.js";
 
 const requiredFields = [
   "titre",
@@ -414,6 +415,8 @@ export const deleteEvent = async (req, res, next) => {
 };
 
 export const inscrireAUnEvenement = async (req, res, next) => {
+  let pdf = null;
+
   try {
     const { id } = req.params;
     const { nomComplet, email, sexe, telephone } = req.body;
@@ -512,7 +515,7 @@ export const inscrireAUnEvenement = async (req, res, next) => {
     event.nombreInscrits += 1;
     await event.save();
 
-    const pdf = await generateEventTicketPDF({
+    pdf = await generateEventTicketPDF({
       event,
       inscription,
     });
@@ -561,10 +564,14 @@ export const inscrireAUnEvenement = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await deleteFile(pdf?.filePath);
   }
 };
 
 export const registerToEvent = async (req, res, next) => {
+  let pdf = null;
+
   try {
     const { slug } = req.params;
     const { nomComplet, email, sexe, telephone } = req.body;
@@ -664,7 +671,7 @@ export const registerToEvent = async (req, res, next) => {
     event.nombreInscrits += 1;
     await event.save();
 
-    const pdf = await generateEventTicketPDF({
+    pdf = await generateEventTicketPDF({
       event,
       inscription,
     });
@@ -713,10 +720,14 @@ export const registerToEvent = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await deleteFile(pdf?.filePath);
   }
 };
 
 export const inscrireVisiteurParAdmin = async (req, res, next) => {
+  let pdf = null;
+
   try {
     const { id } = req.params;
     const { nomComplet, email, sexe, telephone } = req.body;
@@ -768,7 +779,7 @@ export const inscrireVisiteurParAdmin = async (req, res, next) => {
     event.nombreInscrits += 1;
     await event.save();
 
-    const pdf = await generateEventTicketPDF({ event, inscription });
+    pdf = await generateEventTicketPDF({ event, inscription });
 
     await transporter.sendMail({
       from: `"BurningHeart IHS" <${EMAIL}>`,
@@ -797,10 +808,14 @@ export const inscrireVisiteurParAdmin = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await deleteFile(pdf?.filePath);
   }
 };
 
 export const renvoyerTicketInscription = async (req, res, next) => {
+  let pdf = null;
+
   try {
     const { id, inscriptionId } = req.params;
 
@@ -821,7 +836,7 @@ export const renvoyerTicketInscription = async (req, res, next) => {
         .json({ message: "Inscription introuvable pour cet événement." });
     }
 
-    const pdf = await generateEventTicketPDF({ event, inscription });
+    pdf = await generateEventTicketPDF({ event, inscription });
 
     await transporter.sendMail({
       from: `"BurningHeart IHS" <${EMAIL}>`,
@@ -849,6 +864,8 @@ export const renvoyerTicketInscription = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  } finally {
+    await deleteFile(pdf?.filePath);
   }
 };
 
