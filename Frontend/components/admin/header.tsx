@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Bell, User, Settings, LogOut } from "lucide-react";
+import { Menu, Bell, User, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { useTheme } from "@/contexts/theme-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +32,7 @@ export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
   const notifications = 3;
   const currentUser = getCurrentUser();
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -79,7 +80,19 @@ export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
             <DropdownMenuItem>Mise à jour système disponible</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <ThemeToggle />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          className="rounded-full"
+          aria-label="Toggle theme"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -102,15 +115,15 @@ export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-72">
-            <DropdownMenuLabel>
-              Mon compte
-            </DropdownMenuLabel>
+            <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
             <div className="space-y-2 px-2 py-1.5">
               <div className="flex items-center justify-between gap-2">
                 <p className="truncate text-sm font-semibold">
                   {getUserDisplayName(currentUser)}
                 </p>
-                <Badge variant="secondary">{getRoleLabel(currentUser?.role)}</Badge>
+                <Badge variant="secondary">
+                  {getRoleLabel(currentUser?.role)}
+                </Badge>
               </div>
               <p className="truncate text-xs text-muted-foreground">
                 {currentUser?.email || "Email inconnu"}
