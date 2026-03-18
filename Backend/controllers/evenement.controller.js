@@ -715,3 +715,268 @@ export const registerToEvent = async (req, res, next) => {
     next(error);
   }
 };
+
+export const inscrireVisiteurParAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { nomComplet, email, sexe, telephone } = req.body;
+
+    if (!nomComplet || !email || !sexe || !telephone) {
+      return res.status(400).json({
+        message: "Nom, email, sexe et téléphone sont obligatoires.",
+      });
+    }
+
+    if (!valideEmail(email)) {
+      return res.status(400).json({ message: "Adresse email invalide" });
+    }
+
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement introuvable." });
+
+    if (event.statut !== "publie") {
+      return res
+        .status(400)
+        .json({ message: "Cet événement n'est pas ouvert aux inscriptions." });
+    }
+
+    const dejaInscrit = await InscriptionEvenement.findOne({
+      where: {
+        idEvenement: id,
+        email,
+      },
+    });
+
+    if (dejaInscrit) {
+      return res
+        .status(409)
+        .json({ message: "Cet email est déjà inscrit à cet événement." });
+    }
+
+    const inscription = await InscriptionEvenement.create({
+      idEvenement: id,
+      idUtilisateur: null,
+      nomComplet,
+      email,
+      sexe,
+      telephone,
+      typeInscription: "visiteur",
+      statut: "confirme",
+    });
+
+    event.nombreInscrits += 1;
+    await event.save();
+
+    const pdf = await generateEventTicketPDF({ event, inscription });
+
+    await transporter.sendMail({
+      from: `"BurningHeart IHS" <${EMAIL}>`,
+      to: inscription.email,
+      subject: `Confirmation d’inscription - ${event.titre}`,
+      html: eventRegistrationWithPDFTemplate(
+        inscription.nomComplet,
+        event.titre,
+        new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
+        event.lieu,
+        `${FRONT_URL}/events/${event.slug}`,
+      ),
+      attachments: [
+        {
+          filename: pdf.fileName,
+          path: pdf.filePath,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    return res.status(201).json({
+      message: "Visiteur inscrit avec succès 🎉",
+      inscription,
+      pdfUrl: `${HOST_URL}${pdf.url}`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const renvoyerTicketInscription = async (req, res, next) => {
+  try {
+    const { id, inscriptionId } = req.params;
+
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement introuvable." });
+
+    const inscription = await InscriptionEvenement.findOne({
+      where: {
+        idInscription: inscriptionId,
+        idEvenement: id,
+      },
+    });
+
+    if (!inscription) {
+      return res
+        .status(404)
+        .json({ message: "Inscription introuvable pour cet événement." });
+    }
+
+    const pdf = await generateEventTicketPDF({ event, inscription });
+
+    await transporter.sendMail({
+      from: `"BurningHeart IHS" <${EMAIL}>`,
+      to: inscription.email,
+      subject: `Renvoi du ticket - ${event.titre}`,
+      html: eventRegistrationWithPDFTemplate(
+        inscription.nomComplet,
+        event.titre,
+        new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
+        event.lieu,
+        `${FRONT_URL}/events/${event.slug}`,
+      ),
+      attachments: [
+        {
+          filename: pdf.fileName,
+          path: pdf.filePath,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+
+    return res.status(200).json({
+      message: `Ticket renvoyé à ${inscription.email}`,
+      pdfUrl: `${HOST_URL}${pdf.url}`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const supprimerDoublonsInscriptions = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement introuvable." });
+
+    const inscriptions = await InscriptionEvenement.findAll({
+      where: { idEvenement: id },
+      order: [
+        ["email", "ASC"],
+        ["dateInscription", "ASC"],
+        ["idInscription", "ASC"],
+      ],
+    });
+
+    const seenEmails = new Set();
+    const duplicateIds = [];
+
+    for (const inscription of inscriptions) {
+      const normalizedEmail = (inscription.email || "").trim().toLowerCase();
+      if (!normalizedEmail) continue;
+
+      if (seenEmails.has(normalizedEmail)) {
+        duplicateIds.push(inscription.idInscription);
+      } else {
+        seenEmails.add(normalizedEmail);
+      }
+    }
+
+    if (duplicateIds.length === 0) {
+      return res.status(200).json({
+        message: "Aucun doublon trouvé.",
+        removedCount: 0,
+      });
+    }
+
+    await InscriptionEvenement.destroy({
+      where: { idInscription: duplicateIds },
+    });
+
+    event.nombreInscrits = Math.max(
+      (event.nombreInscrits || 0) - duplicateIds.length,
+      0,
+    );
+    await event.save();
+
+    return res.status(200).json({
+      message: `${duplicateIds.length} doublon(s) supprimé(s) avec succès.`,
+      removedCount: duplicateIds.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const supprimerDoublonsSelectionnes = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { inscriptionIds } = req.body;
+
+    if (!Array.isArray(inscriptionIds) || inscriptionIds.length === 0) {
+      return res.status(400).json({
+        message: "Veuillez fournir la liste des inscriptions à supprimer.",
+      });
+    }
+
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement introuvable." });
+
+    const inscriptions = await InscriptionEvenement.findAll({
+      where: { idEvenement: id },
+      order: [
+        ["email", "ASC"],
+        ["dateInscription", "ASC"],
+        ["idInscription", "ASC"],
+      ],
+    });
+
+    const duplicateSet = new Set();
+    const seenEmails = new Set();
+
+    for (const inscription of inscriptions) {
+      const normalizedEmail = (inscription.email || "").trim().toLowerCase();
+      if (!normalizedEmail) continue;
+
+      if (seenEmails.has(normalizedEmail)) {
+        duplicateSet.add(inscription.idInscription);
+      } else {
+        seenEmails.add(normalizedEmail);
+      }
+    }
+
+    const requestedIds = inscriptionIds
+      .map((value) => Number(value))
+      .filter((value) => !Number.isNaN(value));
+
+    const idsToDelete = requestedIds.filter((idInscription) =>
+      duplicateSet.has(idInscription),
+    );
+
+    if (idsToDelete.length === 0) {
+      return res.status(400).json({
+        message: "Aucune inscription sélectionnée n'est un doublon valide.",
+        removedCount: 0,
+      });
+    }
+
+    await InscriptionEvenement.destroy({
+      where: { idInscription: idsToDelete },
+    });
+
+    event.nombreInscrits = Math.max(
+      (event.nombreInscrits || 0) - idsToDelete.length,
+      0,
+    );
+    await event.save();
+
+    return res.status(200).json({
+      message: `${idsToDelete.length} doublon(s) sélectionné(s) supprimé(s).`,
+      removedCount: idsToDelete.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

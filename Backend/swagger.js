@@ -13,17 +13,30 @@ const options = {
     servers: [{ url: HOST_URL }],
     components: {
       securitySchemes: {
+        // Keep both naming variants to match existing annotations across routes.
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Entrez uniquement le JWT (sans le préfixe Bearer)",
+        },
         BearerAuth: {
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
-          description: "Entrez votre token JWT",
+          description: "Entrez uniquement le JWT (sans le préfixe Bearer)",
+        },
+        cookieAuth: {
+          type: "apiKey",
+          in: "cookie",
+          name: "token",
+          description: "Cookie token (optionnel)",
         },
       },
     },
     security: [
       {
-        BearerAuth: [],
+        bearerAuth: [],
       },
     ],
   },
@@ -33,7 +46,15 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options);
 
 export const setupSwagger = (app) => {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    }),
+  );
 };
 
 // npm install swagger-jsdoc swagger-ui-express

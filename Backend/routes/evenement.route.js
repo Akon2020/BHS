@@ -11,6 +11,10 @@ import {
   deleteEvent,
   inscrireAUnEvenement,
   registerToEvent,
+  inscrireVisiteurParAdmin,
+  renvoyerTicketInscription,
+  supprimerDoublonsInscriptions,
+  supprimerDoublonsSelectionnes,
 } from "../controllers/evenement.controller.js";
 import {
   authenticationJWT,
@@ -359,6 +363,61 @@ evenementRouter.post(
   authenticationJWT,
   authorizeRoles("admin", "editeur", "membre"),
   inscrireAUnEvenement,
+);
+
+/**
+ * @swagger
+ * /api/evenements/{id}/inscription/visiteur:
+ *   post:
+ *     summary: Ajouter un visiteur à un événement (admin)
+ *     tags: [Événements]
+ *     security:
+ *       - bearerAuth: []
+ */
+evenementRouter.post(
+  "/:id/inscription/visiteur",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  inscrireVisiteurParAdmin,
+);
+
+/**
+ * @swagger
+ * /api/evenements/{id}/inscriptions/{inscriptionId}/renvoyer-ticket:
+ *   post:
+ *     summary: Renvoyer le ticket PDF d'une inscription
+ *     tags: [Événements]
+ *     security:
+ *       - bearerAuth: []
+ */
+evenementRouter.post(
+  "/:id/inscriptions/:inscriptionId/renvoyer-ticket",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  renvoyerTicketInscription,
+);
+
+/**
+ * @swagger
+ * /api/evenements/{id}/inscriptions/doublons:
+ *   delete:
+ *     summary: Supprimer les inscriptions en doublon par email
+ *     tags: [Événements]
+ *     security:
+ *       - bearerAuth: []
+ */
+evenementRouter.delete(
+  "/:id/inscriptions/doublons",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  supprimerDoublonsInscriptions,
+);
+
+evenementRouter.post(
+  "/:id/inscriptions/doublons/supprimer-selection",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  supprimerDoublonsSelectionnes,
 );
 
 /**

@@ -23,7 +23,7 @@ const authRouter = Router();
  *     summary: Vérifie si l'utilisateur est connecté
  *     tags: [Auth]
  *     security:
- *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Statut d'authentification renvoyé
@@ -39,7 +39,7 @@ authRouter.get("/status", authenticationJWT, checkAuthStatus);
  *     summary: Récupère les informations de l'utilisateur connecté
  *     tags: [Auth]
  *     security:
- *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Informations de l'utilisateur
@@ -181,7 +181,7 @@ authRouter.post("/resetpassword", updatePassword);
  *     summary: Déconnecte l'utilisateur
  *     tags: [Auth]
  *     security:
- *       - cookieAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Déconnexion réussie

@@ -11,7 +11,6 @@ import {
   InscriptionEvenementBody,
 } from "@/types/user";
 
-
 export const getAllEvents = async (params?: {
   page?: number;
   limit?: number;
@@ -24,13 +23,13 @@ export const getAllEvents = async (params?: {
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la récupération des événements"
+        "Erreur lors de la récupération des événements",
     );
   }
 };
 
 export const getSingleEvent = async (
-  id: number
+  id: number,
 ): Promise<GetSingleEventResponse> => {
   try {
     const res = await api.get<GetSingleEventResponse>(`/api/evenements/${id}`);
@@ -38,27 +37,26 @@ export const getSingleEvent = async (
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la récupération de l'événement"
+        "Erreur lors de la récupération de l'événement",
     );
   }
 };
 
 export const getEventBySlug = async (
-  slug: string
+  slug: string,
 ): Promise<GetSingleEventResponse> => {
   try {
     const res = await api.get<GetSingleEventResponse>(
-      `/api/evenements/slug/${slug}`
+      `/api/evenements/slug/${slug}`,
     );
     return res.data;
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la récupération de l'événement"
+        "Erreur lors de la récupération de l'événement",
     );
   }
 };
-
 
 export const getAllEventsAdmin = async (params?: {
   page?: number;
@@ -76,27 +74,26 @@ export const getAllEventsAdmin = async (params?: {
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la récupération des événements (admin)"
+        "Erreur lors de la récupération des événements (admin)",
     );
   }
 };
 
 export const getSingleEventAdmin = async (
-  id: number
+  id: number,
 ): Promise<GetSingleEventAdminResponse> => {
   try {
     const res = await api.get<GetSingleEventAdminResponse>(
-      `/api/evenements/admin/${id}`
+      `/api/evenements/admin/${id}`,
     );
     return res.data;
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la récupération de l'événement (admin)"
+        "Erreur lors de la récupération de l'événement (admin)",
     );
   }
 };
-
 
 export const createEvent = async (
   data:
@@ -111,7 +108,7 @@ export const createEvent = async (
         nombrePlaces?: number;
         statut?: string;
         imageEvenement?: File;
-      }
+      },
 ): Promise<CreateEvenementResponse> => {
   try {
     let formData: FormData;
@@ -126,7 +123,14 @@ export const createEvent = async (
       const heureFin = formData.get("heureFin") as string;
       const lieu = formData.get("lieu") as string;
 
-      if (!titre || !description || !dateEvenement || !heureDebut || !heureFin || !lieu) {
+      if (
+        !titre ||
+        !description ||
+        !dateEvenement ||
+        !heureDebut ||
+        !heureFin ||
+        !lieu
+      ) {
         throw new Error("Tous les champs obligatoires doivent être remplis");
       }
     } else {
@@ -161,18 +165,17 @@ export const createEvent = async (
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
-      }
+      },
     );
 
     return res.data;
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la création de l'événement"
+        "Erreur lors de la création de l'événement",
     );
   }
 };
-
 
 export const updateEvent = async (
   id: number,
@@ -187,7 +190,7 @@ export const updateEvent = async (
     nombrePlaces: number;
     statut: string;
     imageEvenement: File;
-  }>
+  }>,
 ): Promise<UpdateEvenementResponse> => {
   try {
     const formData = new FormData();
@@ -203,66 +206,134 @@ export const updateEvent = async (
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" },
-      }
+      },
     );
 
     return res.data;
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la mise à jour de l'événement"
+        "Erreur lors de la mise à jour de l'événement",
     );
   }
 };
 
-
-export const deleteEvent = async (id: number): Promise<DeleteEvenementResponse> => {
+export const deleteEvent = async (
+  id: number,
+): Promise<DeleteEvenementResponse> => {
   try {
     const res = await api.delete<DeleteEvenementResponse>(
-      `/api/evenements/delete/${id}`
+      `/api/evenements/delete/${id}`,
     );
     return res.data;
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de la suppression de l'événement"
+        "Erreur lors de la suppression de l'événement",
     );
   }
 };
-
 
 export const inscrireAUnEvenement = async (
   id: number,
-  data?: InscriptionEvenementBody
+  data?: InscriptionEvenementBody,
 ): Promise<InscriptionEvenementResponse> => {
   try {
     const res = await api.post<InscriptionEvenementResponse>(
       `/api/evenements/${id}/inscription`,
-      data || {}
+      data || {},
     );
     return res.data;
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de l'inscription à l'événement"
+        "Erreur lors de l'inscription à l'événement",
     );
   }
 };
 
 export const registerToEvent = async (
   slug: string,
-  data?: InscriptionEvenementBody
+  data?: InscriptionEvenementBody,
 ): Promise<InscriptionEvenementResponse> => {
   try {
     const res = await api.post<InscriptionEvenementResponse>(
       `/api/evenements/slug/${slug}/inscription`,
-      data || {}
+      data || {},
     );
     return res.data;
   } catch (error: any) {
     throw new Error(
       error.response?.data?.message ||
-        "Erreur lors de l'inscription à l'événement"
+        "Erreur lors de l'inscription à l'événement",
+    );
+  }
+};
+
+export const addVisitorToEventAdmin = async (
+  id: number,
+  data: Required<InscriptionEvenementBody>,
+): Promise<InscriptionEvenementResponse> => {
+  try {
+    const res = await api.post<InscriptionEvenementResponse>(
+      `/api/evenements/${id}/inscription/visiteur`,
+      data,
+    );
+    return res.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Erreur lors de l'ajout du visiteur à l'événement",
+    );
+  }
+};
+
+export const resendEventTicket = async (
+  eventId: number,
+  inscriptionId: number,
+): Promise<{ message: string; pdfUrl?: string }> => {
+  try {
+    const res = await api.post<{ message: string; pdfUrl?: string }>(
+      `/api/evenements/${eventId}/inscriptions/${inscriptionId}/renvoyer-ticket`,
+    );
+    return res.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Erreur lors du renvoi du ticket",
+    );
+  }
+};
+
+export const removeDuplicateEventInscriptions = async (
+  eventId: number,
+): Promise<{ message: string; removedCount: number }> => {
+  try {
+    const res = await api.delete<{ message: string; removedCount: number }>(
+      `/api/evenements/${eventId}/inscriptions/doublons`,
+    );
+    return res.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Erreur lors de la suppression des doublons",
+    );
+  }
+};
+
+export const removeSelectedDuplicateEventInscriptions = async (
+  eventId: number,
+  inscriptionIds: number[],
+): Promise<{ message: string; removedCount: number }> => {
+  try {
+    const res = await api.post<{ message: string; removedCount: number }>(
+      `/api/evenements/${eventId}/inscriptions/doublons/supprimer-selection`,
+      { inscriptionIds },
+    );
+    return res.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Erreur lors de la suppression des doublons sélectionnés",
     );
   }
 };

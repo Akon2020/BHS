@@ -24,6 +24,7 @@ import { Footer } from "@/components/footer";
 import { UpcomingEventsSection } from "@/components/sections/upcoming-events";
 import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form";
 import { DepartmentsSection } from "@/components/sections/departments";
+import { ActusSection } from "@/components/sections/actus";
 import { createContact } from "@/actions/contact";
 
 export default function HomePage() {
@@ -220,6 +221,9 @@ export default function HomePage() {
       {/* Événements à Venir Section */}
       <UpcomingEventsSection />
 
+      {/* Actualites Recentes Section */}
+      <ActusSection />
+
       {/* Témoignages Section */}
       <section className="py-24 bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -371,20 +375,20 @@ export default function HomePage() {
                     <div>
                       <h4 className="font-medium mb-1">Email</h4>
                       <p>
-                      <a
-                        href="mailto:contact@burningheartihs.org"
-                        className="text-sm text-primary hover:underline"
-                      >
-                        contact@burningheartihs.org
-                      </a>
+                        <a
+                          href="mailto:contact@burningheartihs.org"
+                          className="text-sm text-primary hover:underline"
+                        >
+                          contact@burningheartihs.org
+                        </a>
                       </p>
                       <p>
-                      <a
-                        href="mailto:burningheartihs@gmail.com"
-                        className="text-sm text-primary hover:underline"
-                      >
-                        burningheartihs@gmail.com
-                      </a>
+                        <a
+                          href="mailto:burningheartihs@gmail.com"
+                          className="text-sm text-primary hover:underline"
+                        >
+                          burningheartihs@gmail.com
+                        </a>
                       </p>
                     </div>
                   </div>

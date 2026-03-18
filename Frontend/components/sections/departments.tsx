@@ -216,7 +216,7 @@ const departmentsData: DepartmentsData = {
           name: "Webmaster",
           icon: "globe",
           description:
-            "Gère le site web du groupe, publie les contenus numériques et assure la présence en ligne du mouvement.",
+            "Gère le site web du groupe, publie les contenus numériques et assure la présence en ligne du groupe.",
         },
       ],
     },
