@@ -178,7 +178,7 @@ export default function EventsPage() {
                   return (
                     <Link
                       key={event.idEvenement}
-                      href={`/events/${event.slug || event.idEvenement}`}
+                      href={`/events/${event.slug}`}
                     >
                       <Card
                         className={`group h-full overflow-hidden border-none bg-card shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 ${

@@ -23,7 +23,6 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { UpcomingEventsSection } from "@/components/sections/upcoming-events";
 import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form";
-import { DepartmentsSection } from "@/components/sections/departments";
 import { ActusSection } from "@/components/sections/actus";
 import { createContact } from "@/actions/contact";
 
@@ -214,9 +213,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Nos Départements Section */}
-      <DepartmentsSection />
 
       {/* Événements à Venir Section */}
       <UpcomingEventsSection />

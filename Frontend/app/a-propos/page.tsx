@@ -2,6 +2,7 @@ import { Heart, Target, Users, Book } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { DepartmentsSection } from "@/components/sections/departments";
 
 export const metadata = {
   title: "À propos - Burning Heart",
@@ -106,6 +107,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Nos Départements Section */}
+      <DepartmentsSection />
 
       {/* Mission */}
       <section className="py-24">
