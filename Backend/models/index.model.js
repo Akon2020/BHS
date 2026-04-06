@@ -7,6 +7,7 @@ import Evenement from "./evenement.model.js";
 import Equipe from "./equipe.model.js";
 import Abonne from "./abonne.model.js";
 import Contact from "./contact.model.js";
+import ReponseContact from "./reponseContact.model.js";
 import InscriptionEvenement from "./inscriptionEvenement.model.js";
 import NewsletterAbonne from "./newsletterAbonne.model.js";
 import Commentaire from "./commentaire.model.js";
@@ -116,6 +117,20 @@ Newsletter.hasMany(NewsletterAbonne, {
 NewsletterAbonne.belongsTo(Abonne, { foreignKey: "idAbonne", as: "abonne" });
 Abonne.hasMany(NewsletterAbonne, { foreignKey: "idAbonne", as: "receptions" });
 
+// Contact-Réponse associations
+ReponseContact.belongsTo(Contact, {
+  foreignKey: "idContact",
+  as: "contact",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Contact.hasMany(ReponseContact, {
+  foreignKey: "idContact",
+  as: "reponses",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
 // Synchronisation des modèles
 const syncModels = async () => {
   try {
@@ -136,6 +151,7 @@ export {
   Equipe,
   Abonne,
   Contact,
+  ReponseContact,
   InscriptionEvenement,
   NewsletterAbonne,
   Commentaire,

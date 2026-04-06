@@ -107,6 +107,7 @@ export default function ContactViewAdminPage() {
       });
 
       if (entry.repondu) {
+        console.log("[ENTRY]", entry)
         const localReply = localReplies[entry.idContact];
 
         items.push({

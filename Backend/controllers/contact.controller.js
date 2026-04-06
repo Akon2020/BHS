@@ -1,8 +1,11 @@
 import { EMAIL, FRONT_URL, CONTACT_EMAIL } from "../config/env.js";
 import transporter from "../config/nodemailer.js";
 import { valideEmail } from "../middlewares/email.middleware.js";
-import { Contact } from "../models/index.model.js";
-import { confirmationReceptionEmailTemplate, contactReplyEmailTemplate } from "../utils/email.template.js";
+import { Contact, ReponseContact } from "../models/index.model.js";
+import {
+  confirmationReceptionEmailTemplate,
+  contactReplyEmailTemplate,
+} from "../utils/email.template.js";
 import { formatDateForUser } from "../utils/user.utils.js";
 
 export const getAllContacts = async (req, res, next) => {
@@ -83,7 +86,7 @@ export const createContact = async (req, res, next) => {
       html: confirmationReceptionEmailTemplate(
         nouveauContact.nomComplet,
         sujet,
-        FRONT_URL
+        FRONT_URL,
       ),
     };
 
@@ -114,7 +117,9 @@ export const repondreContact = async (req, res, next) => {
     const { sujetReponse, messageReponse } = req.body;
 
     if (!sujetReponse || !messageReponse) {
-      return res.status(400).json({ message: "Sujet et message de réponse requis." });
+      return res
+        .status(400)
+        .json({ message: "Sujet et message de réponse requis." });
     }
 
     const contact = await Contact.findByPk(id);
@@ -127,10 +132,24 @@ export const repondreContact = async (req, res, next) => {
       from: `"BurningHeart IHS" <${CONTACT_EMAIL}>`,
       to: contact.email,
       subject: sujetReponse,
-      html: contactReplyEmailTemplate(contact.nomComplet, sujetReponse, formatDateForUser(contact.createdAt), contact.sujet, messageReponse),
+      html: contactReplyEmailTemplate(
+        contact.nomComplet,
+        sujetReponse,
+        formatDateForUser(contact.createdAt),
+        contact.sujet,
+        messageReponse,
+      ),
     };
 
     await transporter.sendMail(mailOptions);
+
+    const reponseContact = await ReponseContact.create({
+      idContact: contact.idContact,
+      sujetReponse,
+      messageReponse,
+      emailDestinataire: contact.email,
+      sentAt: new Date(),
+    });
 
     contact.repondu = true;
     contact.statut = "traite";
@@ -138,7 +157,10 @@ export const repondreContact = async (req, res, next) => {
 
     return res.status(200).json({
       message: `Une réponse a été envoyée avec succès à ${contact.nomComplet}`,
-      data: contact,
+      data: {
+        contact,
+        reponse: reponseContact,
+      },
     });
   } catch (error) {
     console.error("Erreur lors de la réponse au contact :", error);
@@ -146,7 +168,6 @@ export const repondreContact = async (req, res, next) => {
     next(error);
   }
 };
-
 
 export const deleteContact = async (req, res, next) => {
   try {

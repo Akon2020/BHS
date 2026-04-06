@@ -217,7 +217,7 @@ export default function EventsPage() {
                           </h3>
 
                           <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                            {event.description}
+                            <div dangerouslySetInnerHTML={{ __html: event.description }} />
                           </p>
 
                           <div className="space-y-2 text-sm text-muted-foreground">
