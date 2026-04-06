@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getContactById, getContactsByEmail, replyToContact } from "@/actions/contact";
+import {
+  getContactById,
+  getContactsByEmail,
+  replyToContact,
+} from "@/actions/contact";
 import type { Contact } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +27,18 @@ import {
   UserRound,
 } from "lucide-react";
 
-interface ReplyPayload {
+interface ContactReply {
+  idReponseContact: number;
+  idContact: number;
   sujetReponse: string;
   messageReponse: string;
+  emailDestinataire: string;
+  sentAt: string;
 }
+
+type ContactWithReplies = Contact & {
+  reponses?: ContactReply[];
+};
 
 interface ConversationItem {
   id: string;
@@ -42,15 +54,15 @@ export default function ContactViewAdminPage() {
   const router = useRouter();
   const id = Number(params?.id);
 
-  const [contact, setContact] = useState<Contact | null>(null);
-  const [sameEmailContacts, setSameEmailContacts] = useState<Contact[]>([]);
+  const [contact, setContact] = useState<ContactWithReplies | null>(null);
+  const [sameEmailContacts, setSameEmailContacts] = useState<
+    ContactWithReplies[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [sendingReply, setSendingReply] = useState(false);
 
   const [replySubject, setReplySubject] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
-
-  const [localReplies, setLocalReplies] = useState<Record<number, ReplyPayload>>({});
 
   const fetchCurrentContact = async (contactId: number) => {
     const data = await getContactById(contactId);
@@ -62,7 +74,8 @@ export default function ContactViewAdminPage() {
   const fetchSameEmailContacts = async (email: string) => {
     const response = await getContactsByEmail(email);
     const list = [...(response.contactsInfo || [])].sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
     setSameEmailContacts(list);
   };
@@ -81,7 +94,8 @@ export default function ContactViewAdminPage() {
       } catch (error: any) {
         toast({
           title: "Erreur",
-          description: error.message || "Impossible de charger cette correspondance.",
+          description:
+            error.message || "Impossible de charger cette correspondance.",
           variant: "destructive",
         });
         router.push("/admin/contact");
@@ -106,25 +120,36 @@ export default function ContactViewAdminPage() {
         createdAt: entry.createdAt,
       });
 
-      if (entry.repondu) {
-        console.log("[ENTRY]", entry)
-        const localReply = localReplies[entry.idContact];
+      const replies = [...(entry.reponses || [])].sort(
+        (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
+      );
 
+      replies.forEach((reply) => {
         items.push({
-          id: `admin-${entry.idContact}`,
+          id: `admin-${entry.idContact}-${reply.idReponseContact}`,
           sender: "admin",
           contactId: entry.idContact,
-          subject: localReply?.sujetReponse || `Re: ${entry.sujet}`,
-          message:
-            localReply?.messageReponse ||
-            "Une réponse administrative a été envoyée à cet utilisateur.",
-          createdAt: entry.createdAt,
+          subject: reply.sujetReponse,
+          message: reply.messageReponse,
+          createdAt: reply.sentAt,
         });
-      }
+      });
     });
 
-    return items;
-  }, [sameEmailContacts, localReplies]);
+    return items.sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    );
+  }, [sameEmailContacts]);
+
+  const totalReplies = useMemo(
+    () =>
+      sameEmailContacts.reduce(
+        (count, entry) => count + (entry.reponses?.length || 0),
+        0,
+      ),
+    [sameEmailContacts],
+  );
 
   const handleSendReply = async () => {
     if (!contact) return;
@@ -148,11 +173,6 @@ export default function ContactViewAdminPage() {
         sujetReponse,
         messageReponse,
       });
-
-      setLocalReplies((prev) => ({
-        ...prev,
-        [contact.idContact]: { sujetReponse, messageReponse },
-      }));
 
       const refreshed = await fetchCurrentContact(contact.idContact);
       await fetchSameEmailContacts(refreshed.email);
@@ -190,7 +210,11 @@ export default function ContactViewAdminPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/admin/contact")}> 
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push("/admin/contact")}
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
@@ -299,6 +323,12 @@ export default function ContactViewAdminPage() {
               <p className="text-muted-foreground">Total correspondances</p>
               <p className="text-2xl font-bold">{sameEmailContacts.length}</p>
             </div>
+            <div>
+              <p className="text-muted-foreground">Total réponses envoyées</p>
+              <Badge variant="outline" className="mt-1">
+                {totalReplies}
+              </Badge>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -320,7 +350,11 @@ export default function ContactViewAdminPage() {
             rows={6}
           />
           <div className="flex justify-end">
-            <Button onClick={handleSendReply} disabled={sendingReply} className="gap-2">
+            <Button
+              onClick={handleSendReply}
+              disabled={sendingReply}
+              className="gap-2"
+            >
               <Send className="h-4 w-4" />
               {sendingReply ? "Envoi en cours..." : "Envoyer la reponse"}
             </Button>

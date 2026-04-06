@@ -25,7 +25,9 @@ export const getAllContacts = async (req, res, next) => {
 export const getContactById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const contact = await Contact.findByPk(id);
+    const contact = await Contact.findByPk(id, {
+      include: [{ model: ReponseContact, as: "reponses" }],
+    });
 
     if (!contact) {
       return res.status(404).json({ message: "Contact non trouvé" });
@@ -43,6 +45,7 @@ export const getContactsByEmail = async (req, res, next) => {
     const { email } = req.params;
     const contacts = await Contact.findAll({
       where: { email },
+      include: [{ model: ReponseContact, as: "reponses" }],
       order: [["createdAt", "DESC"]],
     });
 
