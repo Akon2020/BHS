@@ -83,6 +83,14 @@ export default function EventsAdminPage() {
       setIsDeleteModalOpen(false)
       setSelectedEvent(null)
     }
+
+    /* const truncateText = (text: any, maxLength = 500) => {
+      if (!text) return "Aucune description disponible";
+      if (text.length <= maxLength) return text;
+
+      const truncated = text.slice(0, maxLength);
+      return truncated.slice(0, truncated.lastIndexOf(" ")) + "...";
+    } */
   }
 
   return (
@@ -157,9 +165,9 @@ export default function EventsAdminPage() {
                   <TableCell>
                     <div>
                       <p className="font-medium">{event.titre}</p>
-                      <p className="text-sm text-muted-foreground line-clamp-1">
-                        {event.description}
-                      </p>
+                      {/* <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                        {event.description ? event.description.slice(0, 500) + (event.description.length > 500 ? "..." : "") : "Aucune description disponible"}
+                      </p> */}
                     </div>
                   </TableCell>
                   <TableCell>

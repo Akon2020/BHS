@@ -182,7 +182,7 @@ export default function ContactAdminPage() {
 
                   <TableCell>
                     <p className="line-clamp-1 font-medium">{contact.sujet}</p>
-                    <p className="line-clamp-2 text-sm text-muted-foreground">{contact.message}</p>
+                    {/* <p className="line-clamp-2 text-sm text-muted-foreground">{contact.message}</p> */}
                   </TableCell>
 
                   <TableCell>

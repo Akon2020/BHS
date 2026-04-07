@@ -194,9 +194,9 @@ export default function BlogAdminPage() {
                 <TableRow key={post.id}>
                   <TableCell>
                     <p className="font-medium">{post.title}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
+                    {/* <p className="text-sm text-muted-foreground line-clamp-1">
                       {post.excerpt}
-                    </p>
+                    </p> */}
                     <p className="text-xs text-muted-foreground mt-1">
                       {post.date}
                     </p>
