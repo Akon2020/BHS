@@ -1,5 +1,15 @@
 const currentYear = new Date().getFullYear();
 
+const escapeHtml = (value = "") =>
+  String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+
+const formatPlainTextForEmail = (value = "") => escapeHtml(value);
+
 export const welcomeEmailTemplate = (nom, email, url) => {
   return `
   <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
@@ -63,7 +73,6 @@ export const welcomeEmailTemplate = (nom, email, url) => {
   </div>
   `;
 };
-
 
 export const newUserEmailTemplate = (nom, email, defaultPassword, url) => {
   return `<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
@@ -199,7 +208,13 @@ export const confirmationReceptionEmailTemplate = (nom, sujet, url) => {
   `;
 };
 
-export const contactReplyEmailTemplate = (nom, sujet, date, sujetResponse, contenuHtml) => {
+export const contactReplyEmailTemplate = (
+  nom,
+  sujet,
+  date,
+  sujetResponse,
+  contenuPlainText,
+) => {
   return `
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4; padding: 40px 1rem;">
     <tr>
@@ -232,7 +247,9 @@ export const contactReplyEmailTemplate = (nom, sujet, date, sujetResponse, conte
 
           <tr>
             <td style="color: #555555; font-size: 15px; line-height: 1.6; padding-bottom: 24px;">
-              ${contenuHtml}
+              <div style="white-space: pre-wrap; word-break: break-word; margin: 0;">
+                ${formatPlainTextForEmail(contenuPlainText)}
+              </div>
             </td>
           </tr>
 
@@ -282,7 +299,12 @@ export const contactReplyEmailTemplate = (nom, sujet, date, sujetResponse, conte
   `;
 };
 
-export const newsletterEmailTemplate = (nom, sujet, contenuHtml, unsubscribeUrl) => {
+export const newsletterEmailTemplate = (
+  nom,
+  sujet,
+  contenuHtml,
+  unsubscribeUrl,
+) => {
   return `
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9f9f9; padding: 40px 1rem;">
     <tr>
@@ -358,7 +380,6 @@ export const newsletterEmailTemplate = (nom, sujet, contenuHtml, unsubscribeUrl)
   </table>
   `;
 };
-
 
 export const newsletterSubscriptionConfirmationTemplate = (nom, url) => {
   return `
@@ -446,7 +467,13 @@ export const newsletterSubscriptionConfirmationTemplate = (nom, url) => {
   `;
 };
 
-export const eventPublishedNotificationTemplate = (nom, nomEvenement, dateEvenement, lieuEvenement, url) => {
+export const eventPublishedNotificationTemplate = (
+  nom,
+  nomEvenement,
+  dateEvenement,
+  lieuEvenement,
+  url,
+) => {
   return `
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9f9f9; padding: 40px 1rem;">
     <tr>
@@ -552,7 +579,13 @@ export const eventPublishedNotificationTemplate = (nom, nomEvenement, dateEvenem
   `;
 };
 
-export const eventRegistrationConfirmationTemplate = (nom, nomEvenement, dateEvenement, lieuEvenement, url) => {
+export const eventRegistrationConfirmationTemplate = (
+  nom,
+  nomEvenement,
+  dateEvenement,
+  lieuEvenement,
+  url,
+) => {
   return `
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9f9f9; padding: 40px 1rem;">
     <tr>
@@ -651,7 +684,7 @@ export const eventRegistrationWithPDFTemplate = (
   nomEvenement,
   dateEvenement,
   lieuEvenement,
-  url
+  url,
 ) => {
   return `
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9f9f9; padding: 40px 1rem;">
