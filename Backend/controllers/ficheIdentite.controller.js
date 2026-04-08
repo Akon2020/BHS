@@ -19,8 +19,14 @@ const allowedEtatsCivils = ["Célibataire", "Marié(e)", "Veuf(ve)"];
 const normalizeText = (value) =>
   typeof value === "string" ? value.trim() : value;
 
+const normalizeKey = (value) =>
+  normalizeText(value)
+    ?.toLowerCase()
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
 const normalizePieceType = (value) => {
-  const normalized = normalizeText(value)?.toLowerCase();
+  const normalized = normalizeKey(value);
 
   if (!normalized) return null;
 
@@ -28,7 +34,7 @@ const normalizePieceType = (value) => {
     "carte d'electeur": "carte d'électeur",
     "carte d'etudiant": "carte d'étudiant",
     "carte d'eleve": "carte d'élève",
-    "passeport": "passeport",
+    passeport: "passeport",
     "carte de bapteme": "carte de baptême",
   };
 
@@ -36,12 +42,12 @@ const normalizePieceType = (value) => {
 };
 
 const normalizeEtatCivil = (value) => {
-  const normalized = normalizeText(value)?.toLowerCase();
+  const normalized = normalizeKey(value);
 
   if (!normalized) return null;
 
   const mapping = {
-    "celibataire": "Célibataire",
+    celibataire: "Célibataire",
     "marie(e)": "Marié(e)",
     "veuf(ve)": "Veuf(ve)",
   };
@@ -69,7 +75,7 @@ const buildFicheIdentitePayload = (body) => {
     sexe: allowedSexes.includes(normalizeText(identite?.sexe))
       ? normalizeText(identite?.sexe)
       : null,
-    etatCivil: normalizeEtatCivil(identite?.etatCivil) || "Celibataire",
+    etatCivil: normalizeEtatCivil(identite?.etatCivil) || "Célibataire",
     adresse: normalizeText(identite?.adresse),
     tel: normalizeText(identite?.tel),
     email: normalizeText(identite?.email),
@@ -288,7 +294,11 @@ export const getFicheIdentiteById = async (req, res, next) => {
 
 export const createFicheIdentite = async (req, res, next) => {
   try {
+    console.log("Requête reçue - Body complet:", JSON.stringify(req.body, null, 2));
+    
     const payload = buildFicheIdentitePayload(req.body);
+    console.log("Payload buildFicheIdentitePayload:", JSON.stringify(payload, null, 2));
+    
     const validationMessage = validateFicheIdentitePayload(payload);
 
     if (validationMessage) {
@@ -327,7 +337,14 @@ export const createFicheIdentite = async (req, res, next) => {
       data: ficheIdentite,
     });
   } catch (error) {
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error("❌ Erreur lors de la création de ficheIdentite:", {
+      errorMessage: error.message,
+      errorName: error.name,
+      errorOriginal: error.original,
+      errorSQL: error.sql,
+      payload,
+    });
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
     next(error);
   }
 };
