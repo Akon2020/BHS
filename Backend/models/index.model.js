@@ -8,6 +8,7 @@ import Equipe from "./equipe.model.js";
 import Abonne from "./abonne.model.js";
 import Contact from "./contact.model.js";
 import ReponseContact from "./reponseContact.model.js";
+import FicheIdentite from "./ficheIdentite.model.js";
 import InscriptionEvenement from "./inscriptionEvenement.model.js";
 import NewsletterAbonne from "./newsletterAbonne.model.js";
 import Commentaire from "./commentaire.model.js";
@@ -152,6 +153,7 @@ export {
   Abonne,
   Contact,
   ReponseContact,
+  FicheIdentite,
   InscriptionEvenement,
   NewsletterAbonne,
   Commentaire,
