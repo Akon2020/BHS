@@ -294,11 +294,17 @@ export const getFicheIdentiteById = async (req, res, next) => {
 
 export const createFicheIdentite = async (req, res, next) => {
   try {
-    console.log("Requête reçue - Body complet:", JSON.stringify(req.body, null, 2));
-    
+    console.log(
+      "Requête reçue - Body complet:",
+      JSON.stringify(req.body, null, 2),
+    );
+
     const payload = buildFicheIdentitePayload(req.body);
-    console.log("Payload buildFicheIdentitePayload:", JSON.stringify(payload, null, 2));
-    
+    console.log(
+      "Payload buildFicheIdentitePayload:",
+      JSON.stringify(payload, null, 2),
+    );
+
     const validationMessage = validateFicheIdentitePayload(payload);
 
     if (validationMessage) {
@@ -342,7 +348,6 @@ export const createFicheIdentite = async (req, res, next) => {
       errorName: error.name,
       errorOriginal: error.original,
       errorSQL: error.sql,
-      payload,
     });
     res.status(500).json({ message: "Erreur serveur", error: error.message });
     next(error);
@@ -384,7 +389,7 @@ export const updateFicheIdentite = async (req, res, next) => {
   }
 };
 
-export const approuverFicheIdentite = async (req, res, next) => {
+export const approuveFicheIdentite = async (req, res, next) => {
   try {
     const { id } = req.params;
     const ficheIdentite = await FicheIdentite.findByPk(id);
@@ -420,6 +425,27 @@ export const deleteFicheIdentite = async (req, res, next) => {
 
     return res.status(200).json({
       message: "Fiche d'identité supprimée avec succès",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
+export const approuverFicheIdentite = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const ficheIdentite = await FicheIdentite.findByPk(id);
+
+    if (!ficheIdentite) {
+      return res.status(404).json({ message: "Fiche d'identité introuvable" });
+    }
+
+    await ficheIdentite.update({ approuve: true, lu: true });
+
+    return res.status(200).json({
+      message: "Fiche d'identité approuvée avec succès",
+      data: ficheIdentite,
     });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });

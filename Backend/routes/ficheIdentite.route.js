@@ -160,4 +160,30 @@ ficheIdentiteRouter.delete(
   deleteFicheIdentite,
 );
 
+/**
+ * @swagger
+ * /api/identites/approuver/{id}:
+ *   patch:
+ *     summary: Approuver une fiche d'identité
+ *     tags: [Identites]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID de la fiche d'identité à approuver
+ *     responses:
+ *       200:
+ *         description: Fiche approuvée avec succès
+ *       404:
+ *         description: Fiche non trouvée
+ */
+ficheIdentiteRouter.patch(
+  "/approuver/:id",
+  authenticationJWT,
+  authorizeRoles("admin"),
+  approuverFicheIdentite,
+);
+
 export default ficheIdentiteRouter;

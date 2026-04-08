@@ -17,7 +17,8 @@ import {
   UserCircle,
   Folder,
   LogOut,
-  Phone,
+  MessageSquare,
+  IdCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -61,6 +62,12 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       active: pathname === "/admin/users",
     },
     {
+      label: "Identités",
+      icon: IdCard ,
+      href: "/admin/identities",
+      active: pathname.startsWith("/admin/identities"),
+    },
+    {
       label: "Catégories",
       icon: Folder,
       href: "/admin/categories",
@@ -74,7 +81,7 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
     },
     {
       label: "Messages",
-      icon: Phone,
+      icon: MessageSquare,
       href: "/admin/contact",
       active: pathname.startsWith("/admin/contact"),
     },

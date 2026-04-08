@@ -844,6 +844,25 @@ export const eventRegistrationWithPDFTemplate = (
             </td>
           </tr>
 
+          <!-- Fiche Renseignement -->
+          <tr>
+            <td style="color: #555555; font-size: 15px; padding-bottom: 24px;">
+              Pensez déjà remplir la fiche de renseignement pour la participation à la retraite si ce n'est pas encore fait.<br>
+              Le montant de participation est à payé au bureau de Burning Heart de 12h à 15h du 5 Avril 2026 au 12 Avril 2026.
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding: 20px 0;">
+              <a href="https://burningheartihs.org/identity" 
+                style="background-color: #a42223; color: #ffffff; text-decoration: none; 
+                padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;">
+                Cliquez pour remplir la fiche renseignement
+              </a>
+            </td>
+          </tr>
+
           <!-- Footer text -->
           <tr>
             <td style="color: #555555; font-size: 15px; padding-bottom: 4px;">

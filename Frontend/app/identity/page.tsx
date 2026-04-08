@@ -461,17 +461,19 @@ export default function IdentityPage() {
                     type="email"
                     value={formData.identite.email}
                     onChange={onIdentiteChange("email")}
-                    placeholder="votre.email@domaine.com"
+                    placeholder="email@exemple.com"
                   />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium">Paroisse *</label>
+                  <label className="text-sm font-medium">
+                    Paroisse d'origine *
+                  </label>
                   <Input
                     required
                     value={formData.identite.paroisse}
                     onChange={onIdentiteChange("paroisse")}
-                    placeholder="Nom de votre paroisse"
+                    placeholder="Le nom de votre paroisse d'origine"
                   />
                 </div>
               </CardContent>
@@ -488,6 +490,7 @@ export default function IdentityPage() {
                     required
                     value={formData.urgence.nom}
                     onChange={onUrgenceChange("nom")}
+                    placeholder="Le nom complet du contact d'urgence"
                   />
                 </div>
                 <div className="space-y-2">
@@ -498,25 +501,28 @@ export default function IdentityPage() {
                     required
                     value={formData.urgence.lien}
                     onChange={onUrgenceChange("lien")}
+                    placeholder="Le lien avec vous: Père, Mère, Tuteur, etc."
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Téléphone principal *
+                    Téléphone principal (WhatsApp) *
                   </label>
                   <Input
                     required
                     value={formData.urgence.tel.principal}
                     onChange={onUrgenceTelChange("principal")}
+                    placeholder="+243..."
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Téléphone secondaire
+                    Téléphone secondaire (Mobile)
                   </label>
                   <Input
                     value={formData.urgence.tel.secondaire || ""}
                     onChange={onUrgenceTelChange("secondaire")}
+                    placeholder="+243..."
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -528,6 +534,7 @@ export default function IdentityPage() {
                     type="email"
                     value={formData.urgence.email}
                     onChange={onUrgenceChange("email")}
+                    placeholder="email@exemple.com"
                   />
                 </div>
               </CardContent>
@@ -600,7 +607,16 @@ export default function IdentityPage() {
                     Aperçu du dossier
                   </p>
                   <p className="text-lg font-semibold">
-                    {fullNamePreview || "Nom non renseigné"}
+                    {fullNamePreview || "Nom non renseigné"},
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    En souscrivant à ce formulaire, vous certifiez que les
+                    informations fournies sont fiables, que vous vous inscrivez
+                    à notre protocole de protection des mineurs et acceptez que
+                    les images ainsi que les vidéos acquises au cours de cette
+                    activité soient utilisées par <strong>BURNING HEART</strong>{" "}
+                    afin d’aider d’autres personnes à apprendre la spiritualité
+                    Ignatienne
                   </p>
                 </div>
 
