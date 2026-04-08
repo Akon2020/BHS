@@ -58,6 +58,113 @@ export interface GetAllContactsResponse {
   contactsInfo: Contact[];
 }
 
+export type PieceTypeIdentite =
+  | "carte d'électeur"
+  | "carte d'étudiant"
+  | "carte d'élève"
+  | "passeport"
+  | "carte de baptême";
+
+export type SexeIdentite = "Masculin" | "Feminin";
+export type EtatCivilIdentite = "Célibataire" | "Marié(e)" | "Veuf(ve)";
+
+export interface MedicalToggleDetails {
+  has: boolean;
+  details: string;
+}
+
+export interface IdentityFormPayload {
+  identite: {
+    piece: {
+      type: PieceTypeIdentite;
+      numero: string;
+    };
+    nom: string;
+    postnom: string;
+    prenom: string;
+    naissance: string;
+    sexe: SexeIdentite;
+    etatCivil: EtatCivilIdentite;
+    adresse: string;
+    tel: string;
+    email: string;
+    paroisse: string;
+  };
+  urgence: {
+    nom: string;
+    lien: string;
+    tel: {
+      principal: string;
+      secondaire?: string;
+    };
+    email: string;
+  };
+  medical: {
+    allergies: MedicalToggleDetails;
+    traitement: MedicalToggleDetails;
+    maladie: MedicalToggleDetails;
+    regime: MedicalToggleDetails;
+    autres: string;
+  };
+}
+
+export interface FicheIdentite {
+  idFicheIdentite: number;
+  pieceType: PieceTypeIdentite;
+  pieceNumero: string;
+  nom: string;
+  postnom: string;
+  prenom: string;
+  naissance: string;
+  sexe: SexeIdentite;
+  etatCivil: EtatCivilIdentite;
+  adresse: string;
+  tel: string;
+  email: string;
+  paroisse: string;
+  urgenceNom: string;
+  urgenceLien: string;
+  urgenceTelPrincipal: string;
+  urgenceTelSecondaire?: string | null;
+  urgenceEmail: string;
+  allergiesHas: boolean;
+  allergiesDetails?: string | null;
+  traitementHas: boolean;
+  traitementDetails?: string | null;
+  maladieHas: boolean;
+  maladieDetails?: string | null;
+  regimeHas: boolean;
+  regimeDetails?: string | null;
+  autres?: string | null;
+  dateSoumission: string;
+  lu: boolean;
+  approuve: boolean;
+}
+
+export interface GetAllIdentityResponse {
+  nombre: number;
+  fichesIdentites: FicheIdentite[];
+}
+
+export interface GetIdentityByIdResponse {
+  ficheIdentiteInfo: FicheIdentite;
+}
+
+export interface CreateIdentityResponse {
+  message: string;
+  emailStatus?: string;
+  data: FicheIdentite;
+}
+
+export interface UpdateIdentityResponse {
+  message: string;
+  data: FicheIdentite;
+}
+
+export interface DeleteIdentityResponse {
+  message: string;
+}
+
 export interface Abonne {
   idAbonne: number;
   nomComplet: string;

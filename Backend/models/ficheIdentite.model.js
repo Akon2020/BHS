@@ -11,11 +11,11 @@ const FicheIdentite = db.define(
     },
     pieceType: {
       type: DataTypes.ENUM(
-        "carte d'electeur",
-        "carte d'etudiant",
-        "carte d'eleve",
+        "carte d'électeur",
+        "carte d'étudiant",
+        "carte d'élève",
         "passeport",
-        "carte de bapteme",
+        "carte de baptême",
       ),
       allowNull: false,
     },
@@ -44,9 +44,9 @@ const FicheIdentite = db.define(
       allowNull: false,
     },
     etatCivil: {
-      type: DataTypes.ENUM("Celibataire", "Marie(e)", "Veuf(ve)"),
+      type: DataTypes.ENUM("Célibataire", "Marié(e)", "Veuf(ve)"),
       allowNull: false,
-      defaultValue: "Celibataire",
+      defaultValue: "Célibataire",
     },
     adresse: {
       type: DataTypes.STRING(255),
@@ -170,6 +170,11 @@ const FicheIdentite = db.define(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+    },
+    lu: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
     approuve: {
       type: DataTypes.BOOLEAN,
