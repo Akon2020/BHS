@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import QRCode from "qrcode";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +15,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, Trash, CheckCircle2, Clock } from "lucide-react";
+import {
+  Search,
+  Eye,
+  Trash,
+  CheckCircle2,
+  Clock,
+  Download,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import {
   Select,
@@ -23,19 +34,30 @@ import {
 } from "@/components/ui/select";
 import DeleteConfirmationModal from "@/components/modals/delete-confirmation-modal";
 import { toast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import { getAllIdentity, deleteIdentity } from "@/actions/identity";
 import type { FicheIdentite } from "@/types/user";
 
 export default function IdentityAdminPage() {
+  type ExportMode = "approved" | "new" | "all";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [identitiesList, setIdentitiesList] = useState<FicheIdentite[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedIdentity, setSelectedIdentity] = useState<FicheIdentite | null>(
-    null,
-  );
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [selectedIdentity, setSelectedIdentity] =
+    useState<FicheIdentite | null>(null);
 
   const fetchIdentities = async () => {
     try {
@@ -119,10 +141,186 @@ export default function IdentityAdminPage() {
     nouveaux: identitiesList.filter((i) => !i.lu).length,
   };
 
+  const getStatusLabel = (identity: FicheIdentite) => {
+    if (identity.approuve) return "Approuvée";
+    if (!identity.lu) return "Nouvelle";
+    return "En cours";
+  };
+
+  const getExportData = (mode: ExportMode) => {
+    if (mode === "approved") {
+      return identitiesList.filter((identity) => identity.approuve);
+    }
+    if (mode === "new") {
+      return identitiesList.filter((identity) => !identity.lu);
+    }
+    return identitiesList;
+  };
+
+  const handleExportPDF = async (mode: ExportMode) => {
+    try {
+      const exportList = getExportData(mode);
+
+      if (exportList.length === 0) {
+        toast({
+          title: "Aucune donnée",
+          description: "Aucune fiche d'identité disponible pour cet export.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setIsExporting(true);
+
+      const doc = new jsPDF("p", "mm", "a4");
+
+      const PRIMARY: [number, number, number] = [148, 28, 38];
+      const TEXT_DARK: [number, number, number] = [40, 40, 40];
+      const MUTED: [number, number, number] = [120, 120, 120];
+
+      const logoUrl = "/images/logon.png";
+      const logoBase64 = await fetch(logoUrl)
+        .then((res) => res.blob())
+        .then(
+          (blob) =>
+            new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            }),
+        );
+
+      const qrBase64 = await QRCode.toDataURL(
+        `${window.location.origin}/admin/identities`,
+        {
+          margin: 1,
+          width: 300,
+          color: {
+            dark: "#941C26",
+            light: "#FFFFFF",
+          },
+        },
+      );
+
+      const exportTitle =
+        mode === "approved"
+          ? "Liste des identités approuvées"
+          : mode === "new"
+            ? "Liste des identités nouvelles"
+            : "Liste complète des identités";
+
+      doc.addImage(logoBase64, "PNG", 95, 12, 20, 20);
+      doc.addImage(qrBase64, "PNG", 175, 12, 18, 18);
+
+      doc.setFontSize(14);
+      doc.setTextColor(...TEXT_DARK);
+      doc.text("BURNING HEART", 105, 38, { align: "center" });
+
+      doc.setFontSize(10);
+      doc.text("PÈLERINS AVEC LE CHRIST", 105, 44, { align: "center" });
+
+      doc.setFontSize(9);
+      doc.setTextColor(...MUTED);
+      doc.text("Email : burningheartihs@gmail.com", 105, 50, {
+        align: "center",
+      });
+      doc.text("Tél : +243 849 005 240", 105, 55, { align: "center" });
+      doc.text(
+        "Adresse : 259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu",
+        105,
+        60,
+        { align: "center" },
+      );
+
+      doc.setTextColor(...TEXT_DARK);
+      doc.setFontSize(14);
+      doc.text(exportTitle, 14, 75);
+
+      doc.setFontSize(10);
+      doc.setTextColor(...MUTED);
+      doc.text(`Nombre total : ${exportList.length}`, 14, 82);
+      doc.text(`Généré le : ${new Date().toLocaleDateString("fr-FR")}`, 14, 88);
+
+      const rows = exportList.map((identity, i) => [
+        i + 1,
+        `${identity.nom} ${identity.postnom} ${identity.prenom}`,
+        identity.email,
+        identity.tel,
+        getStatusLabel(identity),
+        new Date(identity.dateSoumission).toLocaleDateString("fr-FR"),
+      ]);
+
+      autoTable(doc, {
+        head: [
+          ["#", "Nom complet", "Email", "Téléphone", "Statut", "Soumis le"],
+        ],
+        body: rows,
+        startY: 95,
+        theme: "grid",
+        headStyles: {
+          fillColor: PRIMARY,
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+        },
+        bodyStyles: {
+          textColor: TEXT_DARK,
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245],
+        },
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+        margin: { left: 14, right: 14 },
+      });
+
+      const pageCount = doc.getNumberOfPages();
+      const today = new Date().toLocaleDateString("fr-FR");
+
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(9);
+        doc.setTextColor(...MUTED);
+
+        doc.text(`Généré par burningheartihs.org • ${today}`, 14, 290);
+        doc.text(`Page ${i} / ${pageCount}`, 190, 290, { align: "right" });
+      }
+
+      const fileSuffix =
+        mode === "approved"
+          ? "approuvees"
+          : mode === "new"
+            ? "nouvelles"
+            : "complet";
+
+      doc.save(`BHS-Identites-${fileSuffix}.pdf`);
+
+      setIsExportModalOpen(false);
+      toast({
+        title: "Export réussi",
+        description: "Le fichier PDF a été généré avec succès.",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Erreur export PDF",
+        description: "Impossible de générer le PDF.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestion des Fiches d'Identité</h1>
+        <Button onClick={() => setIsExportModalOpen(true)}>
+          <Download className="mr-2 h-4 w-4" />
+          Exporter
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -205,7 +403,10 @@ export default function IdentityAdminPage() {
             </TableHeader>
             <TableBody>
               {filteredIdentities.map((identity) => (
-                <TableRow key={identity.idFicheIdentite} className="hover:bg-muted/50">
+                <TableRow
+                  key={identity.idFicheIdentite}
+                  className="hover:bg-muted/50"
+                >
                   <TableCell className="font-medium">
                     {identity.nom} {identity.postnom} {identity.prenom}
                   </TableCell>
@@ -251,7 +452,9 @@ export default function IdentityAdminPage() {
                         asChild
                         className="text-primary border-primary hover:bg-primary/10"
                       >
-                        <Link href={`/admin/identity/view/${identity.idFicheIdentite}`}>
+                        <Link
+                          href={`/admin/identities/view/${identity.idFicheIdentite}`}
+                        >
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
@@ -279,6 +482,70 @@ export default function IdentityAdminPage() {
         title="Supprimer la fiche d'identité"
         description={`Êtes-vous sûr de vouloir supprimer la fiche d'identité de ${selectedIdentity?.nom} ${selectedIdentity?.prenom} ? Cette action ne peut pas être annulée.`}
       />
+
+      <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Exporter les fiches d'identité</DialogTitle>
+            <DialogDescription>
+              Choisissez le type de liste à exporter au format PDF.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-3">
+            <Button
+              onClick={() => handleExportPDF("approved")}
+              disabled={isExporting}
+              className="justify-start"
+            >
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Exporter les approuvés
+            </Button>
+
+            <Button
+              onClick={() => handleExportPDF("new")}
+              disabled={isExporting}
+              variant="secondary"
+              className="justify-start"
+            >
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Exporter les non approuvées (Nouvelles)
+            </Button>
+
+            <Button
+              onClick={() => handleExportPDF("all")}
+              disabled={isExporting}
+              variant="outline"
+              className="justify-start"
+            >
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Exporter toute la liste
+            </Button>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsExportModalOpen(false)}
+              disabled={isExporting}
+            >
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
