@@ -19,6 +19,7 @@ import {
   LogOut,
   MessageSquare,
   IdCard,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -87,7 +88,7 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
     },
     {
       label: "Abonnés Newsletter",
-      icon: Mail,
+      icon: UserPlus,
       href: "/admin/abonnes",
       active: pathname.startsWith("/admin/abonnes"),
     },
