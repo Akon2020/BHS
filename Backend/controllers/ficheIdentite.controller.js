@@ -343,7 +343,7 @@ export const createFicheIdentite = async (req, res, next) => {
       data: ficheIdentite,
     });
   } catch (error) {
-    console.error("❌ Erreur lors de la création de ficheIdentite:", {
+    console.error("Erreur lors de la création de ficheIdentite:", {
       errorMessage: error.message,
       errorName: error.name,
       errorOriginal: error.original,

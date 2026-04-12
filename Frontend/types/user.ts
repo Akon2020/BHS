@@ -171,12 +171,39 @@ export interface Abonne {
   email: string;
   statut: AbonneStatut;
   dateAbonnement: string;
-  dateDesabonnement: string;
+  dateDesabonnement?: string | null;
 }
 
 export interface GetAllAbonnesResponse {
   nombre: number;
-  abonnesInfo: Abonne[];
+  abonnes: Abonne[];
+}
+
+export interface AbonneReception {
+  idNewsletterAbonne: number;
+  statut: NewsletterEnvoiStatut | "attente";
+  dateEnvoi?: string | null;
+  newsletter?: {
+    idNewsletter: number;
+    titreInterne: string;
+    objetMail: string;
+    dateEnvoi?: string | null;
+  };
+}
+
+export interface GetSingleAbonneResponse {
+  abonne: Abonne & {
+    receptions?: AbonneReception[];
+  };
+  stats: {
+    totalReceptions: number;
+    totalRecues: number;
+  };
+}
+
+export interface AbonneMutationResponse {
+  message: string;
+  data?: Abonne;
 }
 
 export interface Equipe {

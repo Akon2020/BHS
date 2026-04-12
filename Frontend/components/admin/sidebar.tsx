@@ -86,6 +86,12 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       active: pathname.startsWith("/admin/contact"),
     },
     {
+      label: "Abonnés Newsletter",
+      icon: Mail,
+      href: "/admin/abonnes",
+      active: pathname.startsWith("/admin/abonnes"),
+    },
+    {
       label: "Newsletter",
       icon: Mail,
       href: "/admin/newsletter",
