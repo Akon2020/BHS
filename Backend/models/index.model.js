@@ -12,6 +12,7 @@ import FicheIdentite from "./ficheIdentite.model.js";
 import InscriptionEvenement from "./inscriptionEvenement.model.js";
 import NewsletterAbonne from "./newsletterAbonne.model.js";
 import Commentaire from "./commentaire.model.js";
+import Fichier from "./fichier.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -71,6 +72,10 @@ Utilisateur.hasMany(Newsletter, { foreignKey: "writedBy", as: "newsletters" });
 // Événement associations
 Evenement.belongsTo(Utilisateur, { foreignKey: "createdBy", as: "createur" });
 Utilisateur.hasMany(Evenement, { foreignKey: "createdBy", as: "evenements" });
+
+// Fichier associations
+Fichier.belongsTo(Utilisateur, { foreignKey: "createdBy", as: "createur" });
+Utilisateur.hasMany(Fichier, { foreignKey: "createdBy", as: "fichiers" });
 
 // Inscription événement associations
 InscriptionEvenement.belongsTo(Evenement, {
@@ -157,5 +162,6 @@ export {
   InscriptionEvenement,
   NewsletterAbonne,
   Commentaire,
+  Fichier,
   syncModels,
 };

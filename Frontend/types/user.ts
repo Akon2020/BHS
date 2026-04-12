@@ -540,3 +540,47 @@ export interface InscriptionEvenementResponse {
   inscription: InscriptionEvenement;
   pdfUrl: string;
 }
+
+export type FichierStatut = "brouillon" | "publie" | "programme" | "archive";
+
+export interface FichierItem {
+  nomOriginal: string;
+  nomStocke: string;
+  chemin: string;
+  typeMime: string;
+  taille: number;
+}
+
+export interface FichierRessource {
+  idFichier: number;
+  nomReference: string;
+  slug: string;
+  description: string;
+  statut: FichierStatut;
+  datePublication?: string | null;
+  fichiers: FichierItem[];
+  nombreFichiers: number;
+  tailleTotale: number;
+  createdBy?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  createur?: {
+    idUtilisateur: number;
+    nomComplet: string;
+    email: string;
+  } | null;
+}
+
+export interface GetAllFichiersResponse {
+  nombre: number;
+  fichiers: FichierRessource[];
+}
+
+export interface GetSingleFichierResponse {
+  fichier: FichierRessource;
+}
+
+export interface FichierMutationResponse {
+  message: string;
+  data?: FichierRessource;
+}

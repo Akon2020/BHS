@@ -20,6 +20,7 @@ import {
   MessageSquare,
   IdCard,
   UserPlus,
+  Tags,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -70,7 +71,7 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
     },
     {
       label: "Catégories",
-      icon: Folder,
+      icon: Tags,
       href: "/admin/categories",
       active: pathname.startsWith("/admin/categories"),
     },
@@ -87,16 +88,16 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       active: pathname.startsWith("/admin/contact"),
     },
     {
-      label: "Abonnés Newsletter",
-      icon: UserPlus,
-      href: "/admin/abonnes",
-      active: pathname.startsWith("/admin/abonnes"),
-    },
-    {
       label: "Newsletter",
       icon: Mail,
       href: "/admin/newsletter",
       active: pathname.startsWith("/admin/newsletter"),
+    },
+    {
+      label: "Abonnés Newsletter",
+      icon: UserPlus,
+      href: "/admin/abonnes",
+      active: pathname.startsWith("/admin/abonnes"),
     },
     {
       label: "Événements",
@@ -105,10 +106,16 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       active: pathname.startsWith("/admin/events"),
     },
     {
-      label: "Équipe",
+      label: "Équipe (Membre interne)",
       icon: Users,
       href: "/admin/team",
       active: pathname.startsWith("/admin/team"),
+    },
+    {
+      label: "Fichiers",
+      icon: Folder,
+      href: "/admin/files",
+      active: pathname === "/admin/files",
     },
     {
       label: "Profil",
