@@ -8,6 +8,7 @@ import type {
 export const getAllFiles = async (params?: {
   search?: string;
   statut?: string;
+  idCategorie?: number;
 }): Promise<GetAllFichiersResponse> => {
   try {
     const res = await api.get<GetAllFichiersResponse>("/api/fichiers", {
@@ -93,6 +94,7 @@ export const deleteFileResource = async (
 
 export const getPublicFiles = async (params?: {
   search?: string;
+  idCategorie?: number;
 }): Promise<GetAllFichiersResponse> => {
   try {
     const res = await api.get<GetAllFichiersResponse>("/api/fichiers/public", {
@@ -121,4 +123,14 @@ export const getPublicFileBySlug = async (
         "Erreur lors de la récupération du fichier public",
     );
   }
+};
+
+export const getAdminFileDownloadUrl = (id: number, index: number) => {
+  const base = process.env.NEXT_PUBLIC_API_URL || "";
+  return `${base}/api/fichiers/${id}/download/${index}`;
+};
+
+export const getPublicFileDownloadUrl = (slug: string, index: number) => {
+  const base = process.env.NEXT_PUBLIC_API_URL || "";
+  return `${base}/api/fichiers/slug/${slug}/download/${index}`;
 };

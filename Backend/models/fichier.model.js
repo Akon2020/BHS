@@ -22,10 +22,23 @@ const Fichier = db.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    idCategorie: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "categories",
+        key: "idCategorie",
+      },
+    },
     statut: {
       type: DataTypes.ENUM("brouillon", "publie", "programme", "archive"),
       allowNull: false,
       defaultValue: "brouillon",
+    },
+    modeAcces: {
+      type: DataTypes.ENUM("lecture", "telechargement"),
+      allowNull: false,
+      defaultValue: "telechargement",
     },
     datePublication: {
       type: DataTypes.DATE,

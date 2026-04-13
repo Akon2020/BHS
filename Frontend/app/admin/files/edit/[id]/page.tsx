@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 
+import { getAllCategories } from "@/actions/categorie";
 import { getSingleFile, updateFileResource } from "@/actions/file";
-import type { FichierRessource } from "@/types/user";
+import type { Categorie, FichierRessource } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,13 +46,16 @@ export default function EditFileResourcePage() {
   const id = Number(params?.id);
 
   const [resource, setResource] = useState<FichierRessource | null>(null);
+  const [categories, setCategories] = useState<Categorie[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [idCategorie, setIdCategorie] = useState("");
   const [nomReference, setNomReference] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [statut, setStatut] = useState("brouillon");
+  const [modeAcces, setModeAcces] = useState("telechargement");
   const [datePublication, setDatePublication] = useState("");
   const [newFiles, setNewFiles] = useState<File[]>([]);
 
@@ -61,10 +65,12 @@ export default function EditFileResourcePage() {
       const res = await getSingleFile(id);
       const item = res.fichier;
       setResource(item);
+      setIdCategorie(String(item.idCategorie || ""));
       setNomReference(item.nomReference || "");
       setSlug(item.slug || "");
       setDescription(item.description || "");
       setStatut(item.statut || "brouillon");
+      setModeAcces(item.modeAcces || "telechargement");
       setDatePublication(
         item.datePublication
           ? new Date(item.datePublication).toISOString().slice(0, 16)
@@ -86,6 +92,19 @@ export default function EditFileResourcePage() {
     if (!Number.isNaN(id)) fetchResource();
   }, [id]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getAllCategories();
+        setCategories(res.categories || []);
+      } catch {
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const totalNewSize = useMemo(
     () => newFiles.reduce((acc, file) => acc + file.size, 0),
     [newFiles],
@@ -97,10 +116,15 @@ export default function EditFileResourcePage() {
 
   const onSubmit = async () => {
     try {
-      if (!nomReference.trim() || !description.trim() || !slug.trim()) {
+      if (
+        !nomReference.trim() ||
+        !description.trim() ||
+        !slug.trim() ||
+        !idCategorie
+      ) {
         toast({
           title: "Champs requis",
-          description: "Nom, slug et description sont obligatoires.",
+          description: "Nom, slug, catégorie et description sont obligatoires.",
           variant: "destructive",
         });
         return;
@@ -122,7 +146,9 @@ export default function EditFileResourcePage() {
       formData.append("nomReference", nomReference.trim());
       formData.append("slug", toSlug(slug));
       formData.append("description", description.trim());
+      formData.append("idCategorie", idCategorie);
       formData.append("statut", statut);
+      formData.append("modeAcces", modeAcces);
       formData.append(
         "datePublication",
         datePublication ? new Date(datePublication).toISOString() : "",
@@ -195,6 +221,25 @@ export default function EditFileResourcePage() {
           </div>
 
           <div className="space-y-2">
+            <Label>Catégorie</Label>
+            <Select value={idCategorie} onValueChange={setIdCategorie}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisir une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem
+                    key={cat.idCategorie}
+                    value={String(cat.idCategorie)}
+                  >
+                    {cat.nomCategorie}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label>Statut</Label>
             <Select value={statut} onValueChange={setStatut}>
               <SelectTrigger>
@@ -205,6 +250,21 @@ export default function EditFileResourcePage() {
                 <SelectItem value="publie">Publié</SelectItem>
                 <SelectItem value="programme">Programmé</SelectItem>
                 <SelectItem value="archive">Archivé</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label>Mode d'accès côté client</Label>
+            <Select value={modeAcces} onValueChange={setModeAcces}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisir le mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="telechargement">
+                  Lecture et téléchargement
+                </SelectItem>
+                <SelectItem value="lecture">Lecture seule</SelectItem>
               </SelectContent>
             </Select>
           </div>

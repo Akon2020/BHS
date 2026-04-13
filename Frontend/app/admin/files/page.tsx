@@ -12,8 +12,13 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { deleteFileResource, getAllFiles } from "@/actions/file";
-import type { FichierRessource } from "@/types/user";
+import { getAllCategories } from "@/actions/categorie";
+import {
+  deleteFileResource,
+  getAdminFileDownloadUrl,
+  getAllFiles,
+} from "@/actions/file";
+import type { Categorie, FichierRessource } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -50,17 +55,13 @@ const formatSize = (size = 0) => {
   return `${(size / (1024 * 1024 * 1024)).toFixed(2)} Go`;
 };
 
-const toPublicFileUrl = (chemin: string) => {
-  const base = process.env.NEXT_PUBLIC_API_URL || "";
-  if (!chemin) return "#";
-  return `${base}/${chemin}`;
-};
-
 export default function AdminFilesPage() {
   const [files, setFiles] = useState<FichierRessource[]>([]);
+  const [categories, setCategories] = useState<Categorie[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statut, setStatut] = useState("all");
+  const [selectedCategorie, setSelectedCategorie] = useState("all");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selected, setSelected] = useState<FichierRessource | null>(null);
 
@@ -70,6 +71,8 @@ export default function AdminFilesPage() {
       const res = await getAllFiles({
         search: search || undefined,
         statut: statut !== "all" ? statut : undefined,
+        idCategorie:
+          selectedCategorie !== "all" ? Number(selectedCategorie) : undefined,
       });
       setFiles(res.fichiers || []);
     } catch (error: any) {
@@ -85,7 +88,20 @@ export default function AdminFilesPage() {
 
   useEffect(() => {
     fetchFiles();
-  }, [statut]);
+  }, [statut, selectedCategorie]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await getAllCategories();
+        setCategories(res.categories || []);
+      } catch {
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -207,6 +223,19 @@ export default function AdminFilesPage() {
             <SelectItem value="archive">Archivé</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={selectedCategorie} onValueChange={setSelectedCategorie}>
+          <SelectTrigger className="w-full md:w-[220px]">
+            <SelectValue placeholder="Filtrer par catégorie" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes les catégories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.idCategorie} value={String(cat.idCategorie)}>
+                {cat.nomCategorie}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button variant="outline" onClick={fetchFiles}>
           Rafraîchir
         </Button>
@@ -218,6 +247,7 @@ export default function AdminFilesPage() {
             <TableRow className="bg-muted/40">
               <TableHead>Ressource</TableHead>
               <TableHead>Slug</TableHead>
+              <TableHead>Catégorie</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead>Fichiers</TableHead>
               <TableHead>Taille</TableHead>
@@ -227,14 +257,14 @@ export default function AdminFilesPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center">
+                <TableCell colSpan={7} className="py-8 text-center">
                   Chargement...
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="py-8 text-center text-muted-foreground"
                 >
                   Aucune ressource trouvée.
@@ -251,6 +281,11 @@ export default function AdminFilesPage() {
                   </TableCell>
                   <TableCell className="font-mono text-xs">
                     {item.slug}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {item.categorie?.nomCategorie || "Sans catégorie"}
+                    </Badge>
                   </TableCell>
                   <TableCell>{getBadge(item.statut)}</TableCell>
                   <TableCell>{item.nombreFichiers}</TableCell>
@@ -272,7 +307,7 @@ export default function AdminFilesPage() {
                       {item.fichiers?.[0]?.chemin ? (
                         <Button variant="outline" size="icon" asChild>
                           <a
-                            href={toPublicFileUrl(item.fichiers[0].chemin)}
+                            href={getAdminFileDownloadUrl(item.idFichier, 0)}
                             target="_blank"
                             rel="noreferrer"
                           >

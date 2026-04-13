@@ -1,4 +1,5 @@
 import db from "../database/db.js";
+import { DataTypes } from "sequelize";
 import Utilisateur from "./utilisateur.model.js";
 import Categorie from "./categorie.model.js";
 import Blog from "./blog.model.js";
@@ -76,6 +77,8 @@ Utilisateur.hasMany(Evenement, { foreignKey: "createdBy", as: "evenements" });
 // Fichier associations
 Fichier.belongsTo(Utilisateur, { foreignKey: "createdBy", as: "createur" });
 Utilisateur.hasMany(Fichier, { foreignKey: "createdBy", as: "fichiers" });
+Fichier.belongsTo(Categorie, { foreignKey: "idCategorie", as: "categorie" });
+Categorie.hasMany(Fichier, { foreignKey: "idCategorie", as: "fichiers" });
 
 // Inscription événement associations
 InscriptionEvenement.belongsTo(Evenement, {
@@ -141,6 +144,30 @@ Contact.hasMany(ReponseContact, {
 const syncModels = async () => {
   try {
     await db.sync({ alter: false });
+
+    // Backfill du schéma fichiers pour les bases déjà existantes
+    const queryInterface = db.getQueryInterface();
+    const fichiersTable = await queryInterface
+      .describeTable("fichiers")
+      .catch(() => null);
+
+    if (fichiersTable) {
+      if (!fichiersTable.idCategorie) {
+        await queryInterface.addColumn("fichiers", "idCategorie", {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+        });
+      }
+
+      if (!fichiersTable.modeAcces) {
+        await queryInterface.addColumn("fichiers", "modeAcces", {
+          type: DataTypes.ENUM("lecture", "telechargement"),
+          allowNull: false,
+          defaultValue: "telechargement",
+        });
+      }
+    }
+
     console.log("Modèles synchronisés avec succès");
   } catch (error) {
     console.error("Erreur lors de la synchronisation des modèles:", error);

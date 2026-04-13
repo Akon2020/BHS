@@ -1,8 +1,11 @@
+import slugify from "slugify";
 import { Op } from "sequelize";
-import { Fichier, Utilisateur } from "../models/index.model.js";
+import path from "path";
+import { Fichier, Utilisateur, Categorie } from "../models/index.model.js";
 import { deleteFile } from "../utils/deletefile.js";
 
 const allowedStatuts = ["brouillon", "publie", "programme", "archive"];
+const allowedModesAcces = ["lecture", "telechargement"];
 
 const normalizeText = (value) =>
   typeof value === "string" ? value.trim() : value;
@@ -43,7 +46,7 @@ const isPubliclyAvailable = (fichier) => {
 
 export const getAllFichiers = async (req, res, next) => {
   try {
-    const { search = "", statut } = req.query;
+    const { search = "", statut, idCategorie } = req.query;
 
     const where = {};
     if (search?.trim()) {
@@ -58,6 +61,10 @@ export const getAllFichiers = async (req, res, next) => {
       where.statut = statut;
     }
 
+    if (idCategorie) {
+      where.idCategorie = Number(idCategorie);
+    }
+
     const fichiers = await Fichier.findAll({
       where,
       include: [
@@ -65,6 +72,12 @@ export const getAllFichiers = async (req, res, next) => {
           model: Utilisateur,
           as: "createur",
           attributes: ["idUtilisateur", "nomComplet", "email"],
+          required: false,
+        },
+        {
+          model: Categorie,
+          as: "categorie",
+          attributes: ["idCategorie", "nomCategorie", "slug"],
           required: false,
         },
       ],
@@ -93,6 +106,12 @@ export const getSingleFichier = async (req, res, next) => {
           attributes: ["idUtilisateur", "nomComplet", "email"],
           required: false,
         },
+        {
+          model: Categorie,
+          as: "categorie",
+          attributes: ["idCategorie", "nomCategorie", "slug"],
+          required: false,
+        },
       ],
     });
 
@@ -109,7 +128,7 @@ export const getSingleFichier = async (req, res, next) => {
 
 export const getPublicFichiers = async (req, res, next) => {
   try {
-    const { search = "" } = req.query;
+    const { search = "", idCategorie } = req.query;
 
     const where = {
       statut: {
@@ -125,8 +144,20 @@ export const getPublicFichiers = async (req, res, next) => {
       ];
     }
 
+    if (idCategorie) {
+      where.idCategorie = Number(idCategorie);
+    }
+
     const fichiers = await Fichier.findAll({
       where,
+      include: [
+        {
+          model: Categorie,
+          as: "categorie",
+          attributes: ["idCategorie", "nomCategorie", "slug"],
+          required: false,
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
@@ -146,7 +177,17 @@ export const getPublicFichierBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params;
 
-    const fichier = await Fichier.findOne({ where: { slug } });
+    const fichier = await Fichier.findOne({
+      where: { slug },
+      include: [
+        {
+          model: Categorie,
+          as: "categorie",
+          attributes: ["idCategorie", "nomCategorie", "slug"],
+          required: false,
+        },
+      ],
+    });
 
     if (!fichier || !isPubliclyAvailable(fichier)) {
       return res.status(404).json({ message: "Ressource introuvable" });
@@ -164,16 +205,30 @@ export const createFichier = async (req, res, next) => {
     const nomReference = normalizeText(req.body?.nomReference);
     const description = normalizeText(req.body?.description);
     const statut = normalizeText(req.body?.statut) || "brouillon";
-    const slug = normalizeSlug(req.body?.slug || nomReference);
+    const modeAcces = normalizeText(req.body?.modeAcces) || "telechargement";
+    const generatedSlug = slugify(nomReference, { lower: true, strict: true });
+    const finalSlug = req.body?.slug || generatedSlug;
+    const slug = finalSlug;
+    const idCategorie = Number(req.body?.idCategorie);
 
-    if (!nomReference || !description || !slug) {
+    if (!nomReference || !description || !slug || Number.isNaN(idCategorie)) {
       return res.status(400).json({
-        message: "Le nom de référence, la description et le slug sont requis.",
+        message:
+          "Le nom de référence, la description, le slug et la catégorie sont requis.",
       });
     }
 
     if (!allowedStatuts.includes(statut)) {
       return res.status(400).json({ message: "Statut de fichier invalide." });
+    }
+
+    if (!allowedModesAcces.includes(modeAcces)) {
+      return res.status(400).json({ message: "Mode d'accès invalide." });
+    }
+
+    const categorie = await Categorie.findByPk(idCategorie);
+    if (!categorie) {
+      return res.status(400).json({ message: "Catégorie introuvable." });
     }
 
     const uploadedFiles = normalizeUploadedFiles(req.files);
@@ -204,7 +259,9 @@ export const createFichier = async (req, res, next) => {
       nomReference,
       slug,
       description,
+      idCategorie,
       statut,
+      modeAcces,
       datePublication,
       fichiers: uploadedFiles,
       nombreFichiers: uploadedFiles.length,
@@ -251,6 +308,18 @@ export const updateFichier = async (req, res, next) => {
       patch.description = description;
     }
 
+    if (req.body?.idCategorie !== undefined) {
+      const idCategorie = Number(req.body.idCategorie);
+      if (Number.isNaN(idCategorie)) {
+        return res.status(400).json({ message: "Catégorie invalide." });
+      }
+      const categorie = await Categorie.findByPk(idCategorie);
+      if (!categorie) {
+        return res.status(400).json({ message: "Catégorie introuvable." });
+      }
+      patch.idCategorie = idCategorie;
+    }
+
     if (req.body?.slug !== undefined) {
       const slug = normalizeSlug(req.body.slug);
       if (!slug) {
@@ -272,6 +341,14 @@ export const updateFichier = async (req, res, next) => {
         return res.status(400).json({ message: "Statut de fichier invalide." });
       }
       patch.statut = nextStatut;
+    }
+
+    if (req.body?.modeAcces !== undefined) {
+      const modeAcces = normalizeText(req.body.modeAcces);
+      if (!allowedModesAcces.includes(modeAcces)) {
+        return res.status(400).json({ message: "Mode d'accès invalide." });
+      }
+      patch.modeAcces = modeAcces;
     }
 
     if (req.body?.datePublication !== undefined) {
@@ -331,6 +408,80 @@ export const deleteFichier = async (req, res, next) => {
     await fichier.destroy();
 
     return res.status(200).json({ message: "Fichier supprimé avec succès" });
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
+const resolveSafeAbsolutePath = (relativePath) => {
+  const normalizedRelative = String(relativePath || "").replace(/\\/g, "/");
+  const absolutePath = path.resolve(process.cwd(), normalizedRelative);
+  const uploadsRoot = path.resolve(process.cwd(), "uploads");
+
+  if (!absolutePath.startsWith(uploadsRoot)) {
+    return null;
+  }
+
+  return absolutePath;
+};
+
+export const downloadFichierAdmin = async (req, res, next) => {
+  try {
+    const { id, index } = req.params;
+
+    const fichier = await Fichier.findByPk(id);
+    if (!fichier) {
+      return res.status(404).json({ message: "Fichier introuvable" });
+    }
+
+    const idx = Number(index);
+    if (Number.isNaN(idx) || idx < 0 || idx >= (fichier.fichiers || []).length) {
+      return res.status(400).json({ message: "Index de fichier invalide" });
+    }
+
+    const fileItem = fichier.fichiers[idx];
+    const absolutePath = resolveSafeAbsolutePath(fileItem?.chemin);
+
+    if (!absolutePath) {
+      return res.status(400).json({ message: "Chemin de fichier invalide" });
+    }
+
+    return res.download(absolutePath, fileItem.nomOriginal || fileItem.nomStocke);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
+export const downloadFichierPublic = async (req, res, next) => {
+  try {
+    const { slug, index } = req.params;
+
+    const fichier = await Fichier.findOne({ where: { slug } });
+    if (!fichier || !isPubliclyAvailable(fichier)) {
+      return res.status(404).json({ message: "Ressource introuvable" });
+    }
+
+    if (fichier.modeAcces !== "telechargement") {
+      return res.status(403).json({
+        message: "Cette ressource est en lecture seule et ne peut pas être téléchargée.",
+      });
+    }
+
+    const idx = Number(index);
+    if (Number.isNaN(idx) || idx < 0 || idx >= (fichier.fichiers || []).length) {
+      return res.status(400).json({ message: "Index de fichier invalide" });
+    }
+
+    const fileItem = fichier.fichiers[idx];
+    const absolutePath = resolveSafeAbsolutePath(fileItem?.chemin);
+
+    if (!absolutePath) {
+      return res.status(400).json({ message: "Chemin de fichier invalide" });
+    }
+
+    return res.download(absolutePath, fileItem.nomOriginal || fileItem.nomStocke);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
     next(error);

@@ -2,6 +2,8 @@ import { Router } from "express";
 import {
   createFichier,
   deleteFichier,
+  downloadFichierAdmin,
+  downloadFichierPublic,
   getAllFichiers,
   getPublicFichierBySlug,
   getPublicFichiers,
@@ -25,6 +27,7 @@ const fichierRouter = Router();
 
 fichierRouter.get("/public", getPublicFichiers);
 fichierRouter.get("/slug/:slug", getPublicFichierBySlug);
+fichierRouter.get("/slug/:slug/download/:index", downloadFichierPublic);
 
 fichierRouter.get(
   "/",
@@ -38,6 +41,13 @@ fichierRouter.get(
   authenticationJWT,
   authorizeRoles("admin", "editeur", "membre"),
   getSingleFichier,
+);
+
+fichierRouter.get(
+  "/:id/download/:index",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  downloadFichierAdmin,
 );
 
 fichierRouter.post(

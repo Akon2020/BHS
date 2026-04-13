@@ -542,6 +542,7 @@ export interface InscriptionEvenementResponse {
 }
 
 export type FichierStatut = "brouillon" | "publie" | "programme" | "archive";
+export type FichierModeAcces = "lecture" | "telechargement";
 
 export interface FichierItem {
   nomOriginal: string;
@@ -556,6 +557,8 @@ export interface FichierRessource {
   nomReference: string;
   slug: string;
   description: string;
+  idCategorie: number;
+  modeAcces: FichierModeAcces;
   statut: FichierStatut;
   datePublication?: string | null;
   fichiers: FichierItem[];
@@ -568,6 +571,11 @@ export interface FichierRessource {
     idUtilisateur: number;
     nomComplet: string;
     email: string;
+  } | null;
+  categorie?: {
+    idCategorie: number;
+    nomCategorie: string;
+    slug: string;
   } | null;
 }
 

@@ -41,6 +41,7 @@ const navigation = [
   { name: "Services", href: "/services" },
   { name: "Événements", href: "/events" },
   { name: "Blog", href: "/blog" },
+  { name: "Fichiers", href: "/files" },
   { name: "Contact", href: "/contact" },
 ];
 
