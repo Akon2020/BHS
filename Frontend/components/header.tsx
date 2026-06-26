@@ -185,7 +185,7 @@ export function Header() {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Link href="/admin/profil" className="flex items-center gap-2">
+                    <Link href="/admin/profile" className="flex items-center gap-2">
                       <User className="mr-2 h-4 w-4" />
                       Profil
                     </Link>
