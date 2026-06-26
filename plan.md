@@ -51,9 +51,9 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟠 Vérifier que toutes les routes de la sidebar existent et sont autorisées pour les bons rôles (toutes les routes existent ; autorisation gérée par la matrice unique).
 
 ### 0.2 Configuration build
-- [ ] 🟠 **Retirer `typescript.ignoreBuildErrors: true`** de `next.config.mjs` après correction des erreurs de typage (sinon les bugs de type passent en prod).
-- [ ] 🔵 **Réactiver l'optimisation d'images** (`images.unoptimized` → configurer `remotePatterns` pour `api.burningheartihs.org` + uploads) — gain perf & SEO.
-- [ ] 🔵 Ajouter `metadataBase` dans `app/layout.tsx` (requis pour les URLs OG/canonical absolues).
+- [x] 🟠 **Retirer `typescript.ignoreBuildErrors: true`** de `next.config.mjs` : 5 erreurs TS préexistantes corrigées (blog/events utilisent désormais les types partagés `Blog`/`Evenement` ; `totalPages` calculé). `next build` passe ✅.
+- [ ] 🔵 **Réactiver l'optimisation d'images** (`images.unoptimized` → `remotePatterns` pour l'API prod + dev) — **différé au Lot 2.4** (perf) : risque d'erreur runtime sur les nombreux `next/image` distants tant que le host/port de dev n'est pas confirmé + test visuel requis.
+- [x] 🔵 Ajouter `metadataBase` dans `app/layout.tsx` (URLs OG/canonical absolues, via `NEXT_PUBLIC_SITE_URL` avec fallback `https://burningheartihs.org`).
 
 ### 0.3 Contenus factices / placeholders
 - [ ] 🟠 Remplacer les **notifications admin codées en dur** (`components/admin/header.tsx`, « 3 ») par des notifications réelles ou masquer le badge tant que la source n'existe pas.

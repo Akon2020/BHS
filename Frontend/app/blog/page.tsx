@@ -11,31 +11,14 @@ import { getAllBlogs } from "@/actions/blog";
 import { getAllCategories } from "@/actions/categorie";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
-
-interface BlogPost {
-  idBlog: number;
-  titre: string;
-  slug: string;
-  extrait: string;
-  imageUne: string;
-  statut: string;
-  createdAt: string;
-  estimationLecture: number;
-  auteur?: {
-    avatar?: string;
-    nomComplet: string;
-  };
-  categorie?: {
-    nomCategorie: string;
-  };
-}
+import type { Blog } from "@/types/user";
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState("Tous");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [posts, setPosts] = useState<Blog[]>([]);
   const [categories, setCategories] = useState<
     { idCategorie: number; nomCategorie: string }[]
   >([]);
@@ -130,7 +113,7 @@ export default function BlogPage() {
     ? posts.filter(
         (post) =>
           post.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          post.extrait.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          post.extrait?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           post.categorie?.nomCategorie
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase()),
