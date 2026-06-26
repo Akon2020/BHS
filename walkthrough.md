@@ -95,3 +95,24 @@
 **Vérification**
 - Front : `npx tsc --noEmit` → 0 erreur ; `npm run build` → succès.
 - Back : `node --check` OK sur `app.js`, `config/env.js`, `utils/user.utils.js`, `controllers/auth.controller.js`.
+
+### 0.4 Qualité backend ✅ (partiel)
+
+**Modifications**
+- `app.js` : montage de **Helmet** avec une config adaptée à l'API :
+  - `contentSecurityPolicy: false` (évite de casser l'UI Swagger `/api-docs`).
+  - `crossOriginResourcePolicy: { policy: "cross-origin" }` (autorise le front, autre sous-domaine, à charger les fichiers de `/uploads`).
+  - `crossOriginEmbedderPolicy: false`.
+
+**Constats / vérifications**
+- `syncModels()` : `db.sync({ alter: false })` → **non destructif** (OK).
+- `upload.middleware.js` : Multer **sans limite de taille ni filtre de type** ; `bodyParser` à 1024 Mo → **décision requise** sur les tailles/types max (traité avec le module Fichiers / Lot 4).
+- Audit fin de la gestion d'erreurs des contrôleurs : reporté (non bloquant ; `errorMiddleware` global + `try/catch` déjà en place).
+
+**Vérification** : `node --check app.js` → OK.
+
+---
+
+## LOT 0 — Bilan
+
+Lot 0 traité (0.1 → 0.4). Restes connus, non bloquants : optimisation d'images (→ Lot 2.4), témoignages statiques (→ Lot 3.2), limites d'upload (décision), audit fin des contrôleurs. Prochaine étape : **Lot 1 — Responsivité**.

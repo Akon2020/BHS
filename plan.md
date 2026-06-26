@@ -61,9 +61,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟠 **Auth unifiée en cookie httpOnly** : le backend pose le token dans un cookie httpOnly (`secure` en prod uniquement, `sameSite=lax`, `domain` partagé via `COOKIE_DOMAIN`). Ajout de `cookie-parser` (manquant) dans `app.js`. Le front ne manipule plus de token JS (`lib/axios.ts` sans Bearer, `js-cookie`/`localStorage.token` retirés, `useAuth`/`getProfile` via cookie). Cookie parasite retiré de `/register` (n'écrase plus la session admin). ⚠️ **À tester en runtime** (login/logout/refresh) et **définir `COOKIE_DOMAIN=.burningheartihs.org` en prod**.
 
 ### 0.4 Qualité backend
-- [ ] 🟠 Auditer les contrôleurs pour la gestion d'erreurs homogène (codes HTTP, messages) et la validation des entrées.
-- [ ] 🔵 Vérouiller CORS / Helmet / limites d'upload (Multer 1024 Mo est très élevé — confirmer la limite réelle voulue par type de fichier).
-- [ ] 🔵 S'assurer que `syncModels()` n'utilise pas `force/alter` destructeur en production.
+- [ ] 🟠 *(en cours)* Auditer les contrôleurs pour la gestion d'erreurs homogène (codes HTTP, messages) et la validation des entrées. État : un `errorMiddleware` global existe et la plupart des contrôleurs ont des `try/catch` ; audit fin reporté (non bloquant).
+- [x] 🔵 **Helmet monté** dans `app.js` (CSP off pour Swagger, CORP `cross-origin` pour servir `/uploads`). CORS déjà correct (origines + `credentials`).
+- [ ] 🔵 ⚠️ **Limites d'upload à définir** : Multer n'a **aucune** limite de taille ni filtre de type ; `bodyParser` est à 1024 Mo. **Décision requise** sur la taille/type max par usage (avatars/images vs module Fichiers) avant de poser des limites — à traiter avec le Lot 3 (Fichiers) / Lot 4.
+- [x] 🔵 **`syncModels()` non destructif** vérifié : `db.sync({ alter: false })` (pas de `force`/`alter`).
 
 ---
 

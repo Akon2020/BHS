@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
 import path from "path";
 import logger from "morgan";
 import { PORT, HOST_URL } from "./config/env.js";
@@ -23,6 +24,18 @@ import dashboardRouter from "./routes/dashboard.route.js";
 import fichierRouter from "./routes/fichier.route.js";
 
 const app = express();
+
+// Sécurité des en-têtes HTTP.
+// - CSP désactivée (sinon casse l'UI Swagger /api-docs).
+// - CORP en "cross-origin" pour autoriser le front (autre sous-domaine) à charger
+//   les fichiers servis depuis /uploads (images du blog, des événements, etc.).
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(logger("dev"));
