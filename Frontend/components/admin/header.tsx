@@ -29,7 +29,8 @@ interface AdminHeaderProps {
 }
 
 export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
-  const notifications = 3;
+  // Pas de source de notifications pour l'instant (cf. plan.md Lot 0.3).
+  const notifications = 0;
   const currentUser = getCurrentUser();
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
@@ -72,12 +73,12 @@ export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
               <span className="sr-only">Notifications</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Nouvel utilisateur inscrit</DropdownMenuItem>
-            <DropdownMenuItem>Nouveau commentaire sur le blog</DropdownMenuItem>
-            <DropdownMenuItem>Mise à jour système disponible</DropdownMenuItem>
+            <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+              Aucune notification
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
         <Button

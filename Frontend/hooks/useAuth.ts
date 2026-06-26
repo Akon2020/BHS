@@ -13,17 +13,11 @@ export const useAuth = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No token");
-
-        const res = await api.get("/api/auth/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Le cookie httpOnly est envoyé automatiquement (withCredentials).
+        const res = await api.get("/api/auth/profile");
         setUser(res.data.user);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
       } catch {
-        localStorage.removeItem("token");
         localStorage.removeItem("user");
         setUser(null);
       } finally {
@@ -35,9 +29,13 @@ export const useAuth = () => {
   }, []);
 
   const logout = async () => {
-    await api.post("/api/auth/logout");
-    localStorage.clear();
-    router.push("/connexion");
+    try {
+      await api.post("/api/auth/logout");
+    } finally {
+      localStorage.removeItem("user");
+      setUser(null);
+      router.push("/connexion");
+    }
   };
 
   return {

@@ -1,7 +1,5 @@
 import api from "@/lib/axios";
 import { AuthResponse, User } from "@/types/user";
-import Cookies from "js-cookie";
-import { getAuthHeaders } from "@/lib/auth";
 
 export interface AuthPayload {
   email: string;
@@ -12,13 +10,10 @@ export const login = async (payload: AuthPayload): Promise<User> => {
   try {
     const res = await api.post<AuthResponse>("/api/auth/login", payload);
 
-    const { token, userInfo } = res.data.data;
+    const { userInfo } = res.data.data;
 
-    localStorage.setItem("token", token);
-    Cookies.set("token", token, {
-      expires: 7,
-      secure: true,
-    });
+    // Le token est posé par le backend dans un cookie httpOnly (non accessible au JS).
+    // On ne conserve côté front que le profil (non sensible) pour l'affichage UI.
     localStorage.setItem("user", JSON.stringify(userInfo));
 
     return userInfo;
@@ -34,16 +29,13 @@ export const logout = async () => {
   try {
     await api.post("/api/auth/logout");
   } finally {
-    localStorage.removeItem("token");
-    Cookies.remove("token");
+    // Le cookie httpOnly est effacé par le backend ; on nettoie le profil local.
     localStorage.removeItem("user");
   }
 };
 
 export const getProfile = async (): Promise<User> => {
-  const res = await api.get("/api/auth/profile", {
-    headers: getAuthHeaders(),
-  });
+  const res = await api.get("/api/auth/profile");
   return res.data.user;
 };
 

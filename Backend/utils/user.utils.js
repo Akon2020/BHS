@@ -1,4 +1,9 @@
-import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env.js";
+import {
+  COOKIE_DOMAIN,
+  JWT_EXPIRES_IN,
+  JWT_SECRET,
+  NODE_ENV,
+} from "../config/env.js";
 import jwt from "jsonwebtoken";
 
 export const generateToken = (user) => {
@@ -6,6 +11,24 @@ export const generateToken = (user) => {
     expiresIn: JWT_EXPIRES_IN,
   });
 };
+
+const AUTH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+/**
+ * Options communes du cookie d'authentification httpOnly.
+ * - `secure` uniquement en production (sinon le cookie est rejeté sur http en dev).
+ * - `domain` partagé entre sous-domaines en production (ex. `.burningheartihs.org`)
+ *   pour que l'API et le front (proxy.ts) voient le même cookie. Non défini en dev.
+ * @param {{ withMaxAge?: boolean }} [opts]
+ */
+export const getAuthCookieOptions = ({ withMaxAge = false } = {}) => ({
+  httpOnly: true,
+  secure: NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+  ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+  ...(withMaxAge ? { maxAge: AUTH_COOKIE_MAX_AGE } : {}),
+});
 
 export const getUserWithoutPassword = (userInstance) => {
   if (!userInstance || typeof userInstance.toJSON !== "function") {

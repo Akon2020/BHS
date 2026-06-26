@@ -56,9 +56,9 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 Ajouter `metadataBase` dans `app/layout.tsx` (URLs OG/canonical absolues, via `NEXT_PUBLIC_SITE_URL` avec fallback `https://burningheartihs.org`).
 
 ### 0.3 Contenus factices / placeholders
-- [ ] 🟠 Remplacer les **notifications admin codées en dur** (`components/admin/header.tsx`, « 3 ») par des notifications réelles ou masquer le badge tant que la source n'existe pas.
-- [ ] 🟠 Brancher la section **Témoignages** de la home (actuellement statique) sur le futur module dynamique (voir Lot 3.2).
-- [ ] 🟠 Auth `lib/axios.ts` : le token est lu dans `localStorage` **et** un cookie `token` est utilisé par le middleware → unifier la stratégie (cookie httpOnly recommandé) pour éviter les désynchronisations.
+- [x] 🟠 **Notifications admin factices masquées** (`components/admin/header.tsx`) : badge à 0 + état vide « Aucune notification » tant qu'il n'y a pas de source réelle.
+- [ ] 🟠 ⏸️ Brancher la section **Témoignages** de la home (statique) sur le module dynamique — **bloqué par le Lot 3.2** (module pas encore créé).
+- [x] 🟠 **Auth unifiée en cookie httpOnly** : le backend pose le token dans un cookie httpOnly (`secure` en prod uniquement, `sameSite=lax`, `domain` partagé via `COOKIE_DOMAIN`). Ajout de `cookie-parser` (manquant) dans `app.js`. Le front ne manipule plus de token JS (`lib/axios.ts` sans Bearer, `js-cookie`/`localStorage.token` retirés, `useAuth`/`getProfile` via cookie). Cookie parasite retiré de `/register` (n'écrase plus la session admin). ⚠️ **À tester en runtime** (login/logout/refresh) et **définir `COOKIE_DOMAIN=.burningheartihs.org` en prod**.
 
 ### 0.4 Qualité backend
 - [ ] 🟠 Auditer les contrôleurs pour la gestion d'erreurs homogène (codes HTTP, messages) et la validation des entrées.

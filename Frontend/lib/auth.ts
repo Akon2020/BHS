@@ -1,15 +1,3 @@
-export const getAuthHeaders = (): { Authorization: string } => {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    throw new Error("Access token manquant");
-  }
-
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-};
-
 export interface User {
   id?: string | number;
   idUtilisateur?: string | number;

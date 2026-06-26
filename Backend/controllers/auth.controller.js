@@ -15,6 +15,7 @@ import {
 import { valideEmail } from "../middlewares/email.middleware.js";
 import {
   generateToken,
+  getAuthCookieOptions,
   getUserWithoutPassword,
   strongPasswd,
 } from "../utils/user.utils.js";
@@ -59,8 +60,6 @@ export const register = async (req, res, next) => {
       avatar,
       role,
     });
-    const token = generateToken({ id: newUser, email });
-
     const mailOptions = {
       from: `"BurningHeart IHS" <${EMAIL}>`,
       to: email,
@@ -72,14 +71,11 @@ export const register = async (req, res, next) => {
 
     const userWithoutPassword = getUserWithoutPassword(newUser);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-    });
-
+    // NB : /register est un endpoint admin (création de comptes). On ne pose
+    // PAS de cookie ici pour ne pas écraser la session de l'admin appelant.
     res.status(201).json({
       message: "Utilisateur créé avec succès",
-      data: { token, user: userWithoutPassword },
+      data: { user: userWithoutPassword },
     });
   } catch (error) {
     console.error("Erreur lors de l'inscription :", error);
@@ -115,16 +111,13 @@ export const login = async (req, res, next) => {
     await user.save();
 
     const loginToken = generateToken(user);
-    res.cookie("token", loginToken, {
-      httpOnly: true,
-      secure: true,
-    });
+    res.cookie("token", loginToken, getAuthCookieOptions({ withMaxAge: true }));
 
     const userWithoutPassword = getUserWithoutPassword(user);
 
     res.status(200).json({
       message: `Bienvenu ${userWithoutPassword.nomComplet} 👋`,
-      data: { token: loginToken, userInfo: userWithoutPassword },
+      data: { userInfo: userWithoutPassword },
     });
   } catch (error) {
     console.error("Erreur lors de la connexion :", error);
@@ -226,11 +219,7 @@ export const updatePassword = async (req, res, next) => {
 
 export const logout = (req, res) => {
   try {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-    });
+    res.clearCookie("token", getAuthCookieOptions());
 
     return res.status(200).json({
       success: true,

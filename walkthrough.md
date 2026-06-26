@@ -57,3 +57,41 @@
 **Vérification**
 - `npx tsc --noEmit` : **0 erreur**.
 - `npm run build` : **succès** (route table complète ; `ƒ Proxy (Middleware)` confirme la prise en compte de `proxy.ts` par Next.js 16).
+
+### 0.3 Auth httpOnly + notifications ✅
+
+**Objectif** : sécuriser l'authentification (token hors du JS) et retirer les placeholders.
+
+**Diagnostic initial**
+- `cookie-parser` était installé mais **non monté** dans `app.js` → `req.cookies` indéfini ; l'auth reposait en réalité uniquement sur le header `Authorization: Bearer` (token du `localStorage`).
+- Le front écrasait le cookie httpOnly du backend par un cookie JS (`js-cookie`) — faille XSS.
+- `secure: true` en dur sur les cookies → cookie rejeté en dev (http).
+
+**Backend**
+- `app.js` : montage de `cookie-parser` (`app.use(cookieParser())`).
+- `config/env.js` : export de `COOKIE_DOMAIN`.
+- `utils/user.utils.js` : helper `getAuthCookieOptions()` (httpOnly, `secure` en prod uniquement, `sameSite=lax`, `path=/`, `domain` si `COOKIE_DOMAIN`, `maxAge` 7 j optionnel).
+- `controllers/auth.controller.js` :
+  - `login` : pose le cookie via le helper ; ne renvoie plus le token dans le corps JSON.
+  - `register` : **suppression du `res.cookie`** (endpoint admin → ne doit pas écraser la session de l'admin appelant) ; ne renvoie plus le token.
+  - `logout` : `clearCookie` avec les mêmes options.
+
+**Frontend**
+- `lib/axios.ts` : suppression de l'intercepteur qui injectait le Bearer depuis `localStorage` (cookie + `withCredentials` suffisent).
+- `actions/auth.ts` : `login` ne stocke plus que le profil (`user`) ; `logout` nettoie `user` ; `getProfile` sans header manuel ; retrait de `js-cookie` et `getAuthHeaders`.
+- `lib/auth.ts` : suppression de `getAuthHeaders`.
+- `hooks/useAuth.ts` : validation de session via `/api/auth/profile` (cookie), persistance du profil, nettoyage si échec.
+- `types/user.ts` : `AuthResponse.data.token` rendu optionnel.
+- `proxy.ts` : inchangé — lit le cookie côté serveur et relaie le Bearer à `/api/auth/profile`.
+
+**Notifications**
+- `components/admin/header.tsx` : badge factice « 3 » → `0` + état vide « Aucune notification ».
+
+**⚠️ À faire avant prod / à tester**
+- Tester le flux réel : connexion, accès `/admin`, refresh, déconnexion.
+- En **production**, définir `COOKIE_DOMAIN=.burningheartihs.org` (cookie partagé entre `burningheartihs.org` et `api.burningheartihs.org`, lisible par `proxy.ts`). En dev, laisser vide (host-only `localhost`).
+- `js-cookie` / `@types/js-cookie` désormais inutilisés (nettoyage possible au Lot 4).
+
+**Vérification**
+- Front : `npx tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+- Back : `node --check` OK sur `app.js`, `config/env.js`, `utils/user.utils.js`, `controllers/auth.controller.js`.
