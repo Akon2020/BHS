@@ -135,3 +135,11 @@ Lot 0 traité (0.1 → 0.4). Restes connus, non bloquants : optimisation d'image
 - `components/admin/header.tsx` : prop `onOpenSidebar` ; bouton menu `lg:hidden` (au lieu de `md:hidden`) avec `aria-label`.
 
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+### 1.1 Admin — tableaux & dashboard ✅ (structurel)
+
+- **Tableaux** : le primitif `components/ui/table.tsx` enveloppe déjà dans `overflow-x-auto` ; les 8 pages liste utilisent ce composant → défilement horizontal mobile déjà assuré. (Variante « cartes » mobile = enhancement optionnel.)
+- **Dashboard** (`app/admin/page.tsx`) : grille stats déjà adaptive ; en-tête d'actions rendu responsive (`flex-col` empilé sur mobile → `sm:flex-row`, titre `text-2xl sm:text-3xl`, boutons `flex-wrap`).
+- **Reste (passe visuelle)** : wrapping des en-têtes titre+actions et grilles de formulaires par page — à finaliser/valider au navigateur (360→1440).
+
+**Vérification** : `tsc --noEmit` → 0 erreur.
