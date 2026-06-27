@@ -130,15 +130,12 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - **Fuseau horaire** de référence : **Africa/Lubumbashi (UTC+2)** (calculs de durée et affichage).
 - **Clôture a posteriori** : on peut compléter une session ouverte en lui ajoutant l'heure de fin plus tard (la durée se calcule alors).
 
-**Backend**
-- [ ] 🟢 Modèle `ProfilPointage` : `idProfil`, `nomComplet`, `fonction`, `source` (`systeme` | `manuel`), `idUtilisateur` (nullable, FK si source = système), `actif`, timestamps.
-- [ ] 🟢 Modèle `Pointage` (session) : `idPointage`, `idProfil` (FK), `date`, `heureDebut`, `heureFin` (nullable), `dureeMinutes` (calculée à la complétion), `note`, `createdBy`, timestamps.
-- [ ] 🟢 Endpoints CRUD profils + sessions (`/api/pointages`, `/api/pointages/profils`).
-- [ ] 🟢 Endpoint **stats** avec filtre `periode` (`hebdo` | `mensuel` | `annuel`) + bornes de dates :
-  - Nb de profils actifs · Nb de présences enregistrées · Temps de travail cumulé.
-  - Profils les plus actifs (heures) → données graphique.
-  - Récapitulatif tabulaire (par profil : présences, temps cumulé).
-- [ ] 🟢 **Export PDF** stylisé (réutiliser le style de `utils/identity-pdf.js` / `event-pdf.js`) : **global** ou **individuel**, par période (hebdo/mensuel/annuel).
+**Backend** ✅
+- [x] 🟢 Modèle `ProfilPointage` (`idProfil`, `nomComplet`, `fonction`, `source`, `idUtilisateur`, `actif`, timestamps).
+- [x] 🟢 Modèle `Pointage` (`idPointage`, `idProfil`, `date`, `heureDebut`, `heureFin`, `dureeMinutes` calculée par hook, `note`, `createdBy`, timestamps).
+- [x] 🟢 Endpoints CRUD profils + sessions (`/api/pointages`, `/api/pointages/profils`) + clôture a posteriori (PUT). Accès `admin`+`editeur`. Swagger inline.
+- [x] 🟢 Endpoint **stats** `/api/pointages/stats?periode=` (profils actifs, présences, temps cumulé, graphique « profils les plus actifs », récap tabulaire) — fuseau UTC+2.
+- [x] 🟢 **Export PDF** `/api/pointages/export?scope=global|individuel` stylisé (pdfkit, `utils/pointage-pdf.js`) par période.
 
 **Frontend**
 - [ ] 🟢 Page admin `/admin/pointage` (+ entrée sidebar, permissions admin/editeur).

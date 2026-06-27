@@ -212,3 +212,31 @@ Passe groupée (même motif d'en-tête débordant que `blog/view`) :
 **Reste (passe visuelle)** : vérification fine au navigateur (360→1440) — carte Google Maps, grille contact, carrousel témoignages, a11y tactile.
 
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+---
+
+## LOT 3 — Nouvelles fonctionnalités
+
+### 3.1 Pointage — Backend ✅
+
+**Modèles**
+- `models/profilPointage.model.js` : `ProfilPointage` (nomComplet, fonction, `source` systeme/manuel, idUtilisateur FK nullable, actif). Table `profilsPointage`.
+- `models/pointage.model.js` : `Pointage` (idProfil FK, date, heureDebut, heureFin nullable, `dureeMinutes` calculée par hook `beforeSave` — uniquement si début+fin et fin>début, sinon pointage simple, note, createdBy). Table `pointages`.
+- `models/index.model.js` : associations (`profil`/`pointages` CASCADE, `utilisateur`, `createur`) + exports.
+
+**Helpers & PDF**
+- `utils/pointage.utils.js` : `getPeriodeRange(periode, anchor)` (hebdo ISO lun–dim / mensuel / annuel, fuseau **UTC+2**), `formatDuree`, `formatPeriodeLabel`.
+- `utils/pointage-pdf.js` : `generatePointagePdf(stream, data)` (pdfkit, branding crimson, résumé + table avec en-tête/zébrage + pagination).
+
+**Contrôleur** `controllers/pointage.controller.js`
+- Profils : `getProfils`, `createProfil` (manuel ou depuis utilisateur système, anti-doublon), `updateProfil`, `deleteProfil`.
+- Sessions : `getPointages` (filtres profil/période/dates), `createPointage`, `updatePointage` (**clôture a posteriori**), `deletePointage`.
+- Stats : `getStats` (profils actifs, présences, temps cumulé, graphique top 10, récap) — agrégation JS.
+- Export : `exportPdf` (scope `global`/`individuel`, stream PDF en réponse).
+
+**Route & montage**
+- `routes/pointage.route.js` : garde `authenticationJWT` + `authorizeRoles("admin","editeur")` ; routes spécifiques (`/profils`, `/stats`, `/export`) avant `/:id` ; Swagger inline.
+- `app.js` : `app.use("/api/pointages", pointageRouter)`.
+
+**Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels` au démarrage.
+**Reste** : frontend `/admin/pointage` (actions, types, UI saisie + dashboard stats + export).
