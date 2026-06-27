@@ -88,7 +88,7 @@ export default function HomePage() {
     <div className="flex flex-col">
       <Header />
       {/* Hero Section with Background Image */}
-      <section className="relative h-[100vh] flex items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/bg.jpg"

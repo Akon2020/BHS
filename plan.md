@@ -83,9 +83,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [ ] 🔵 *(optionnel)* Variantes « cartes » de tableaux sur très petit écran — enhancement non bloquant (tables déjà scrollables).
 
 ### 1.2 Public
-- [ ] 🔵 Audit responsive page par page : `/`, `/a-propos`, `/services`, `/don`, `/contact`, `/events` (+ `[slug]`), `/files` (+ `[slug]`), `/blog` (+ `[slug]`), `/identity`, `/connexion`.
-- [ ] 🔵 Home : hero `h-[100vh]` → `min-h-[100svh]` (évite le saut de barre mobile) ; vérifier la carte Google Maps, la grille contact, le carrousel témoignages sur petit écran.
-- [ ] 🔵 Vérifier les `max-w`, tailles de police fluides, espacements et images sur 360 px / 768 px / 1024 px / 1440 px.
+- [~] 🔵 Audit responsive page par page (`/`, `/a-propos`, `/services`, `/don`, `/contact`, `/events`, `/files`, `/blog`, `/identity`, `/connexion`) : audit des motifs à risque effectué (grilles fixes, flex non-wrap, hauteurs/largeurs figées) → pages déjà majoritairement mobile-first ; seuls 2 points concrets corrigés (ci-dessous). Polish fin à valider visuellement.
+- [x] 🔵 Home : hero `h-[100vh]` → `min-h-[100svh]` (évite le saut de barre mobile + le clipping).
+- [x] 🔵 Connexion : wrappers `h-screen` → `min-h-[100svh]` (`/connexion`, `/connexion/reset`, `/connexion/reset-request`) pour éviter la coupure de la carte sur petit écran.
+- [ ] 🔵 Vérifier visuellement `max-w`, tailles de police, espacements et images sur 360 / 768 / 1024 / 1440 px (carte Google Maps, grille contact, carrousel témoignages).
 - [ ] 🟠 Accessibilité tactile : tailles de cibles ≥ 44 px, focus visibles, `aria-*` sur les menus/dialogs.
 
 ---

@@ -198,3 +198,17 @@ Passe groupée (même motif d'en-tête débordant que `blog/view`) :
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
 
 **Bilan 1.1** : responsivité de l'admin complète (navigation, layout, tableaux, dashboard, en-têtes liste, formulaires, modales, pages détail). Prochaine étape : **Lot 1.2 — Public**.
+
+### 1.2 Public — audit & correctifs structurels ✅ (partiel)
+
+**Audit** des motifs à risque (grilles fixes sans préfixe responsive, flex non-wrap, hauteurs/largeurs figées) sur les pages publiques → site déjà majoritairement mobile-first ; peu d'écarts.
+
+**Corrigé**
+- **Home** (`app/page.tsx`) : hero `h-[100vh]` → `min-h-[100svh]` (évite le saut de barre d'URL mobile et le clipping du contenu).
+- **Connexion** (`/connexion`, `/connexion/reset`, `/connexion/reset-request`) : wrapper `flex h-screen …` → `min-h-[100svh]` (la carte n'est plus coupée si elle dépasse la hauteur de l'écran).
+
+**Sans risque (laissé tel quel)** : `min-w-[200px]`/`min-w-[220px]` des boutons « Charger plus » (< 360 px) ; `grid-cols-2` de métadonnées `text-xs` sur `/files` (libellés courts).
+
+**Reste (passe visuelle)** : vérification fine au navigateur (360→1440) — carte Google Maps, grille contact, carrousel témoignages, a11y tactile.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
