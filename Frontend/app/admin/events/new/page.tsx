@@ -180,24 +180,29 @@ export default function NewEventPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/admin/events">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold">Nouvel Événement</h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">Nouvel Événement</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             variant="outline"
             onClick={() => handleSubmit("brouillon")}
             disabled={isLoading}
+            className="w-full sm:w-auto"
           >
             Enregistrer comme brouillon
           </Button>
-          <Button onClick={() => handleSubmit("publie")} disabled={isLoading}>
+          <Button
+            onClick={() => handleSubmit("publie")}
+            disabled={isLoading}
+            className="w-full sm:w-auto"
+          >
             <Save className="h-4 w-4 mr-2" />
             Publier
           </Button>

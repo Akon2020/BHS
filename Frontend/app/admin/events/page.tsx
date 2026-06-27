@@ -117,9 +117,9 @@ export default function EventsAdminPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full gap-2 sm:w-auto">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent>

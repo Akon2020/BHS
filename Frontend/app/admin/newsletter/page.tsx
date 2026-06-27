@@ -183,7 +183,7 @@ export default function NewsletterAdminPage() {
         </div>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>

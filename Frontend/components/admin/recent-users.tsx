@@ -58,28 +58,30 @@ export default function AdminRecentUsers({ users }: Props) {
           email: u.email,
           avatar: `${process.env.NEXT_PUBLIC_API_URL}/${u.avatar}` || "/placeholder.svg",
           status: "active",
-          date: new Date(u.createdAt).toLocaleString(),
+          date: new Date(u.createdAt).toLocaleDateString("fr-FR"),
         }))
       : fallbackUsers;
 
   return (
     <div className="space-y-4">
       {list.map((user) => (
-        <div key={user.id} className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar>
+        <div key={user.id} className="flex items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <Avatar className="shrink-0">
               <AvatarImage
                 src={user.avatar || "/placeholder.svg"}
                 alt={user.name}
               />
               <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div>
-              <p className="font-medium">{user.name}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
+            <div className="min-w-0">
+              <p className="truncate font-medium">{user.name}</p>
+              <p className="truncate text-sm text-muted-foreground">
+                {user.email}
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 flex-col items-end gap-1">
             <Badge
               variant={
                 user.status === "active"
@@ -95,7 +97,9 @@ export default function AdminRecentUsers({ users }: Props) {
                   ? "En attente"
                   : "Inactif"}
             </Badge>
-            <span className="text-xs text-muted-foreground">{user.date}</span>
+            <span className="whitespace-nowrap text-xs text-muted-foreground">
+              {user.date}
+            </span>
           </div>
         </div>
       ))}

@@ -153,3 +153,16 @@ Lot 0 traité (0.1 → 0.4). Restes connus, non bloquants : optimisation d'image
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
 
 **Bilan 1.1** : responsivité de l'espace admin traitée (sidebar drawer, layout, tables, dashboard, en-têtes, formulaires, modales). Prochaine étape : **Lot 1.2 — Public**.
+
+### 1.1 Admin — correctifs après tests mobile ✅
+
+Suite aux retours (captures) de test sur téléphone :
+- **« Utilisateurs récents » / « Articles récents »** (`components/admin/recent-users.tsx`, `recent-posts.tsx`) : débordement corrigé — bloc gauche `min-w-0 flex-1` + `truncate` (nom/email/titre), bloc droit `shrink-0 flex-col items-end`, date au format court `toLocaleDateString("fr-FR")`.
+- **Recherche fiches d'identité** : la rangée de filtres utilisait `items-end` (largeur réduite sur mobile) → `flex-col gap-4 md:flex-row md:items-end` + champ `w-full md:flex-1`.
+- **Filtres de statut** (newsletter, événements) : `SelectTrigger` passait `w-[150px]` fixe → `w-full sm:w-[180px]` (pleine largeur sur mobile ; conteneur events `w-full sm:w-auto`).
+- **Débordement création newsletter** : groupe de boutons `flex gap-2` (avec `min-w-[200px]`) → `flex-col gap-2 sm:flex-row`, boutons `w-full sm:w-auto` (supprime le scroll horizontal de page).
+- **Débordement création/édition événement** : en-tête `flex items-center justify-between` non responsive → `flex-col gap-4 sm:flex-row…`, boutons d'action empilés `w-full sm:w-auto`, titre `text-2xl sm:text-3xl`.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+> **En attente (point 3)** : pages/boutons `/admin/contact/sent` (Messages envoyés) et `/admin/contact/new` (Écrire un nouveau message) — n'ont jamais existé dans ce dépôt et le backend n'expose pas d'endpoint « messages envoyés » ni « composer un message » distinct du formulaire public → comportement à clarifier avant implémentation.
