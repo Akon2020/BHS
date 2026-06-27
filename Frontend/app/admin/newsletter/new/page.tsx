@@ -177,12 +177,12 @@ export default function NewNewsletterPage() {
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             variant="outline"
             onClick={() => handleSubmit("draft")}
             disabled={isLoading || isSubmitting}
-            className="min-w-[200px]"
+            className="w-full sm:w-auto sm:min-w-[200px]"
           >
             {isSubmitting ? (
               <>
@@ -199,6 +199,7 @@ export default function NewNewsletterPage() {
               <Button
                 variant="outline"
                 disabled={isLoading || isSubmitting}
+                className="w-full sm:w-auto"
               >
                 <Calendar className="h-4 w-4 mr-2" />
                 {date
@@ -229,6 +230,7 @@ export default function NewNewsletterPage() {
           <Button
             onClick={() => handleSubmit("send")}
             disabled={isLoading || isSubmitting}
+            className="w-full sm:w-auto"
           >
             <Send className="h-4 w-4 mr-2" />
             Envoyer maintenant

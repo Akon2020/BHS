@@ -1,6 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
 import path from "path";
 import logger from "morgan";
 import { PORT, HOST_URL } from "./config/env.js";
@@ -20,11 +22,25 @@ import abonneRouter from "./routes/abonne.route.js";
 import newsletterRouter from "./routes/newsletter.route.js";
 import dashboardRouter from "./routes/dashboard.route.js";
 import fichierRouter from "./routes/fichier.route.js";
+import messageEnvoyeRouter from "./routes/messageEnvoye.route.js";
 
 const app = express();
 
+// Sécurité des en-têtes HTTP.
+// - CSP désactivée (sinon casse l'UI Swagger /api-docs).
+// - CORP en "cross-origin" pour autoriser le front (autre sous-domaine) à charger
+//   les fichiers servis depuis /uploads (images du blog, des événements, etc.).
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
+
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(logger("dev"));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "1024mb" }));
@@ -63,6 +79,7 @@ app.use("/api/newsletters", newsletterRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/identites", ficheIdentiteRouter);
 app.use("/api/fichiers", fichierRouter);
+app.use("/api/messages", messageEnvoyeRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);

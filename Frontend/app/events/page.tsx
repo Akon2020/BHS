@@ -54,7 +54,9 @@ export default function EventsPage() {
       else setEvents((prev) => [...prev, ...publishedAll]);
 
       setPage(pageNum);
-      setTotalPages(res.totalPages || 1);
+      setTotalPages(
+        Math.ceil((res.total ?? 0) / (res.pageSize || limit)) || 1,
+      );
       setTotalEvents(res.total || publishedAll.length);
     } catch (e) {
       console.error("Erreur chargement événements:", e);

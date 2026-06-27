@@ -1,48 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-type UserRole = "admin" | "editeur" | "membre";
-
-const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
-  admin: [
-    "/admin",
-    "/admin/blog",
-    "/admin/categories",
-    "/admin/events",
-    "/admin/contact",
-    "/admin/profile",
-    "/admin/newsletter",
-    "/admin/team",
-    "/admin/users",
-    "/admin/settings",
-  ],
-  editeur: [
-    "/admin",
-    "/admin/blog",
-    "/admin/categories",
-    "/admin/events",
-    "/admin/contact",
-    "/admin/profile",
-  ],
-  membre: [
-    "/admin",
-    "/admin/blog",
-    "/admin/categories",
-    "/admin/events",
-    "/admin/contact",
-    "/admin/profile",
-    "/admin/newsletter",
-    "/admin/team",
-    "/admin/users",
-  ],
-};
-
-const hasAccessToPage = (userRole: UserRole, pathname: string): boolean => {
-  const allowedPages = ADMIN_PAGE_PERMISSIONS[userRole] || [];
-  return allowedPages.some(
-    (page) => pathname === page || pathname.startsWith(`${page}/`),
-  );
-};
+import { hasAccessToPage, type UserRole } from "@/lib/permissions";
 
 const getUserFromSession = async (token: string) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -69,7 +27,7 @@ const getUserFromSession = async (token: string) => {
   }
 };
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname } = req.nextUrl;
 
@@ -108,6 +66,6 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = {
+export const proxyConfig = {
   matcher: ["/admin/:path*", "/connexion"],
 };

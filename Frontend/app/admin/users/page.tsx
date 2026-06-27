@@ -126,8 +126,8 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Utilisateurs</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold sm:text-3xl">Utilisateurs</h1>
         <Button onClick={() => setModals({ ...modals, add: true })}>
           <Plus className="h-4 w-4 mr-2" />
           Nouvel utilisateur

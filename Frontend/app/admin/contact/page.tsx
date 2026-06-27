@@ -23,7 +23,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, Loader2, Mail, Search } from "lucide-react";
+import {
+  Eye,
+  Loader2,
+  Mail,
+  PenSquare,
+  RotateCcw,
+  Search,
+  Send,
+} from "lucide-react";
 
 interface UIContact {
   id: number;
@@ -106,16 +114,35 @@ export default function ContactAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Gestion des Contacts</h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">Gestion des Contacts</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Suivez les messages entrants et gerez les reponses administratives.
           </p>
         </div>
-        <Button variant="outline" onClick={fetchContacts}>
-          Recharger
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            variant="outline"
+            onClick={fetchContacts}
+            className="w-full sm:w-auto"
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Recharger
+          </Button>
+          <Button variant="outline" asChild className="w-full sm:w-auto">
+            <Link href="/admin/contact/sent">
+              <Send className="mr-2 h-4 w-4" />
+              Messages envoyés
+            </Link>
+          </Button>
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/admin/contact/new">
+              <PenSquare className="mr-2 h-4 w-4" />
+              Écrire un nouveau message
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row">

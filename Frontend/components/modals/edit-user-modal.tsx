@@ -106,8 +106,8 @@ export default function EditUserModal({
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 gap-4 items-center">
-              <Label className="text-right">Nom</Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-center">
+              <Label className="sm:text-right">Nom</Label>
               <Input
                 value={form.nomComplet}
                 onChange={(e) =>
@@ -117,8 +117,8 @@ export default function EditUserModal({
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-4 items-center">
-              <Label className="text-right">Email</Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-center">
+              <Label className="sm:text-right">Email</Label>
               <Input
                 type="email"
                 value={form.email}
@@ -129,8 +129,8 @@ export default function EditUserModal({
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-4 items-center">
-              <Label className="text-right">Rôle</Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-center">
+              <Label className="sm:text-right">Rôle</Label>
               <Select
                 value={form.role}
                 onValueChange={(value) =>
@@ -148,8 +148,8 @@ export default function EditUserModal({
               </Select>
             </div>
 
-            <div className="grid grid-cols-4 gap-4 items-center">
-              <Label className="text-right">Avatar</Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 sm:items-center">
+              <Label className="sm:text-right">Avatar</Label>
               <Input
                 type="file"
                 accept="image/*"

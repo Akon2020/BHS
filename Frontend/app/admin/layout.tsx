@@ -11,22 +11,26 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  // Mode réduit (icônes) sur desktop.
+  const [collapsed, setCollapsed] = useState(false);
+  // Drawer ouvert sur mobile/tablette.
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <ProtectedRoute
       allowedRoles={["admin", "editeur", "membre"]}
       checkPagePermissions={true}
     >
-      <div className="flex h-screen">
-        <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <AdminHeader toggleSidebar={toggleSidebar} />
-          <main className="flex-1 overflow-y-auto p-6 bg-secondary/10">
+      <div className="flex h-screen overflow-hidden">
+        <AdminSidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((v) => !v)}
+          mobileOpen={mobileOpen}
+          onMobileClose={() => setMobileOpen(false)}
+        />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <AdminHeader onOpenSidebar={() => setMobileOpen(true)} />
+          <main className="flex-1 overflow-y-auto bg-secondary/10 p-4 md:p-6">
             {children}
           </main>
         </div>

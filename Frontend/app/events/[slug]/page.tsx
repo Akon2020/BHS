@@ -20,29 +20,14 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 
 import { getEventBySlug } from "@/actions/event";
+import type { Evenement } from "@/types/user";
 import { RegisterEventModal } from "@/components/modals/register-event-modal";
-
-interface EventDetails {
-  idEvenement: number;
-  titre: string;
-  slug?: string;
-  description: string;
-  dateEvenement: string;
-  heureDebut: string;
-  heureFin?: string;
-  lieu: string;
-  imageEvenement?: string;
-  statut: "publie" | "brouillon";
-  nombrePlaces?: number;
-  nombreInscrits?: number;
-  inscriptions?: any[];
-}
 
 export default function EventDetailsPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
-  const [event, setEvent] = useState<EventDetails | null>(null);
+  const [event, setEvent] = useState<Evenement | null>(null);
   const [loading, setLoading] = useState(true);
   const [openRegister, setOpenRegister] = useState(false);
 

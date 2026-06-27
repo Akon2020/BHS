@@ -315,8 +315,8 @@ export default function IdentityAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Gestion des Fiches d'Identité</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold sm:text-3xl">Gestion des Fiches d'Identité</h1>
         <Button onClick={() => setIsExportModalOpen(true)}>
           <Download className="mr-2 h-4 w-4" />
           Exporter
@@ -354,8 +354,8 @@ export default function IdentityAdminPage() {
       </div>
 
       {/* Filters and Search */}
-      <div className="flex flex-col md:flex-row gap-4 items-end">
-        <div className="flex-1 relative">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end">
+        <div className="relative w-full md:flex-1">
           <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Rechercher par nom, email ou téléphone..."

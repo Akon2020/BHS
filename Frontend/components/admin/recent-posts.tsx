@@ -59,23 +59,27 @@ export default function AdminRecentPosts({ posts }: Props) {
   return (
     <div className="space-y-4">
       {list.map((post) => (
-        <div key={post.id} className="flex items-center justify-between">
-          <div>
+        <div key={post.id} className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
             <Link
               href={`/admin/blog/view/${post.id}`}
-              className="font-medium hover:text-primary transition-colors"
+              className="block truncate font-medium transition-colors hover:text-primary"
             >
               {post.title}
             </Link>
-            <p className="text-sm text-muted-foreground">Par {post.author}</p>
+            <p className="truncate text-sm text-muted-foreground">
+              Par {post.author}
+            </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 flex-col items-end gap-1">
             <Badge
               variant={post.status === "published" ? "default" : "outline"}
             >
               {post.status === "published" ? "Publié" : "Brouillon"}
             </Badge>
-            <span className="text-xs text-muted-foreground">{post.date}</span>
+            <span className="whitespace-nowrap text-xs text-muted-foreground">
+              {post.date}
+            </span>
           </div>
         </div>
       ))}

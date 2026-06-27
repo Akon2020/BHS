@@ -1,0 +1,189 @@
+# 🛠️ Walkthrough — Burning Heart
+
+> Journal des étapes d'implémentation, lot par lot (cf. [`plan.md`](plan.md)).
+
+---
+
+## LOT 0 — Bugs critiques & dette technique
+
+### 0.1 Permissions & navigation ✅
+
+**Objectif** : unifier le contrôle d'accès admin par rôle et corriger les incohérences/bugs de navigation.
+
+**Modifications**
+
+1. **Renommage `middleware.ts` → `proxy.ts`** (Frontend)
+   - Convention Next.js 16 : le fichier `middleware.ts` devient `proxy.ts`, la fonction `middleware()` devient `proxy()` et l'export `config` devient `proxyConfig`.
+   - `Frontend/middleware.ts` supprimé ; `Frontend/proxy.ts` créé.
+   - Aucune autre référence à `middleware` dans le code (vérifié).
+
+2. **Source unique de permissions** (`Frontend/lib/permissions.ts`)
+   - La matrice `ADMIN_PAGE_PERMISSIONS` y est désormais l'unique source de vérité.
+   - `proxy.ts` importe `hasAccessToPage` + `UserRole` depuis `@/lib/permissions` (plus de duplication de matrice côté middleware).
+   - `hasAccessToPage` : le rôle `admin` a un accès total (court-circuit `return true`).
+   - Matrice appliquée :
+     - `admin` → tout l'espace admin.
+     - `editeur` → `/admin`, `/admin/blog`, `/admin/categories`, `/admin/events`, `/admin/files`, `/admin/contact`, `/admin/team`, `/admin/pointage`, `/admin/profile`.
+     - `membre` → `/admin`, `/admin/team`, `/admin/profile`.
+   - Corrige les bugs : `membre` n'a plus plus de droits qu'`editeur` ; `/admin/files`, `/admin/abonnes`, `/admin/identities` ne redirigent plus pour l'admin.
+
+3. **Correction de lien cassé** `/admin/profil` → `/admin/profile`
+   - `Frontend/components/header.tsx`
+   - `Frontend/components/admin/header.tsx`
+
+**Vérification**
+- `npx tsc --noEmit` : aucune erreur sur les fichiers modifiés (`proxy.ts`, `lib/permissions.ts`, les deux headers).
+- 5 erreurs TS préexistantes restantes (pages `blog`/`events`) — hors périmètre, traitées au goal 0.2.
+- `eslint` non installé côté Frontend (absent des `devDependencies`) — à ajouter (suivi en 0.2 / Lot 4).
+
+### 0.2 Configuration build ✅ (partiel)
+
+**Objectif** : durcir la config build et préparer le SEO.
+
+**Modifications**
+
+1. **Correction des 5 erreurs TS préexistantes** (pour pouvoir retirer `ignoreBuildErrors`) :
+   - `app/blog/page.tsx` : suppression de l'interface locale `BlogPost`, usage du type partagé `Blog` ; garde optionnelle sur `post.extrait` dans le filtre de recherche.
+   - `app/events/[slug]/page.tsx` : suppression de l'interface locale `EventDetails`, usage du type partagé `Evenement` (corrige l'incompatibilité `statut` et `slug`).
+   - `app/events/page.tsx` : `totalPages` calculé (`Math.ceil(total / pageSize)`), car absent de `GetAllEventsResponse`.
+
+2. **`next.config.mjs`** : retrait de `typescript.ignoreBuildErrors: true`.
+
+3. **`app/layout.tsx`** : ajout de `metadataBase` (`NEXT_PUBLIC_SITE_URL` avec fallback `https://burningheartihs.org`).
+
+**Différé**
+- Réactivation de l'optimisation d'images (`images.unoptimized` → `remotePatterns`) : repoussée au **Lot 2.4** (nombreux `next/image` distants → risque runtime ; nécessite host/port de dev + test visuel). Un commentaire `NOTE (Lot 2.4)` est laissé dans `next.config.mjs`.
+
+**Vérification**
+- `npx tsc --noEmit` : **0 erreur**.
+- `npm run build` : **succès** (route table complète ; `ƒ Proxy (Middleware)` confirme la prise en compte de `proxy.ts` par Next.js 16).
+
+### 0.3 Auth httpOnly + notifications ✅
+
+**Objectif** : sécuriser l'authentification (token hors du JS) et retirer les placeholders.
+
+**Diagnostic initial**
+- `cookie-parser` était installé mais **non monté** dans `app.js` → `req.cookies` indéfini ; l'auth reposait en réalité uniquement sur le header `Authorization: Bearer` (token du `localStorage`).
+- Le front écrasait le cookie httpOnly du backend par un cookie JS (`js-cookie`) — faille XSS.
+- `secure: true` en dur sur les cookies → cookie rejeté en dev (http).
+
+**Backend**
+- `app.js` : montage de `cookie-parser` (`app.use(cookieParser())`).
+- `config/env.js` : export de `COOKIE_DOMAIN`.
+- `utils/user.utils.js` : helper `getAuthCookieOptions()` (httpOnly, `secure` en prod uniquement, `sameSite=lax`, `path=/`, `domain` si `COOKIE_DOMAIN`, `maxAge` 7 j optionnel).
+- `controllers/auth.controller.js` :
+  - `login` : pose le cookie via le helper ; ne renvoie plus le token dans le corps JSON.
+  - `register` : **suppression du `res.cookie`** (endpoint admin → ne doit pas écraser la session de l'admin appelant) ; ne renvoie plus le token.
+  - `logout` : `clearCookie` avec les mêmes options.
+
+**Frontend**
+- `lib/axios.ts` : suppression de l'intercepteur qui injectait le Bearer depuis `localStorage` (cookie + `withCredentials` suffisent).
+- `actions/auth.ts` : `login` ne stocke plus que le profil (`user`) ; `logout` nettoie `user` ; `getProfile` sans header manuel ; retrait de `js-cookie` et `getAuthHeaders`.
+- `lib/auth.ts` : suppression de `getAuthHeaders`.
+- `hooks/useAuth.ts` : validation de session via `/api/auth/profile` (cookie), persistance du profil, nettoyage si échec.
+- `types/user.ts` : `AuthResponse.data.token` rendu optionnel.
+- `proxy.ts` : inchangé — lit le cookie côté serveur et relaie le Bearer à `/api/auth/profile`.
+
+**Notifications**
+- `components/admin/header.tsx` : badge factice « 3 » → `0` + état vide « Aucune notification ».
+
+**⚠️ À faire avant prod / à tester**
+- Tester le flux réel : connexion, accès `/admin`, refresh, déconnexion.
+- En **production**, définir `COOKIE_DOMAIN=.burningheartihs.org` (cookie partagé entre `burningheartihs.org` et `api.burningheartihs.org`, lisible par `proxy.ts`). En dev, laisser vide (host-only `localhost`).
+- `js-cookie` / `@types/js-cookie` désormais inutilisés (nettoyage possible au Lot 4).
+
+**Vérification**
+- Front : `npx tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+- Back : `node --check` OK sur `app.js`, `config/env.js`, `utils/user.utils.js`, `controllers/auth.controller.js`.
+
+### 0.4 Qualité backend ✅ (partiel)
+
+**Modifications**
+- `app.js` : montage de **Helmet** avec une config adaptée à l'API :
+  - `contentSecurityPolicy: false` (évite de casser l'UI Swagger `/api-docs`).
+  - `crossOriginResourcePolicy: { policy: "cross-origin" }` (autorise le front, autre sous-domaine, à charger les fichiers de `/uploads`).
+  - `crossOriginEmbedderPolicy: false`.
+
+**Constats / vérifications**
+- `syncModels()` : `db.sync({ alter: false })` → **non destructif** (OK).
+- `upload.middleware.js` : Multer **sans limite de taille ni filtre de type** ; `bodyParser` à 1024 Mo → **décision requise** sur les tailles/types max (traité avec le module Fichiers / Lot 4).
+- Audit fin de la gestion d'erreurs des contrôleurs : reporté (non bloquant ; `errorMiddleware` global + `try/catch` déjà en place).
+
+**Vérification** : `node --check app.js` → OK.
+
+---
+
+## LOT 0 — Bilan
+
+Lot 0 traité (0.1 → 0.4). Restes connus, non bloquants : optimisation d'images (→ Lot 2.4), témoignages statiques (→ Lot 3.2), limites d'upload (décision), audit fin des contrôleurs. Prochaine étape : **Lot 1 — Responsivité**.
+
+---
+
+## LOT 1 — Responsivité
+
+### 1.1 Admin — sidebar drawer + layout ✅
+
+**Objectif** : rendre l'espace admin réellement responsive (la sidebar restait visible et rognait l'écran sur mobile).
+
+**Modifications**
+- `components/admin/sidebar.tsx` : réécriture en **drawer piloté CSS** (SSR-safe, sans hook de breakpoint).
+  - Props `collapsed` / `onToggleCollapse` (desktop) et `mobileOpen` / `onMobileClose` (mobile).
+  - `<lg` : `position: fixed`, `w-64`, masqué via `-translate-x-full`, ouvert via `translate-x-0` + **backdrop** `lg:hidden` + bouton **X**.
+  - `≥lg` : `lg:static`, largeur `lg:w-64` ↔ `lg:w-16` (collapse via chevron) ; libellés masqués en mode réduit (`lg:hidden`), icônes `shrink-0`, `title` au survol.
+  - Fermeture du drawer au clic sur un lien (`onMobileClose`).
+- `app/admin/layout.tsx` : deux états distincts (`collapsed`, `mobileOpen`), `overflow-hidden` sur le conteneur, `main` en `overflow-y-auto p-4 md:p-6`.
+- `components/admin/header.tsx` : prop `onOpenSidebar` ; bouton menu `lg:hidden` (au lieu de `md:hidden`) avec `aria-label`.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+### 1.1 Admin — tableaux & dashboard ✅ (structurel)
+
+- **Tableaux** : le primitif `components/ui/table.tsx` enveloppe déjà dans `overflow-x-auto` ; les 8 pages liste utilisent ce composant → défilement horizontal mobile déjà assuré. (Variante « cartes » mobile = enhancement optionnel.)
+- **Dashboard** (`app/admin/page.tsx`) : grille stats déjà adaptive ; en-tête d'actions rendu responsive (`flex-col` empilé sur mobile → `sm:flex-row`, titre `text-2xl sm:text-3xl`, boutons `flex-wrap`).
+- **En-têtes de pages** : motif responsive (`flex-col` empilé sur mobile → `sm:flex-row sm:items-center sm:justify-between`, titre `text-2xl sm:text-3xl`) appliqué aux 7 pages admin avec boutons d'action : blog, events, newsletter, team, users, identities, contact.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+### 1.1 Admin — formulaires & modales ✅
+
+- **Grilles de formulaires** : audit des pages new/edit → déjà majoritairement responsives (`grid-cols-1 lg:grid-cols-3`, `md:grid-cols-2`). Corrigé les 2 grilles `grid-cols-2` fixes (champs Heure début/fin) dans `events/new` et `events/edit` → `grid-cols-1 sm:grid-cols-2`.
+- **Modales utilisateur** (`add-user-modal`, `edit-user-modal`) : le layout label-gauche `grid-cols-4` s'empile désormais sur mobile (`grid-cols-1 sm:grid-cols-4`, labels `sm:text-right`).
+- **Reste (optionnel)** : variantes « cartes » de tableaux sur très petit écran (non bloquant, tables déjà scrollables).
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+**Bilan 1.1** : responsivité de l'espace admin traitée (sidebar drawer, layout, tables, dashboard, en-têtes, formulaires, modales). Prochaine étape : **Lot 1.2 — Public**.
+
+### 1.1 Admin — correctifs après tests mobile ✅
+
+Suite aux retours (captures) de test sur téléphone :
+- **« Utilisateurs récents » / « Articles récents »** (`components/admin/recent-users.tsx`, `recent-posts.tsx`) : débordement corrigé — bloc gauche `min-w-0 flex-1` + `truncate` (nom/email/titre), bloc droit `shrink-0 flex-col items-end`, date au format court `toLocaleDateString("fr-FR")`.
+- **Recherche fiches d'identité** : la rangée de filtres utilisait `items-end` (largeur réduite sur mobile) → `flex-col gap-4 md:flex-row md:items-end` + champ `w-full md:flex-1`.
+- **Filtres de statut** (newsletter, événements) : `SelectTrigger` passait `w-[150px]` fixe → `w-full sm:w-[180px]` (pleine largeur sur mobile ; conteneur events `w-full sm:w-auto`).
+- **Débordement création newsletter** : groupe de boutons `flex gap-2` (avec `min-w-[200px]`) → `flex-col gap-2 sm:flex-row`, boutons `w-full sm:w-auto` (supprime le scroll horizontal de page).
+- **Débordement création/édition événement** : en-tête `flex items-center justify-between` non responsive → `flex-col gap-4 sm:flex-row…`, boutons d'action empilés `w-full sm:w-auto`, titre `text-2xl sm:text-3xl`.
+- **Visualisation d'article** (`/admin/blog/view/[id]`) : en-tête (titre + badge + Modifier/Supprimer) rendu responsive (`flex-col sm:flex-row`, titre `truncate min-w-0`, boutons `flex-wrap`) ; contenu HTML protégé contre le débordement (`break-words`, images `max-w-full`, `pre`/`table` scrollables).
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+### 3.6 Boîte d'envoi admin (Contact) ✅
+
+Décision : **boîte d'envoi admin** avec **envoi réel** (Nodemailer).
+
+**Backend**
+- `models/messageEnvoye.model.js` : `MessageEnvoye` (destinataireEmail, destinataireNom, sujet, message, statut `envoye`/`echec`, erreur, envoyePar, timestamps ; table `messagesEnvoyes`).
+- `models/index.model.js` : import + association `belongsTo Utilisateur (as expediteur)` + export.
+- `utils/email.template.js` : nouveau `messageAdminTemplate(nom, sujet, message)` (branding existant).
+- `controllers/messageEnvoye.controller.js` : `envoyerMessage` (valide, envoie via transporter, enregistre `envoye` ; en cas d'échec enregistre `echec` + erreur et renvoie 502), `getMessagesEnvoyes`, `getMessageEnvoyeById`, `deleteMessageEnvoye`.
+- `routes/messageEnvoye.route.js` + montage `app.use("/api/messages", …)` ; accès `admin`+`editeur` (DELETE `admin`) ; Swagger inline (scanné via `./routes/*.js`).
+
+**Frontend**
+- `types/user.ts` : `MessageEnvoye`, `GetMessagesEnvoyesResponse`, `EnvoyerMessagePayload`.
+- `actions/message.ts` : `envoyerMessage`, `getMessagesEnvoyes`, `getMessageEnvoye`, `deleteMessageEnvoye`.
+- `app/admin/contact/new/page.tsx` : formulaire de composition (destinataire, sujet, message) + envoi + états chargement/erreur/succès → redirige vers `/sent`.
+- `app/admin/contact/sent/page.tsx` : liste (table scrollable), badge statut, dialog de lecture, suppression (réutilise `DeleteConfirmationModal`).
+- `app/admin/contact/page.tsx` : boutons « Messages envoyés » (`/sent`) et « Écrire un nouveau message » (`/new`) ajoutés à l'en-tête (groupe responsive).
+- Accès : `/admin/contact/*` couvert par la matrice (`admin`, `editeur`).
+
+**Vérification** : Front `tsc` → 0 erreur, `build` → succès ; Back `node --check` OK sur tous les fichiers.
+**À tester en runtime** : envoi réel d'un email + apparition dans « Messages envoyés ».
