@@ -187,3 +187,14 @@ Décision : **boîte d'envoi admin** avec **envoi réel** (Nodemailer).
 
 **Vérification** : Front `tsc` → 0 erreur, `build` → succès ; Back `node --check` OK sur tous les fichiers.
 **À tester en runtime** : envoi réel d'un email + apparition dans « Messages envoyés ».
+
+### 1.1 Admin — pages de visualisation/détail ✅
+
+Passe groupée (même motif d'en-tête débordant que `blog/view`) :
+- **En-têtes rendus responsive** (`flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`, groupe gauche `min-w-0`, titre `truncate text-2xl sm:text-3xl`, bouton d'action `w-full sm:w-auto`, back `shrink-0`) : `identities/view/[id]`, `team/[id]/view`, `users/[id]`, `newsletter/view/[id]`, `contact/view/[id]`, `files/view/[id]`.
+- Déjà responsives (non touchées) : `events/view/[id]`, `abonnes/view/[id]`.
+- **Contenu HTML protégé** du débordement (`break-words`, `[&_img]:max-w-full`, `pre`/`table` scrollables) : `blog/view`, `events/view`, `newsletter/view`.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+**Bilan 1.1** : responsivité de l'admin complète (navigation, layout, tableaux, dashboard, en-têtes liste, formulaires, modales, pages détail). Prochaine étape : **Lot 1.2 — Public**.

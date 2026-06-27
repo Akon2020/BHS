@@ -79,6 +79,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 Dashboard responsive : cartes stats en grille adaptive (déjà en place) + en-tête d'actions corrigé (`flex-col` → `sm:flex-row`, boutons `flex-wrap`).
 - [x] 🔵 **En-têtes de pages responsive** : motif `flex-col` empilé → `sm:flex-row` + titre fluide `text-2xl sm:text-3xl` appliqué aux 7 pages avec actions (blog, events, newsletter, team, users, identities, contact).
 - [x] 🔵 **Formulaires admin responsives** : grilles déjà majoritairement `grid-cols-1 lg:grid-cols-3` / `md:grid-cols-2` ; corrigé les 2 grilles `grid-cols-2` fixes (events new/edit → `sm:grid-cols-2`) ; modales user (add/edit) empilées sur mobile (`grid-cols-1 sm:grid-cols-4`, labels `sm:text-right`).
+- [x] 🔵 **Pages de visualisation/détail responsives** : en-têtes (titre + actions) empilés sur mobile + titres tronqués sur `identities/view`, `team/[id]/view`, `users/[id]`, `newsletter/view`, `contact/view`, `files/view` (events/view & abonnes/view déjà OK). Contenu HTML protégé du débordement (`break-words`, images/pre/table) sur `blog/view`, `events/view`, `newsletter/view`.
 - [ ] 🔵 *(optionnel)* Variantes « cartes » de tableaux sur très petit écran — enhancement non bloquant (tables déjà scrollables).
 
 ### 1.2 Public

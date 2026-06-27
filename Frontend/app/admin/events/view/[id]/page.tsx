@@ -508,7 +508,7 @@ export default function ViewEventAdminPage() {
         <Card className="lg:col-span-2">
           <CardContent className="p-6 space-y-4">
             <div
-              className="text-muted-foreground"
+              className="text-muted-foreground break-words [&_img]:h-auto [&_img]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:overflow-x-auto"
               dangerouslySetInnerHTML={{ __html: event.description }}
             />
 

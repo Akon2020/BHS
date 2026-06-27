@@ -208,18 +208,21 @@ export default function ContactViewAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.push("/admin/contact")}
+            className="shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Conversation de contact</h1>
-            <p className="text-sm text-muted-foreground">
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-bold sm:text-3xl">
+              Conversation de contact
+            </h1>
+            <p className="truncate text-sm text-muted-foreground">
               Vue détaillée des échanges avec {contact.nomComplet}
             </p>
           </div>
