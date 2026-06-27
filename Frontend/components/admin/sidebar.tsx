@@ -21,6 +21,7 @@ import {
   IdCard,
   UserPlus,
   Tags,
+  Timer,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -127,6 +128,12 @@ export default function AdminSidebar({
       icon: Folder,
       href: "/admin/files",
       active: pathname === "/admin/files",
+    },
+    {
+      label: "Pointage",
+      icon: Timer,
+      href: "/admin/pointage",
+      active: pathname.startsWith("/admin/pointage"),
     },
     {
       label: "Profil",

@@ -137,12 +137,12 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟢 Endpoint **stats** `/api/pointages/stats?periode=` (profils actifs, présences, temps cumulé, graphique « profils les plus actifs », récap tabulaire) — fuseau UTC+2.
 - [x] 🟢 **Export PDF** `/api/pointages/export?scope=global|individuel` stylisé (pdfkit, `utils/pointage-pdf.js`) par période.
 
-**Frontend**
-- [ ] 🟢 Page admin `/admin/pointage` (+ entrée sidebar, permissions admin/editeur).
-- [ ] 🟢 Actions `actions/pointage.ts` + types dédiés.
-- [ ] 🟢 UI : sélecteur de profil (combobox cherchable : users système + manuels + « ajouter »), formulaire de saisie de session, liste/édition des présences.
-- [ ] 🟢 Tableau de bord pointage : cartes stats, graphique « profils les plus actifs », tableau récapitulatif, **filtre hebdo/mensuel/annuel**.
-- [ ] 🟢 Boutons d'export PDF (global + individuel) selon la période.
+**Frontend** ✅
+- [x] 🟢 Page admin `/admin/pointage` (+ entrée sidebar « Pointage », permissions admin/editeur déjà dans la matrice).
+- [x] 🟢 Actions `actions/pointage.ts` + types dédiés.
+- [x] 🟢 UI : sélecteur de profil + dialog « Ajouter un profil » (manuel **ou** depuis un utilisateur système), formulaire de saisie (date + heure début/fin optionnelle + note), liste des présences avec édition (clôture a posteriori) et suppression.
+- [x] 🟢 Tableau de bord : cartes stats (profils actifs, présences, temps cumulé), graphique `Bar` (profils les plus actifs), tableau récapitulatif, **filtre hebdo/mensuel/annuel**.
+- [x] 🟢 Boutons d'export PDF : global (en-tête) + individuel (par ligne du récap).
 
 > ✅ **Décisions confirmées** : plusieurs sessions/jour **autorisées** · fuseau **Africa/Lubumbashi (UTC+2)** · **clôture a posteriori** d'une session ouverte **autorisée**.
 

@@ -239,4 +239,18 @@ Passe groupée (même motif d'en-tête débordant que `blog/view`) :
 - `app.js` : `app.use("/api/pointages", pointageRouter)`.
 
 **Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels` au démarrage.
-**Reste** : frontend `/admin/pointage` (actions, types, UI saisie + dashboard stats + export).
+
+### 3.1 Pointage — Frontend ✅
+
+- `types/user.ts` : `ProfilPointage`, `Pointage`, `PointageStatsResponse`, payloads, `PointagePeriode`.
+- `actions/pointage.ts` : profils (get/create/delete), pointages (get/create/update/delete), `getPointageStats`, `getPointageExportUrl` (ouverture nouvel onglet, cookie httpOnly envoyé automatiquement).
+- `app/admin/pointage/page.tsx` :
+  - En-tête responsive + **filtre période** (hebdo/mensuel/annuel) + **export global** (PDF).
+  - Cartes stats (profils actifs, présences, temps cumulé).
+  - **Graphique `Bar`** (chart.js, profils les plus actifs en heures) + **tableau récapitulatif** (export PDF **individuel** par ligne).
+  - **Saisie d'une présence** : sélecteur de profil + dialog d'ajout de profil (manuel ou depuis un utilisateur système, persistant), date, heure début, heure fin optionnelle (sinon « pointage simple »), note.
+  - **Liste des présences** de la période : édition (clôture a posteriori via dialog) + suppression (`DeleteConfirmationModal`).
+- `components/admin/sidebar.tsx` : entrée « Pointage » (icône `Timer`), visible pour `admin`/`editeur` via la matrice.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+**À tester en runtime** : créer un profil (manuel + système), saisir des présences (avec/sans heure de fin), vérifier stats + graphique + récap par période, clôture a posteriori, exports PDF global et individuel.
