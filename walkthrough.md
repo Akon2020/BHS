@@ -141,6 +141,15 @@ Lot 0 traité (0.1 → 0.4). Restes connus, non bloquants : optimisation d'image
 - **Tableaux** : le primitif `components/ui/table.tsx` enveloppe déjà dans `overflow-x-auto` ; les 8 pages liste utilisent ce composant → défilement horizontal mobile déjà assuré. (Variante « cartes » mobile = enhancement optionnel.)
 - **Dashboard** (`app/admin/page.tsx`) : grille stats déjà adaptive ; en-tête d'actions rendu responsive (`flex-col` empilé sur mobile → `sm:flex-row`, titre `text-2xl sm:text-3xl`, boutons `flex-wrap`).
 - **En-têtes de pages** : motif responsive (`flex-col` empilé sur mobile → `sm:flex-row sm:items-center sm:justify-between`, titre `text-2xl sm:text-3xl`) appliqué aux 7 pages admin avec boutons d'action : blog, events, newsletter, team, users, identities, contact.
-- **Reste (passe visuelle)** : grilles de formulaires new/edit (`grid-cols-1 md:grid-cols-2`) + variantes « cartes » de tableaux sur mobile — à valider au navigateur (360→1440).
 
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+### 1.1 Admin — formulaires & modales ✅
+
+- **Grilles de formulaires** : audit des pages new/edit → déjà majoritairement responsives (`grid-cols-1 lg:grid-cols-3`, `md:grid-cols-2`). Corrigé les 2 grilles `grid-cols-2` fixes (champs Heure début/fin) dans `events/new` et `events/edit` → `grid-cols-1 sm:grid-cols-2`.
+- **Modales utilisateur** (`add-user-modal`, `edit-user-modal`) : le layout label-gauche `grid-cols-4` s'empile désormais sur mobile (`grid-cols-1 sm:grid-cols-4`, labels `sm:text-right`).
+- **Reste (optionnel)** : variantes « cartes » de tableaux sur très petit écran (non bloquant, tables déjà scrollables).
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+**Bilan 1.1** : responsivité de l'espace admin traitée (sidebar drawer, layout, tables, dashboard, en-têtes, formulaires, modales). Prochaine étape : **Lot 1.2 — Public**.
