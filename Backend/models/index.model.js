@@ -14,6 +14,7 @@ import InscriptionEvenement from "./inscriptionEvenement.model.js";
 import NewsletterAbonne from "./newsletterAbonne.model.js";
 import Commentaire from "./commentaire.model.js";
 import Fichier from "./fichier.model.js";
+import MessageEnvoye from "./messageEnvoye.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -126,6 +127,16 @@ Newsletter.hasMany(NewsletterAbonne, {
 NewsletterAbonne.belongsTo(Abonne, { foreignKey: "idAbonne", as: "abonne" });
 Abonne.hasMany(NewsletterAbonne, { foreignKey: "idAbonne", as: "receptions" });
 
+// Message envoyé (boîte d'envoi admin) associations
+MessageEnvoye.belongsTo(Utilisateur, {
+  foreignKey: "envoyePar",
+  as: "expediteur",
+});
+Utilisateur.hasMany(MessageEnvoye, {
+  foreignKey: "envoyePar",
+  as: "messagesEnvoyes",
+});
+
 // Contact-Réponse associations
 ReponseContact.belongsTo(Contact, {
   foreignKey: "idContact",
@@ -190,5 +201,6 @@ export {
   NewsletterAbonne,
   Commentaire,
   Fichier,
+  MessageEnvoye,
   syncModels,
 };

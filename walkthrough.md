@@ -165,4 +165,24 @@ Suite aux retours (captures) de test sur téléphone :
 
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
 
-> **En attente (point 3)** : pages/boutons `/admin/contact/sent` (Messages envoyés) et `/admin/contact/new` (Écrire un nouveau message) — n'ont jamais existé dans ce dépôt et le backend n'expose pas d'endpoint « messages envoyés » ni « composer un message » distinct du formulaire public → comportement à clarifier avant implémentation.
+### 3.6 Boîte d'envoi admin (Contact) ✅
+
+Décision : **boîte d'envoi admin** avec **envoi réel** (Nodemailer).
+
+**Backend**
+- `models/messageEnvoye.model.js` : `MessageEnvoye` (destinataireEmail, destinataireNom, sujet, message, statut `envoye`/`echec`, erreur, envoyePar, timestamps ; table `messagesEnvoyes`).
+- `models/index.model.js` : import + association `belongsTo Utilisateur (as expediteur)` + export.
+- `utils/email.template.js` : nouveau `messageAdminTemplate(nom, sujet, message)` (branding existant).
+- `controllers/messageEnvoye.controller.js` : `envoyerMessage` (valide, envoie via transporter, enregistre `envoye` ; en cas d'échec enregistre `echec` + erreur et renvoie 502), `getMessagesEnvoyes`, `getMessageEnvoyeById`, `deleteMessageEnvoye`.
+- `routes/messageEnvoye.route.js` + montage `app.use("/api/messages", …)` ; accès `admin`+`editeur` (DELETE `admin`) ; Swagger inline (scanné via `./routes/*.js`).
+
+**Frontend**
+- `types/user.ts` : `MessageEnvoye`, `GetMessagesEnvoyesResponse`, `EnvoyerMessagePayload`.
+- `actions/message.ts` : `envoyerMessage`, `getMessagesEnvoyes`, `getMessageEnvoye`, `deleteMessageEnvoye`.
+- `app/admin/contact/new/page.tsx` : formulaire de composition (destinataire, sujet, message) + envoi + états chargement/erreur/succès → redirige vers `/sent`.
+- `app/admin/contact/sent/page.tsx` : liste (table scrollable), badge statut, dialog de lecture, suppression (réutilise `DeleteConfirmationModal`).
+- `app/admin/contact/page.tsx` : boutons « Messages envoyés » (`/sent`) et « Écrire un nouveau message » (`/new`) ajoutés à l'en-tête (groupe responsive).
+- Accès : `/admin/contact/*` couvert par la matrice (`admin`, `editeur`).
+
+**Vérification** : Front `tsc` → 0 erreur, `build` → succès ; Back `node --check` OK sur tous les fichiers.
+**À tester en runtime** : envoi réel d'un email + apparition dans « Messages envoyés ».

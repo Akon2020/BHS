@@ -162,6 +162,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [ ] 🟢 Backend : endpoint `/api/recherche?q=` agrégeant blogs + événements + fichiers publics (titre/extrait/tags), résultats paginés et typés.
 - [ ] 🟢 Front : composant de recherche (barre dans le header public + page `/recherche` de résultats), command palette (`cmdk` déjà présent) en option.
 
+### 3.6 ✉️ Boîte d'envoi admin (Contact)  🟢 — *fait*
+- [x] 🟢 Backend : modèle `MessageEnvoye` + endpoints `/api/messages` (POST envoyer, GET liste, GET détail, DELETE), envoi réel via Nodemailer (template `messageAdminTemplate`), statut `envoye`/`echec`, Swagger à jour, `cookie-parser`/Helmet déjà en place. Accès `admin`+`editeur` (DELETE `admin`).
+- [x] 🟢 Front : actions `actions/message.ts` + types ; page `/admin/contact/new` (composer + envoyer) ; page `/admin/contact/sent` (liste + vue + suppression) ; boutons « Messages envoyés » et « Écrire un nouveau message » sur `/admin/contact`.
+
 ### 3.5 🗨️ Commentaires blog (activation)  🟢
 > Le backend a déjà `Commentaire` + modération + endpoints (`actions/comment.ts`).
 - [ ] 🟢 Front : affichage des commentaires publiés sous chaque article (`/blog/[slug]`).

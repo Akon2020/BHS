@@ -592,3 +592,36 @@ export interface FichierMutationResponse {
   message: string;
   data?: FichierRessource;
 }
+
+export type MessageEnvoyeStatut = "envoye" | "echec";
+
+export interface MessageEnvoye {
+  idMessage: number;
+  destinataireEmail: string;
+  destinataireNom?: string | null;
+  sujet: string;
+  message: string;
+  statut: MessageEnvoyeStatut;
+  erreur?: string | null;
+  envoyePar?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  expediteur?: {
+    idUtilisateur: number;
+    nomComplet: string;
+    email: string;
+    avatar?: string;
+  } | null;
+}
+
+export interface GetMessagesEnvoyesResponse {
+  nombre: number;
+  messages: MessageEnvoye[];
+}
+
+export interface EnvoyerMessagePayload {
+  destinataireEmail: string;
+  destinataireNom?: string;
+  sujet: string;
+  message: string;
+}
