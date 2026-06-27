@@ -77,7 +77,8 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 Adapter `app/admin/layout.tsx` : deux états (`collapsed` desktop / `mobileOpen` drawer), padding `p-4 md:p-6`, `overflow` maîtrisé.
 - [x] 🔵 **Tableaux admin scrollables** : confirmé — le primitif `components/ui/table.tsx` enveloppe déjà dans `overflow-x-auto`, et les 8 pages liste (users, blog, events, files, identities, abonnes, newsletter, contact) utilisent ce composant. (Variante « cartes » sur mobile : enhancement optionnel, non bloquant.)
 - [x] 🔵 Dashboard responsive : cartes stats en grille adaptive (déjà en place) + en-tête d'actions corrigé (`flex-col` → `sm:flex-row`, boutons `flex-wrap`).
-- [ ] 🔵 *(passe visuelle)* Polish par page : en-têtes titre+actions à wrapper sur mobile, grilles de formulaires `grid-cols-1 md:grid-cols-2`. À faire/valider au navigateur (360→1440).
+- [x] 🔵 **En-têtes de pages responsive** : motif `flex-col` empilé → `sm:flex-row` + titre fluide `text-2xl sm:text-3xl` appliqué aux 7 pages avec actions (blog, events, newsletter, team, users, identities, contact).
+- [ ] 🔵 *(passe visuelle)* Grilles de formulaires (new/edit) `grid-cols-1 md:grid-cols-2` + variantes « cartes » de tableaux sur mobile — à valider au navigateur (360→1440).
 
 ### 1.2 Public
 - [ ] 🔵 Audit responsive page par page : `/`, `/a-propos`, `/services`, `/don`, `/contact`, `/events` (+ `[slug]`), `/files` (+ `[slug]`), `/blog` (+ `[slug]`), `/identity`, `/connexion`.

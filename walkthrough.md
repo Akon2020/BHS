@@ -140,6 +140,7 @@ Lot 0 traité (0.1 → 0.4). Restes connus, non bloquants : optimisation d'image
 
 - **Tableaux** : le primitif `components/ui/table.tsx` enveloppe déjà dans `overflow-x-auto` ; les 8 pages liste utilisent ce composant → défilement horizontal mobile déjà assuré. (Variante « cartes » mobile = enhancement optionnel.)
 - **Dashboard** (`app/admin/page.tsx`) : grille stats déjà adaptive ; en-tête d'actions rendu responsive (`flex-col` empilé sur mobile → `sm:flex-row`, titre `text-2xl sm:text-3xl`, boutons `flex-wrap`).
-- **Reste (passe visuelle)** : wrapping des en-têtes titre+actions et grilles de formulaires par page — à finaliser/valider au navigateur (360→1440).
+- **En-têtes de pages** : motif responsive (`flex-col` empilé sur mobile → `sm:flex-row sm:items-center sm:justify-between`, titre `text-2xl sm:text-3xl`) appliqué aux 7 pages admin avec boutons d'action : blog, events, newsletter, team, users, identities, contact.
+- **Reste (passe visuelle)** : grilles de formulaires new/edit (`grid-cols-1 md:grid-cols-2`) + variantes « cartes » de tableaux sur mobile — à valider au navigateur (360→1440).
 
-**Vérification** : `tsc --noEmit` → 0 erreur.
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
