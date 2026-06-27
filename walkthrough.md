@@ -116,3 +116,22 @@
 ## LOT 0 — Bilan
 
 Lot 0 traité (0.1 → 0.4). Restes connus, non bloquants : optimisation d'images (→ Lot 2.4), témoignages statiques (→ Lot 3.2), limites d'upload (décision), audit fin des contrôleurs. Prochaine étape : **Lot 1 — Responsivité**.
+
+---
+
+## LOT 1 — Responsivité
+
+### 1.1 Admin — sidebar drawer + layout ✅
+
+**Objectif** : rendre l'espace admin réellement responsive (la sidebar restait visible et rognait l'écran sur mobile).
+
+**Modifications**
+- `components/admin/sidebar.tsx` : réécriture en **drawer piloté CSS** (SSR-safe, sans hook de breakpoint).
+  - Props `collapsed` / `onToggleCollapse` (desktop) et `mobileOpen` / `onMobileClose` (mobile).
+  - `<lg` : `position: fixed`, `w-64`, masqué via `-translate-x-full`, ouvert via `translate-x-0` + **backdrop** `lg:hidden` + bouton **X**.
+  - `≥lg` : `lg:static`, largeur `lg:w-64` ↔ `lg:w-16` (collapse via chevron) ; libellés masqués en mode réduit (`lg:hidden`), icônes `shrink-0`, `title` au survol.
+  - Fermeture du drawer au clic sur un lien (`onMobileClose`).
+- `app/admin/layout.tsx` : deux états distincts (`collapsed`, `mobileOpen`), `overflow-hidden` sur le conteneur, `main` en `overflow-y-auto p-4 md:p-6`.
+- `components/admin/header.tsx` : prop `onOpenSidebar` ; bouton menu `lg:hidden` (au lieu de `md:hidden`) avec `aria-label`.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.

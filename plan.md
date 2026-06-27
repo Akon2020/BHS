@@ -71,10 +71,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 ## 📱 LOT 1 — Responsivité complète  *(priorité 1)*
 
 ### 1.1 Admin (refonte responsive)
-- [ ] 🔵 **Sidebar admin → drawer mobile** : aujourd'hui `h-screen` toujours visible (se réduit à 70px). Comportement cible :
-  - **Desktop (≥ lg)** : sidebar fixe, collapsible 64 ↔ 16 (icônes).
-  - **Mobile/tablette (< lg)** : sidebar masquée par défaut, ouverte en **overlay/Sheet** via le bouton menu de `admin/header.tsx`, avec backdrop et fermeture au clic/route change.
-- [ ] 🔵 Adapter `app/admin/layout.tsx` (flux flex → grille responsive, padding `p-4 md:p-6`).
+- [x] 🔵 **Sidebar admin → drawer mobile** : refonte effectuée (drawer CSS, SSR-safe).
+  - **Desktop (≥ lg)** : sidebar statique, collapsible 64 ↔ 16 (icônes) via chevron.
+  - **Mobile/tablette (< lg)** : sidebar masquée (`-translate-x-full`), ouverte en **overlay** via le bouton menu de `admin/header.tsx`, avec backdrop + bouton X + fermeture au clic sur un lien.
+- [x] 🔵 Adapter `app/admin/layout.tsx` : deux états (`collapsed` desktop / `mobileOpen` drawer), padding `p-4 md:p-6`, `overflow` maîtrisé.
 - [ ] 🔵 **Tableaux admin** (users, blog, events, files, identities, abonnes, newsletter, contact) : rendre scrollables horizontalement + variante « cartes » sur mobile pour les colonnes clés.
 - [ ] 🔵 Formulaires admin (new/edit) : grilles `grid-cols-1 md:grid-cols-2`, boutons d'action sticky en bas sur mobile.
 - [ ] 🔵 Dashboard : graphiques (`chart.js`/`recharts`) responsives + cartes stats en grille adaptive.

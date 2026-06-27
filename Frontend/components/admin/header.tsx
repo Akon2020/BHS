@@ -25,10 +25,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 interface AdminHeaderProps {
-  toggleSidebar: () => void;
+  onOpenSidebar: () => void;
 }
 
-export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
+export default function AdminHeader({ onOpenSidebar }: AdminHeaderProps) {
   // Pas de source de notifications pour l'instant (cf. plan.md Lot 0.3).
   const notifications = 0;
   const currentUser = getCurrentUser();
@@ -51,11 +51,12 @@ export default function AdminHeader({ toggleSidebar }: AdminHeaderProps) {
       <Button
         variant="outline"
         size="icon"
-        className="md:hidden"
-        onClick={toggleSidebar}
+        className="lg:hidden"
+        onClick={onOpenSidebar}
+        aria-label="Ouvrir le menu"
       >
         <Menu className="h-5 w-5" />
-        <span className="sr-only">Toggle sidebar</span>
+        <span className="sr-only">Ouvrir le menu</span>
       </Button>
       <div className="flex-1">
         <h1 className="text-xl font-bold">Tableau de bord</h1>

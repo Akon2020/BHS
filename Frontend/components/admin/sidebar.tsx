@@ -21,6 +21,7 @@ import {
   IdCard,
   UserPlus,
   Tags,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,11 +30,22 @@ import { toast } from "sonner";
 import { logout } from "@/actions/auth";
 
 interface SidebarProps {
-  isOpen: boolean;
-  onToggle: () => void;
+  /** Mode réduit (icônes seules) sur desktop. */
+  collapsed: boolean;
+  /** Bascule le mode réduit (desktop). */
+  onToggleCollapse: () => void;
+  /** Drawer ouvert sur mobile/tablette. */
+  mobileOpen: boolean;
+  /** Ferme le drawer mobile. */
+  onMobileClose: () => void;
 }
 
-export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
+export default function AdminSidebar({
+  collapsed,
+  onToggleCollapse,
+  mobileOpen,
+  onMobileClose,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
@@ -41,7 +53,6 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
   const handleLogout = async () => {
     try {
       await logout();
-
       router.push("/connexion");
       router.refresh();
     } catch (error) {
@@ -61,11 +72,11 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
       label: "Utilisateurs",
       icon: Users,
       href: "/admin/users",
-      active: pathname === "/admin/users",
+      active: pathname.startsWith("/admin/users"),
     },
     {
       label: "Identités",
-      icon: IdCard ,
+      icon: IdCard,
       href: "/admin/identities",
       active: pathname.startsWith("/admin/identities"),
     },
@@ -137,78 +148,108 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
     return hasAccessToPage(user.role, route.href);
   });
 
+  // Le label est masqué uniquement en mode réduit ET sur desktop (≥ lg).
+  // Sur mobile le drawer est toujours pleine largeur, donc on garde les libellés.
+  const labelHidden = collapsed ? "lg:hidden" : "";
+
   return (
-    <div
-      className={cn(
-        "group/sidebar h-screen bg-background border-r relative transition-all duration-300 ease-in-out",
-        isOpen ? "w-64" : "w-[70px]",
+    <>
+      {/* Backdrop (mobile uniquement) */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          aria-hidden="true"
+          onClick={onMobileClose}
+        />
       )}
-    >
-      <div className="flex h-full flex-col">
-        <div className="flex h-14 items-center border-b px-3 justify-between">
+
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r bg-background transition-[transform,width] duration-300 ease-in-out",
+          // Mobile : drawer pleine largeur, masqué hors écran par défaut
+          "w-64",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+          // Desktop : statique, largeur selon le mode réduit
+          "lg:static lg:z-auto lg:translate-x-0",
+          collapsed ? "lg:w-16" : "lg:w-64",
+        )}
+      >
+        <div className="flex h-14 items-center justify-between border-b px-3">
           <Link
             href="/admin"
+            onClick={onMobileClose}
             className={cn(
               "flex items-center gap-2 font-semibold transition-opacity",
-              isOpen ? "opacity-100" : "opacity-0",
+              collapsed ? "lg:opacity-0" : "opacity-100",
             )}
           >
-            <span className="text-primary font-bold">Burning Heart</span>
+            <span className="font-bold text-primary">Burning Heart</span>
           </Link>
+
+          {/* Toggle réduit (desktop) */}
           <Button
-            onClick={onToggle}
+            onClick={onToggleCollapse}
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="hidden h-8 w-8 lg:flex"
+            aria-label={collapsed ? "Déplier le menu" : "Réduire le menu"}
           >
-            {isOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+            {collapsed ? (
+              <ChevronRight size={18} />
+            ) : (
+              <ChevronLeft size={18} />
+            )}
+          </Button>
+
+          {/* Fermer le drawer (mobile) */}
+          <Button
+            onClick={onMobileClose}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 lg:hidden"
+            aria-label="Fermer le menu"
+          >
+            <X size={18} />
           </Button>
         </div>
+
         <ScrollArea className="flex-1 py-2">
           <nav className="grid gap-1 px-2">
             {routes.map((route) => (
               <Link
                 key={route.href}
                 href={route.href}
+                onClick={onMobileClose}
+                title={route.label}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all hover:bg-accent",
+                  collapsed && "lg:justify-center",
                   route.active
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground",
                 )}
               >
-                <route.icon size={20} />
-                <span
-                  className={cn(
-                    "transition-opacity",
-                    isOpen ? "opacity-100" : "opacity-0",
-                  )}
-                >
+                <route.icon size={20} className="shrink-0" />
+                <span className={cn("truncate", labelHidden)}>
                   {route.label}
                 </span>
               </Link>
             ))}
           </nav>
         </ScrollArea>
+
         <div className="mt-auto border-t p-2">
           <Button
             variant="ghost"
             asChild
             className={cn(
               "mb-1 w-full justify-start gap-3",
-              isOpen ? "" : "justify-center",
+              collapsed && "lg:justify-center",
             )}
           >
-            <Link href="/">
-              <Home size={20} />
-              <span
-                className={cn(
-                  "transition-opacity",
-                  isOpen ? "opacity-100" : "opacity-0",
-                )}
-              >
-                Retour à l'accueil
-              </span>
+            <Link href="/" onClick={onMobileClose}>
+              <Home size={20} className="shrink-0" />
+              <span className={cn(labelHidden)}>Retour à l'accueil</span>
             </Link>
           </Button>
 
@@ -216,22 +257,15 @@ export default function AdminSidebar({ isOpen, onToggle }: SidebarProps) {
             variant="ghost"
             onClick={handleLogout}
             className={cn(
-              "w-full justify-start gap-3 text-destructive hover:text-destructive border-t",
-              isOpen ? "" : "justify-center",
+              "w-full justify-start gap-3 border-t text-destructive hover:text-destructive",
+              collapsed && "lg:justify-center",
             )}
           >
-            <LogOut size={20} />
-            <span
-              className={cn(
-                "transition-opacity",
-                isOpen ? "opacity-100" : "opacity-0",
-              )}
-            >
-              Déconnexion
-            </span>
+            <LogOut size={20} className="shrink-0" />
+            <span className={cn(labelHidden)}>Déconnexion</span>
           </Button>
         </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 }
