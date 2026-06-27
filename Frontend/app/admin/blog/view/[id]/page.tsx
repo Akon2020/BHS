@@ -212,15 +212,22 @@ export default function BlogViewAdminPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-3xl font-bold">{blog.titre}</h1>
+          <h1 className="truncate text-2xl font-bold sm:text-3xl">
+            {blog.titre}
+          </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant={blog.statut === "publie" ? "default" : "secondary"}>
             {blog.statut === "publie" ? "Publié" : "Brouillon"}
           </Badge>
@@ -267,7 +274,7 @@ export default function BlogViewAdminPage() {
             </div>
 
             {/* Contenu */}
-            <div className="prose prose-sm max-w-none">
+            <div className="prose prose-sm max-w-none break-words [&_img]:h-auto [&_img]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:overflow-x-auto">
               <div
                 dangerouslySetInnerHTML={{ __html: blog.contenu }}
                 className="text-muted-foreground"

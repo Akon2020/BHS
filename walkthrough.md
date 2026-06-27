@@ -162,6 +162,7 @@ Suite aux retours (captures) de test sur téléphone :
 - **Filtres de statut** (newsletter, événements) : `SelectTrigger` passait `w-[150px]` fixe → `w-full sm:w-[180px]` (pleine largeur sur mobile ; conteneur events `w-full sm:w-auto`).
 - **Débordement création newsletter** : groupe de boutons `flex gap-2` (avec `min-w-[200px]`) → `flex-col gap-2 sm:flex-row`, boutons `w-full sm:w-auto` (supprime le scroll horizontal de page).
 - **Débordement création/édition événement** : en-tête `flex items-center justify-between` non responsive → `flex-col gap-4 sm:flex-row…`, boutons d'action empilés `w-full sm:w-auto`, titre `text-2xl sm:text-3xl`.
+- **Visualisation d'article** (`/admin/blog/view/[id]`) : en-tête (titre + badge + Modifier/Supprimer) rendu responsive (`flex-col sm:flex-row`, titre `truncate min-w-0`, boutons `flex-wrap`) ; contenu HTML protégé contre le débordement (`break-words`, images `max-w-full`, `pre`/`table` scrollables).
 
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
 
