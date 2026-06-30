@@ -307,3 +307,17 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 **Vérification** : `npm run build` → succès.
 **À tester en runtime** : affichage des images distantes (blog/événements) en dev **et** prod ; Lighthouse ≥ 90 sur le site lancé.
 **Reste (optionnel)** : `BreadcrumbList` JSON-LD ; passe a11y (alt systématiques, hiérarchie h1).
+
+---
+
+## LOT 3.2 — Témoignages dynamiques
+
+### Backend ✅
+
+- `models/temoignage.model.js` : `Temoignage` (auteur, fonction, contenu, photo, `statut` brouillon/publié, `ordre`, createdBy). Table `temoignages`.
+- `models/index.model.js` : association `belongsTo Utilisateur (as createur)` + export.
+- `controllers/temoignage.controller.js` : `getTemoignagesPublic` (publiés, triés par `ordre`), `getTemoignages` (admin), `getTemoignageById`, `createTemoignage`, `updateTemoignage`, `deleteTemoignage` (upload photo via champ `image`).
+- `routes/temoignage.route.js` : `GET /public` (public) ; `GET /`, `POST /`, `GET/PUT/DELETE /:id` (admin+editeur, upload `image` + `normalizeUploadPaths`) ; Swagger inline ; montage `app.use("/api/temoignages", …)`.
+
+**Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels`.
+**Reste** : frontend (page admin `/admin/temoignages` + actions/types ; carrousel home alimenté par l'API).

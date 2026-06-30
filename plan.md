@@ -147,9 +147,9 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 > ✅ **Décisions confirmées** : plusieurs sessions/jour **autorisées** · fuseau **Africa/Lubumbashi (UTC+2)** · **clôture a posteriori** d'une session ouverte **autorisée**.
 
 ### 3.2 💬 Témoignages dynamiques  🟢
-- [ ] 🟢 Backend : modèle `Temoignage` (`auteur`, `fonction/role`, `contenu`, `photo`, `statut` brouillon/publié, `ordre`), CRUD + endpoint public (publiés).
-- [ ] 🟢 Admin : page `/admin/temoignages` (CRUD + modération + ordre).
-- [ ] 🔵 Front : remplacer la section statique de la home par un **carrousel fonctionnel** (embla déjà présent) alimenté par l'API.
+- [x] 🟢 Backend : modèle `Temoignage` (`auteur`, `fonction`, `contenu`, `photo`, `statut` brouillon/publié, `ordre`), CRUD `/api/temoignages` + endpoint **public** `/api/temoignages/public` (publiés). Upload photo (`image`), accès admin+editeur, Swagger inline.
+- [ ] 🟢 Admin : page `/admin/temoignages` (CRUD + statut + ordre).
+- [ ] 🔵 Front : remplacer la section statique de la home par un **carrousel fonctionnel** (embla) alimenté par l'API.
 
 ### 3.3 ❤️ Don — manuel + formulaire d'intention  🟢
 - [ ] 🔵 Finaliser la page `/don` : **vraies coordonnées** bancaires + Mobile Money (à fournir), bouton « copier », design soigné, retrait du bouton « Donner maintenant » inactif.
