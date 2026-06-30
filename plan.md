@@ -79,12 +79,14 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 Dashboard responsive : cartes stats en grille adaptive (déjà en place) + en-tête d'actions corrigé (`flex-col` → `sm:flex-row`, boutons `flex-wrap`).
 - [x] 🔵 **En-têtes de pages responsive** : motif `flex-col` empilé → `sm:flex-row` + titre fluide `text-2xl sm:text-3xl` appliqué aux 7 pages avec actions (blog, events, newsletter, team, users, identities, contact).
 - [x] 🔵 **Formulaires admin responsives** : grilles déjà majoritairement `grid-cols-1 lg:grid-cols-3` / `md:grid-cols-2` ; corrigé les 2 grilles `grid-cols-2` fixes (events new/edit → `sm:grid-cols-2`) ; modales user (add/edit) empilées sur mobile (`grid-cols-1 sm:grid-cols-4`, labels `sm:text-right`).
+- [x] 🔵 **Pages de visualisation/détail responsives** : en-têtes (titre + actions) empilés sur mobile + titres tronqués sur `identities/view`, `team/[id]/view`, `users/[id]`, `newsletter/view`, `contact/view`, `files/view` (events/view & abonnes/view déjà OK). Contenu HTML protégé du débordement (`break-words`, images/pre/table) sur `blog/view`, `events/view`, `newsletter/view`.
 - [ ] 🔵 *(optionnel)* Variantes « cartes » de tableaux sur très petit écran — enhancement non bloquant (tables déjà scrollables).
 
 ### 1.2 Public
-- [ ] 🔵 Audit responsive page par page : `/`, `/a-propos`, `/services`, `/don`, `/contact`, `/events` (+ `[slug]`), `/files` (+ `[slug]`), `/blog` (+ `[slug]`), `/identity`, `/connexion`.
-- [ ] 🔵 Home : hero `h-[100vh]` → `min-h-[100svh]` (évite le saut de barre mobile) ; vérifier la carte Google Maps, la grille contact, le carrousel témoignages sur petit écran.
-- [ ] 🔵 Vérifier les `max-w`, tailles de police fluides, espacements et images sur 360 px / 768 px / 1024 px / 1440 px.
+- [~] 🔵 Audit responsive page par page (`/`, `/a-propos`, `/services`, `/don`, `/contact`, `/events`, `/files`, `/blog`, `/identity`, `/connexion`) : audit des motifs à risque effectué (grilles fixes, flex non-wrap, hauteurs/largeurs figées) → pages déjà majoritairement mobile-first ; seuls 2 points concrets corrigés (ci-dessous). Polish fin à valider visuellement.
+- [x] 🔵 Home : hero `h-[100vh]` → `min-h-[100svh]` (évite le saut de barre mobile + le clipping).
+- [x] 🔵 Connexion : wrappers `h-screen` → `min-h-[100svh]` (`/connexion`, `/connexion/reset`, `/connexion/reset-request`) pour éviter la coupure de la carte sur petit écran.
+- [ ] 🔵 Vérifier visuellement `max-w`, tailles de police, espacements et images sur 360 / 768 / 1024 / 1440 px (carte Google Maps, grille contact, carrousel témoignages).
 - [ ] 🟠 Accessibilité tactile : tailles de cibles ≥ 44 px, focus visibles, `aria-*` sur les menus/dialogs.
 
 ---
@@ -92,25 +94,25 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 ## 🔍 LOT 2 — SEO  *(priorité 2)*
 
 ### 2.1 Fondations techniques
-- [ ] 🟢 **`app/sitemap.ts`** dynamique : pages statiques + blogs publiés + événements publiés + fichiers publics (via fetch API).
-- [ ] 🟢 **`app/robots.ts`** : autoriser le public, **bloquer `/admin` et `/connexion`**, référencer le sitemap.
-- [ ] 🟢 **`app/manifest.ts`** (PWA légère : nom, icônes, couleurs de marque crimson).
-- [ ] 🔵 `metadataBase` + favicons/icônes complets (déjà `logon.png`, ajouter tailles + apple-touch).
+- [x] 🟢 **`app/sitemap.ts`** dynamique : pages statiques + blogs publiés + événements publiés + fichiers publics (fetch API, `revalidate: 3600`).
+- [x] 🟢 **`app/robots.ts`** : `allow /`, **bloque `/admin` et `/connexion`**, référence le sitemap.
+- [x] 🟢 **`app/manifest.ts`** (PWA légère : nom, description, icônes `logon.png`, `theme_color` crimson).
+- [x] 🔵 `metadataBase` (fait en 0.2) ; favicons/apple-touch supplémentaires → optionnel (Lot 4).
 
 ### 2.2 Métadonnées par page
-- [ ] 🟠 **Convertir les pages publiques `"use client"` en Server Components** (ou extraire un wrapper client) pour exposer `generateMetadata` : `/`, `/contact`, `/events`, `/files`, `/blog`, `/identity`. (Modèle déjà correct : `app/blog/[slug]/page.tsx`.)
-- [ ] 🟢 `generateMetadata` sur `/events/[slug]` et `/files/[slug]` (titre, description, OG, canonical) comme pour le blog.
-- [ ] 🟢 Métadonnées dédiées pour `/a-propos`, `/services`, `/don`, `/contact`.
+- [x] 🟠 **Pages publiques `"use client"` en wrappers serveur** : `/` (home), `/blog`, `/events`, `/files`, `/contact`, `/identity` → toutes converties (contenu client dans `*-client.tsx`, métadonnées exposées par le `page.tsx` serveur).
+- [x] 🟢 `generateMetadata` sur `/events/[slug]` (+ JSON-LD Event) et `/files/[slug]` (titre, description, OG, canonical) — wrappers serveur créés (`event-detail-client.tsx`, `file-detail-client.tsx`).
+- [x] 🟢 Métadonnées dédiées pour `/a-propos`, `/services`, `/don` (+ home). `/contact` → avec la conversion de la page liste.
 
 ### 2.3 Données structurées & social
-- [ ] 🟢 **JSON-LD** : `Organization`/`NGO` (global), `Article` (blog), `Event` (événements), `BreadcrumbList`.
-- [ ] 🟢 **Images OpenGraph** : `opengraph-image` par défaut + dynamiques pour blog/événements (ou réutiliser `imageUne`/`imageEvenement`).
-- [ ] 🔵 Balises `alt` systématiques, titres `h1` uniques par page, hiérarchie `h1→h6` propre.
+- [~] 🟢 **JSON-LD** : `NGO`/Organization (home) **fait**, `Article` (blog/[slug]) **fait**, `Event` (events/[slug]) **fait**. `BreadcrumbList` → optionnel (à ajouter).
+- [x] 🟢 **Images OpenGraph** : `app/opengraph-image.tsx` (générée via `next/og`, branding crimson, héritée par toutes les pages) ; blog/événements utilisent leur propre image (`imageUne`/`imageEvenement`) via `generateMetadata`.
+- [ ] 🔵 Balises `alt` systématiques, titres `h1` uniques par page, hiérarchie `h1→h6` propre (passe visuelle / a11y).
 
 ### 2.4 Performance (Core Web Vitals)
-- [ ] 🔵 Réactiver `next/image` optimisé (cf. Lot 0.2), `priority` sur le hero, `loading="lazy"` ailleurs.
-- [ ] 🔵 Vérifier le poids des polices (`Inter` + `Crimson_Pro`), `display: swap`.
-- [ ] 🔵 Objectif Lighthouse ≥ 90 (Perf/SEO/Best-practices/A11y) sur les pages clés.
+- [x] 🔵 **`next/image` optimisé réactivé** : `images.unoptimized` retiré, `remotePatterns` configurés (prod `api.burningheartihs.org` + dev `localhost:5500`). `priority` déjà sur le hero. ⚠️ vérifier l'affichage des images distantes en runtime (dev + prod).
+- [x] 🔵 Polices `Inter` + `Crimson_Pro` via `next/font` → `display: swap` par défaut (rien à faire).
+- [ ] 🔵 Objectif Lighthouse ≥ 90 — à mesurer sur le site lancé (perf/SEO/best-practices/a11y).
 
 ---
 
@@ -128,22 +130,19 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - **Fuseau horaire** de référence : **Africa/Lubumbashi (UTC+2)** (calculs de durée et affichage).
 - **Clôture a posteriori** : on peut compléter une session ouverte en lui ajoutant l'heure de fin plus tard (la durée se calcule alors).
 
-**Backend**
-- [ ] 🟢 Modèle `ProfilPointage` : `idProfil`, `nomComplet`, `fonction`, `source` (`systeme` | `manuel`), `idUtilisateur` (nullable, FK si source = système), `actif`, timestamps.
-- [ ] 🟢 Modèle `Pointage` (session) : `idPointage`, `idProfil` (FK), `date`, `heureDebut`, `heureFin` (nullable), `dureeMinutes` (calculée à la complétion), `note`, `createdBy`, timestamps.
-- [ ] 🟢 Endpoints CRUD profils + sessions (`/api/pointages`, `/api/pointages/profils`).
-- [ ] 🟢 Endpoint **stats** avec filtre `periode` (`hebdo` | `mensuel` | `annuel`) + bornes de dates :
-  - Nb de profils actifs · Nb de présences enregistrées · Temps de travail cumulé.
-  - Profils les plus actifs (heures) → données graphique.
-  - Récapitulatif tabulaire (par profil : présences, temps cumulé).
-- [ ] 🟢 **Export PDF** stylisé (réutiliser le style de `utils/identity-pdf.js` / `event-pdf.js`) : **global** ou **individuel**, par période (hebdo/mensuel/annuel).
+**Backend** ✅
+- [x] 🟢 Modèle `ProfilPointage` (`idProfil`, `nomComplet`, `fonction`, `source`, `idUtilisateur`, `actif`, timestamps).
+- [x] 🟢 Modèle `Pointage` (`idPointage`, `idProfil`, `date`, `heureDebut`, `heureFin`, `dureeMinutes` calculée par hook, `note`, `createdBy`, timestamps).
+- [x] 🟢 Endpoints CRUD profils + sessions (`/api/pointages`, `/api/pointages/profils`) + clôture a posteriori (PUT). Accès `admin`+`editeur`. Swagger inline.
+- [x] 🟢 Endpoint **stats** `/api/pointages/stats?periode=` (profils actifs, présences, temps cumulé, graphique « profils les plus actifs », récap tabulaire) — fuseau UTC+2.
+- [x] 🟢 **Export PDF** `/api/pointages/export?scope=global|individuel` stylisé (pdfkit, `utils/pointage-pdf.js`) par période.
 
-**Frontend**
-- [ ] 🟢 Page admin `/admin/pointage` (+ entrée sidebar, permissions admin/editeur).
-- [ ] 🟢 Actions `actions/pointage.ts` + types dédiés.
-- [ ] 🟢 UI : sélecteur de profil (combobox cherchable : users système + manuels + « ajouter »), formulaire de saisie de session, liste/édition des présences.
-- [ ] 🟢 Tableau de bord pointage : cartes stats, graphique « profils les plus actifs », tableau récapitulatif, **filtre hebdo/mensuel/annuel**.
-- [ ] 🟢 Boutons d'export PDF (global + individuel) selon la période.
+**Frontend** ✅
+- [x] 🟢 Page admin `/admin/pointage` (+ entrée sidebar « Pointage », permissions admin/editeur déjà dans la matrice).
+- [x] 🟢 Actions `actions/pointage.ts` + types dédiés.
+- [x] 🟢 UI : sélecteur de profil + dialog « Ajouter un profil » (manuel **ou** depuis un utilisateur système), formulaire de saisie (date + heure début/fin optionnelle + note), liste des présences avec édition (clôture a posteriori) et suppression.
+- [x] 🟢 Tableau de bord : cartes stats (profils actifs, présences, temps cumulé), graphique `Bar` (profils les plus actifs), tableau récapitulatif, **filtre hebdo/mensuel/annuel**.
+- [x] 🟢 Boutons d'export PDF : global (en-tête) + individuel (par ligne du récap).
 
 > ✅ **Décisions confirmées** : plusieurs sessions/jour **autorisées** · fuseau **Africa/Lubumbashi (UTC+2)** · **clôture a posteriori** d'une session ouverte **autorisée**.
 

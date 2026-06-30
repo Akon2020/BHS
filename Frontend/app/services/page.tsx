@@ -2,10 +2,21 @@ import { Book, Users, Heart, Music, Baby, HandHeart } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Services - Burning Heart",
-  description: "Découvrez nos services et activités spirituelles",
+export const metadata: Metadata = {
+  title: "Services | Burning Heart",
+  description:
+    "Découvrez les services et activités spirituelles de Burning Heart : accompagnement, Exercices Spirituels, discernement et plus.",
+  alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Services | Burning Heart",
+    description:
+      "Les services et activités spirituelles de Burning Heart – Pèlerins avec le Christ.",
+    url: "/services",
+    siteName: "Burning Heart",
+    type: "website",
+  },
 }
 
 const services = [

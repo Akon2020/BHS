@@ -187,3 +187,123 @@ Décision : **boîte d'envoi admin** avec **envoi réel** (Nodemailer).
 
 **Vérification** : Front `tsc` → 0 erreur, `build` → succès ; Back `node --check` OK sur tous les fichiers.
 **À tester en runtime** : envoi réel d'un email + apparition dans « Messages envoyés ».
+
+### 1.1 Admin — pages de visualisation/détail ✅
+
+Passe groupée (même motif d'en-tête débordant que `blog/view`) :
+- **En-têtes rendus responsive** (`flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`, groupe gauche `min-w-0`, titre `truncate text-2xl sm:text-3xl`, bouton d'action `w-full sm:w-auto`, back `shrink-0`) : `identities/view/[id]`, `team/[id]/view`, `users/[id]`, `newsletter/view/[id]`, `contact/view/[id]`, `files/view/[id]`.
+- Déjà responsives (non touchées) : `events/view/[id]`, `abonnes/view/[id]`.
+- **Contenu HTML protégé** du débordement (`break-words`, `[&_img]:max-w-full`, `pre`/`table` scrollables) : `blog/view`, `events/view`, `newsletter/view`.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+**Bilan 1.1** : responsivité de l'admin complète (navigation, layout, tableaux, dashboard, en-têtes liste, formulaires, modales, pages détail). Prochaine étape : **Lot 1.2 — Public**.
+
+### 1.2 Public — audit & correctifs structurels ✅ (partiel)
+
+**Audit** des motifs à risque (grilles fixes sans préfixe responsive, flex non-wrap, hauteurs/largeurs figées) sur les pages publiques → site déjà majoritairement mobile-first ; peu d'écarts.
+
+**Corrigé**
+- **Home** (`app/page.tsx`) : hero `h-[100vh]` → `min-h-[100svh]` (évite le saut de barre d'URL mobile et le clipping du contenu).
+- **Connexion** (`/connexion`, `/connexion/reset`, `/connexion/reset-request`) : wrapper `flex h-screen …` → `min-h-[100svh]` (la carte n'est plus coupée si elle dépasse la hauteur de l'écran).
+
+**Sans risque (laissé tel quel)** : `min-w-[200px]`/`min-w-[220px]` des boutons « Charger plus » (< 360 px) ; `grid-cols-2` de métadonnées `text-xs` sur `/files` (libellés courts).
+
+**Reste (passe visuelle)** : vérification fine au navigateur (360→1440) — carte Google Maps, grille contact, carrousel témoignages, a11y tactile.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+
+---
+
+## LOT 3 — Nouvelles fonctionnalités
+
+### 3.1 Pointage — Backend ✅
+
+**Modèles**
+- `models/profilPointage.model.js` : `ProfilPointage` (nomComplet, fonction, `source` systeme/manuel, idUtilisateur FK nullable, actif). Table `profilsPointage`.
+- `models/pointage.model.js` : `Pointage` (idProfil FK, date, heureDebut, heureFin nullable, `dureeMinutes` calculée par hook `beforeSave` — uniquement si début+fin et fin>début, sinon pointage simple, note, createdBy). Table `pointages`.
+- `models/index.model.js` : associations (`profil`/`pointages` CASCADE, `utilisateur`, `createur`) + exports.
+
+**Helpers & PDF**
+- `utils/pointage.utils.js` : `getPeriodeRange(periode, anchor)` (hebdo ISO lun–dim / mensuel / annuel, fuseau **UTC+2**), `formatDuree`, `formatPeriodeLabel`.
+- `utils/pointage-pdf.js` : `generatePointagePdf(stream, data)` (pdfkit, branding crimson, résumé + table avec en-tête/zébrage + pagination).
+
+**Contrôleur** `controllers/pointage.controller.js`
+- Profils : `getProfils`, `createProfil` (manuel ou depuis utilisateur système, anti-doublon), `updateProfil`, `deleteProfil`.
+- Sessions : `getPointages` (filtres profil/période/dates), `createPointage`, `updatePointage` (**clôture a posteriori**), `deletePointage`.
+- Stats : `getStats` (profils actifs, présences, temps cumulé, graphique top 10, récap) — agrégation JS.
+- Export : `exportPdf` (scope `global`/`individuel`, stream PDF en réponse).
+
+**Route & montage**
+- `routes/pointage.route.js` : garde `authenticationJWT` + `authorizeRoles("admin","editeur")` ; routes spécifiques (`/profils`, `/stats`, `/export`) avant `/:id` ; Swagger inline.
+- `app.js` : `app.use("/api/pointages", pointageRouter)`.
+
+**Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels` au démarrage.
+
+### 3.1 Pointage — Frontend ✅
+
+- `types/user.ts` : `ProfilPointage`, `Pointage`, `PointageStatsResponse`, payloads, `PointagePeriode`.
+- `actions/pointage.ts` : profils (get/create/delete), pointages (get/create/update/delete), `getPointageStats`, `getPointageExportUrl` (ouverture nouvel onglet, cookie httpOnly envoyé automatiquement).
+- `app/admin/pointage/page.tsx` :
+  - En-tête responsive + **filtre période** (hebdo/mensuel/annuel) + **export global** (PDF).
+  - Cartes stats (profils actifs, présences, temps cumulé).
+  - **Graphique `Bar`** (chart.js, profils les plus actifs en heures) + **tableau récapitulatif** (export PDF **individuel** par ligne).
+  - **Saisie d'une présence** : sélecteur de profil + dialog d'ajout de profil (manuel ou depuis un utilisateur système, persistant), date, heure début, heure fin optionnelle (sinon « pointage simple »), note.
+  - **Liste des présences** de la période : édition (clôture a posteriori via dialog) + suppression (`DeleteConfirmationModal`).
+- `components/admin/sidebar.tsx` : entrée « Pointage » (icône `Timer`), visible pour `admin`/`editeur` via la matrice.
+
+**Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
+**À tester en runtime** : créer un profil (manuel + système), saisir des présences (avec/sans heure de fin), vérifier stats + graphique + récap par période, clôture a posteriori, exports PDF global et individuel.
+
+---
+
+## LOT 2 — SEO
+
+### 2.1 Fondations techniques ✅
+
+- `app/sitemap.ts` : sitemap **dynamique** — pages statiques publiques + blogs publiés + événements publiés + fichiers publics (fetch API server-side, `revalidate: 3600`, échec → liste vide non bloquante). Basé sur `NEXT_PUBLIC_SITE_URL` (fallback `https://burningheartihs.org`).
+- `app/robots.ts` : `allow /`, **`disallow /admin` et `/connexion`**, référence du `sitemap.xml`.
+- `app/manifest.ts` : PWA légère (nom, description, `start_url`, `display standalone`, `theme_color #8B1538`, icônes `logon.png`).
+
+**Vérification** : `npm run build` génère `sitemap.xml`, `robots.txt`, `manifest.webmanifest` ; `tsc` → 0 erreur.
+
+### 2.2 Métadonnées par page (1/2) ✅
+
+- **Pages serveur** `a-propos`, `services`, `don` : métadonnées enrichies (`title`, `description`, `alternates.canonical`, `openGraph`) typées `Metadata`.
+- **Home** : convertie en wrapper **Server Component** (`app/page.tsx`) + contenu client déplacé dans `app/home-client.tsx`. Le wrapper expose `metadata` (title/description/canonical/OG) **et** un **JSON-LD `NGO`/Organization** (nom, logo, adresse Bukavu, contacts, réseaux sociaux).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → home en statique avec métadonnées.
+### 2.2 / 2.3 — Pages détail & JSON-LD ✅
+
+- **`events/[slug]`** : converti en wrapper serveur (`page.tsx` + `event-detail-client.tsx` recevant `slug` en prop) avec `generateMetadata` (title/description/canonical/OG/Twitter) **et JSON-LD `Event`** (dates, lieu, organisateur, image).
+- **`files/[slug]`** : wrapper serveur (`page.tsx` + `file-detail-client.tsx`) avec `generateMetadata`.
+- **`blog/[slug]`** : ajout du **JSON-LD `Article`** (headline, image, dates, auteur, publisher) au wrapper serveur existant.
+- **Organization/`NGO`** : déjà sur la home (2.2).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+### 2.2 — Pages liste en wrappers serveur ✅
+
+Les pages publiques restées `"use client"` sont passées en wrappers serveur (contenu déplacé dans `*-client.tsx`, `page.tsx` serveur exposant `metadata`) :
+- `/blog` → `blog-list-client.tsx` · `/events` → `events-list-client.tsx` · `/files` → `files-list-client.tsx` · `/contact` → `contact-client.tsx` · `/identity` → `identity-client.tsx`.
+- Chaque wrapper : `title`, `description`, `alternates.canonical`, `openGraph`.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès (pages en statique avec métadonnées).
+
+### 2.3 — Image OpenGraph par défaut ✅
+
+- `app/opengraph-image.tsx` : image **générée** via `next/og` (`ImageResponse`, 1200×630, dégradé crimson + « Burning Heart / Pèlerins avec le Christ »). Légère (générée, pas de gros JPG) et héritée par toutes les pages.
+- Les pages détail blog/événement conservent leur propre image OG (via `generateMetadata`).
+
+**Vérification** : `npm run build` génère la route `/opengraph-image` (statique) ; `tsc` → 0 erreur.
+
+### 2.4 — Optimisation des images ✅
+
+- `next.config.mjs` : retrait de `images.unoptimized`, ajout des `remotePatterns` :
+  - prod : `https://api.burningheartihs.org`, `https://burningheartihs.org`
+  - dev : `http://localhost:5500`, `http://127.0.0.1:5500` (valeur de `NEXT_PUBLIC_API_URL`)
+- Les `next/image` distants (blog, événements) sont désormais optimisés ; le hero garde `priority`.
+- Polices `next/font` : `display: swap` par défaut → OK.
+
+**Vérification** : `npm run build` → succès.
+**À tester en runtime** : affichage des images distantes (blog/événements) en dev **et** prod ; Lighthouse ≥ 90 sur le site lancé.
+**Reste (optionnel)** : `BreadcrumbList` JSON-LD ; passe a11y (alt systématiques, hiérarchie h1).

@@ -625,3 +625,88 @@ export interface EnvoyerMessagePayload {
   sujet: string;
   message: string;
 }
+
+/* -------------------------------- Pointage -------------------------------- */
+
+export type PointageSource = "systeme" | "manuel";
+export type PointagePeriode = "hebdo" | "mensuel" | "annuel";
+
+export interface ProfilPointage {
+  idProfil: number;
+  nomComplet: string;
+  fonction?: string | null;
+  source: PointageSource;
+  idUtilisateur?: number | null;
+  actif: boolean;
+  createdAt: string;
+  updatedAt: string;
+  utilisateur?: {
+    idUtilisateur: number;
+    nomComplet: string;
+    email: string;
+    avatar?: string;
+  } | null;
+}
+
+export interface Pointage {
+  idPointage: number;
+  idProfil: number;
+  date: string;
+  heureDebut: string;
+  heureFin?: string | null;
+  dureeMinutes?: number | null;
+  note?: string | null;
+  createdBy?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  profil?: {
+    idProfil: number;
+    nomComplet: string;
+    fonction?: string | null;
+    source: PointageSource;
+  };
+}
+
+export interface GetProfilsResponse {
+  nombre: number;
+  profils: ProfilPointage[];
+}
+
+export interface GetPointagesResponse {
+  nombre: number;
+  pointages: Pointage[];
+}
+
+export interface PointageStatsResponse {
+  periode: { start: string; end: string; periode: PointagePeriode };
+  stats: {
+    profilsActifs: number;
+    presences: number;
+    tempsCumuleMinutes: number;
+    tempsCumuleLabel: string;
+  };
+  graph: { nomComplet: string; heures: number; minutes: number }[];
+  recap: {
+    idProfil: number;
+    nomComplet: string;
+    fonction: string;
+    presences: number;
+    tempsMinutes: number;
+    tempsLabel: string;
+  }[];
+}
+
+export interface CreateProfilPayload {
+  nomComplet?: string;
+  fonction?: string;
+  source?: PointageSource;
+  idUtilisateur?: number;
+}
+
+export interface CreatePointagePayload {
+  idProfil: number;
+  date: string;
+  heureDebut: string;
+  heureFin?: string;
+  note?: string;
+}

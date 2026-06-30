@@ -135,14 +135,24 @@ export default function UserDetailsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-3xl font-bold">Profil de {uiUser.name}</h1>
+          <h1 className="truncate text-2xl font-bold sm:text-3xl">
+            Profil de {uiUser.name}
+          </h1>
         </div>
-        <Button onClick={() => setIsEditModalOpen(true)}>
+        <Button
+          onClick={() => setIsEditModalOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <Pencil className="h-4 w-4 mr-2" />
           Modifier
         </Button>

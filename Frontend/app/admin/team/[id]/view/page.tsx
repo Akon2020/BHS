@@ -87,17 +87,19 @@ export default function TeamMemberViewPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/admin/team">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold">Profil du membre</h1>
+          <h1 className="truncate text-2xl font-bold sm:text-3xl">
+            Profil du membre
+          </h1>
         </div>
 
-        <Button asChild>
+        <Button asChild className="w-full sm:w-auto">
           <Link href={`/admin/team/${member.idEquipe}/edit`}>
             <Edit className="mr-2 h-4 w-4" />
             Modifier

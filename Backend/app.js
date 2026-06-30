@@ -23,6 +23,7 @@ import newsletterRouter from "./routes/newsletter.route.js";
 import dashboardRouter from "./routes/dashboard.route.js";
 import fichierRouter from "./routes/fichier.route.js";
 import messageEnvoyeRouter from "./routes/messageEnvoye.route.js";
+import pointageRouter from "./routes/pointage.route.js";
 
 const app = express();
 
@@ -80,6 +81,7 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/identites", ficheIdentiteRouter);
 app.use("/api/fichiers", fichierRouter);
 app.use("/api/messages", messageEnvoyeRouter);
+app.use("/api/pointages", pointageRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);

@@ -32,7 +32,7 @@ export default function ResetRequestPage() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center py-12">
+    <div className="flex min-h-[100svh] items-center justify-center py-12">
       <div className="mx-auto w-full max-w-md px-4">
         <Card className="border-none shadow-lg">
           <CardHeader className="text-center">

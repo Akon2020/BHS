@@ -108,15 +108,17 @@ export default function ViewFileResourcePage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild>
+        <div className="flex min-w-0 items-center gap-2">
+          <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/admin/files">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{resource.nomReference}</h1>
-            <p className="text-sm text-muted-foreground">
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-bold sm:text-3xl">
+              {resource.nomReference}
+            </h1>
+            <p className="truncate text-sm text-muted-foreground">
               Slug: {resource.slug}
             </p>
           </div>

@@ -96,14 +96,14 @@ export default function ViewNewsletterPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" asChild>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/admin/newsletter">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold">
+          <h1 className="truncate text-2xl font-bold sm:text-3xl">
             {newsletter.titreInterne}
           </h1>
         </div>
@@ -176,7 +176,7 @@ export default function ViewNewsletterPage() {
         </CardHeader>
         <CardContent>
           <div
-            className="prose prose-sm max-w-none dark:prose-invert"
+            className="prose prose-sm max-w-none break-words dark:prose-invert [&_img]:h-auto [&_img]:max-w-full [&_pre]:overflow-x-auto [&_table]:block [&_table]:overflow-x-auto"
             dangerouslySetInnerHTML={{ __html: newsletter.contenu }}
           />
         </CardContent>

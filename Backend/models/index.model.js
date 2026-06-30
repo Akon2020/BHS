@@ -15,6 +15,8 @@ import NewsletterAbonne from "./newsletterAbonne.model.js";
 import Commentaire from "./commentaire.model.js";
 import Fichier from "./fichier.model.js";
 import MessageEnvoye from "./messageEnvoye.model.js";
+import ProfilPointage from "./profilPointage.model.js";
+import Pointage from "./pointage.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -137,6 +139,34 @@ Utilisateur.hasMany(MessageEnvoye, {
   as: "messagesEnvoyes",
 });
 
+// Pointage associations
+ProfilPointage.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "utilisateur",
+});
+Utilisateur.hasMany(ProfilPointage, {
+  foreignKey: "idUtilisateur",
+  as: "profilsPointage",
+});
+
+Pointage.belongsTo(ProfilPointage, {
+  foreignKey: "idProfil",
+  as: "profil",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+ProfilPointage.hasMany(Pointage, {
+  foreignKey: "idProfil",
+  as: "pointages",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+Pointage.belongsTo(Utilisateur, {
+  foreignKey: "createdBy",
+  as: "createur",
+});
+
 // Contact-Réponse associations
 ReponseContact.belongsTo(Contact, {
   foreignKey: "idContact",
@@ -202,5 +232,7 @@ export {
   Commentaire,
   Fichier,
   MessageEnvoye,
+  ProfilPointage,
+  Pointage,
   syncModels,
 };

@@ -3,10 +3,21 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { DepartmentsSection } from "@/components/sections/departments";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "À propos - Burning Heart",
-  description: "Découvrez notre histoire, notre mission et nos valeurs",
+export const metadata: Metadata = {
+  title: "À propos | Burning Heart",
+  description:
+    "Découvrez l'histoire, la mission et la vision de Burning Heart – Pèlerins avec le Christ, apostolat de spiritualité ignatienne.",
+  alternates: { canonical: "/a-propos" },
+  openGraph: {
+    title: "À propos | Burning Heart",
+    description:
+      "L'histoire, la mission et la vision de Burning Heart – Pèlerins avec le Christ.",
+    url: "/a-propos",
+    siteName: "Burning Heart",
+    type: "website",
+  },
 }
 
 export default function AboutPage() {
