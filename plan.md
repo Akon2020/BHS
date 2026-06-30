@@ -106,8 +106,8 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 ### 2.3 Données structurées & social
 - [~] 🟢 **JSON-LD** : `NGO`/Organization (home) **fait**, `Article` (blog/[slug]) **fait**, `Event` (events/[slug]) **fait**. `BreadcrumbList` → optionnel (à ajouter).
-- [ ] 🟢 **Images OpenGraph** : `opengraph-image` par défaut + dynamiques pour blog/événements (ou réutiliser `imageUne`/`imageEvenement`).
-- [ ] 🔵 Balises `alt` systématiques, titres `h1` uniques par page, hiérarchie `h1→h6` propre.
+- [x] 🟢 **Images OpenGraph** : `app/opengraph-image.tsx` (générée via `next/og`, branding crimson, héritée par toutes les pages) ; blog/événements utilisent leur propre image (`imageUne`/`imageEvenement`) via `generateMetadata`.
+- [ ] 🔵 Balises `alt` systématiques, titres `h1` uniques par page, hiérarchie `h1→h6` propre (passe visuelle / a11y).
 
 ### 2.4 Performance (Core Web Vitals)
 - [ ] 🔵 Réactiver `next/image` optimisé (cf. Lot 0.2), `priority` sur le hero, `loading="lazy"` ailleurs.

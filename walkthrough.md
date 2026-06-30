@@ -288,4 +288,11 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - Chaque wrapper : `title`, `description`, `alternates.canonical`, `openGraph`.
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès (pages en statique avec métadonnées).
-**Reste SEO** : OG image par défaut (2.3) ; `BreadcrumbList` (optionnel) ; perf/optimisation images (2.4).
+
+### 2.3 — Image OpenGraph par défaut ✅
+
+- `app/opengraph-image.tsx` : image **générée** via `next/og` (`ImageResponse`, 1200×630, dégradé crimson + « Burning Heart / Pèlerins avec le Christ »). Légère (générée, pas de gros JPG) et héritée par toutes les pages.
+- Les pages détail blog/événement conservent leur propre image OG (via `generateMetadata`).
+
+**Vérification** : `npm run build` génère la route `/opengraph-image` (statique) ; `tsc` → 0 erreur.
+**Reste SEO** : `BreadcrumbList` (optionnel) ; perf/optimisation images `next/image` (2.4) ; passe a11y (alt/h1).
