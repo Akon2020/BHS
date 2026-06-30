@@ -1,10 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // NOTE (Lot 2.4) : réactiver l'optimisation d'images en remplaçant
-  // `images.unoptimized` par des `remotePatterns` (host API prod + dev),
-  // puis tester l'affichage des images distantes (blog, événements).
   images: {
-    unoptimized: true,
+    // Hôtes autorisés pour l'optimisation des images distantes (uploads de l'API).
+    remotePatterns: [
+      { protocol: "https", hostname: "api.burningheartihs.org" },
+      { protocol: "https", hostname: "burningheartihs.org" },
+      { protocol: "http", hostname: "localhost", port: "5500" },
+      { protocol: "http", hostname: "127.0.0.1", port: "5500" },
+    ],
   },
 };
 

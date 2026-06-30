@@ -295,4 +295,15 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - Les pages détail blog/événement conservent leur propre image OG (via `generateMetadata`).
 
 **Vérification** : `npm run build` génère la route `/opengraph-image` (statique) ; `tsc` → 0 erreur.
-**Reste SEO** : `BreadcrumbList` (optionnel) ; perf/optimisation images `next/image` (2.4) ; passe a11y (alt/h1).
+
+### 2.4 — Optimisation des images ✅
+
+- `next.config.mjs` : retrait de `images.unoptimized`, ajout des `remotePatterns` :
+  - prod : `https://api.burningheartihs.org`, `https://burningheartihs.org`
+  - dev : `http://localhost:5500`, `http://127.0.0.1:5500` (valeur de `NEXT_PUBLIC_API_URL`)
+- Les `next/image` distants (blog, événements) sont désormais optimisés ; le hero garde `priority`.
+- Polices `next/font` : `display: swap` par défaut → OK.
+
+**Vérification** : `npm run build` → succès.
+**À tester en runtime** : affichage des images distantes (blog/événements) en dev **et** prod ; Lighthouse ≥ 90 sur le site lancé.
+**Reste (optionnel)** : `BreadcrumbList` JSON-LD ; passe a11y (alt systématiques, hiérarchie h1).

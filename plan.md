@@ -110,9 +110,9 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [ ] 🔵 Balises `alt` systématiques, titres `h1` uniques par page, hiérarchie `h1→h6` propre (passe visuelle / a11y).
 
 ### 2.4 Performance (Core Web Vitals)
-- [ ] 🔵 Réactiver `next/image` optimisé (cf. Lot 0.2), `priority` sur le hero, `loading="lazy"` ailleurs.
-- [ ] 🔵 Vérifier le poids des polices (`Inter` + `Crimson_Pro`), `display: swap`.
-- [ ] 🔵 Objectif Lighthouse ≥ 90 (Perf/SEO/Best-practices/A11y) sur les pages clés.
+- [x] 🔵 **`next/image` optimisé réactivé** : `images.unoptimized` retiré, `remotePatterns` configurés (prod `api.burningheartihs.org` + dev `localhost:5500`). `priority` déjà sur le hero. ⚠️ vérifier l'affichage des images distantes en runtime (dev + prod).
+- [x] 🔵 Polices `Inter` + `Crimson_Pro` via `next/font` → `display: swap` par défaut (rien à faire).
+- [ ] 🔵 Objectif Lighthouse ≥ 90 — à mesurer sur le site lancé (perf/SEO/best-practices/a11y).
 
 ---
 
