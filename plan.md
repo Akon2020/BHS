@@ -57,7 +57,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 ### 0.3 Contenus factices / placeholders
 - [x] 🟠 **Notifications admin factices masquées** (`components/admin/header.tsx`) : badge à 0 + état vide « Aucune notification » tant qu'il n'y a pas de source réelle.
-- [ ] 🟠 ⏸️ Brancher la section **Témoignages** de la home (statique) sur le module dynamique — **bloqué par le Lot 3.2** (module pas encore créé).
+- [x] 🟠 Section **Témoignages** de la home branchée sur le module dynamique (Lot 3.2) — carrousel alimenté par l'API.
 - [x] 🟠 **Auth unifiée en cookie httpOnly** : le backend pose le token dans un cookie httpOnly (`secure` en prod uniquement, `sameSite=lax`, `domain` partagé via `COOKIE_DOMAIN`). Ajout de `cookie-parser` (manquant) dans `app.js`. Le front ne manipule plus de token JS (`lib/axios.ts` sans Bearer, `js-cookie`/`localStorage.token` retirés, `useAuth`/`getProfile` via cookie). Cookie parasite retiré de `/register` (n'écrase plus la session admin). ⚠️ **À tester en runtime** (login/logout/refresh) et **définir `COOKIE_DOMAIN=.burningheartihs.org` en prod**.
 
 ### 0.4 Qualité backend
@@ -149,7 +149,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 ### 3.2 💬 Témoignages dynamiques  🟢
 - [x] 🟢 Backend : modèle `Temoignage` (`auteur`, `fonction`, `contenu`, `photo`, `statut` brouillon/publié, `ordre`), CRUD `/api/temoignages` + endpoint **public** `/api/temoignages/public` (publiés). Upload photo (`image`), accès admin+editeur, Swagger inline.
 - [x] 🟢 Admin : page `/admin/temoignages` (CRUD + photo + statut + ordre) ; actions/types ; entrée sidebar « Témoignages » ; permission `editeur` ajoutée.
-- [ ] 🔵 Front : remplacer la section statique de la home par un **carrousel fonctionnel** (embla) alimenté par l'API.
+- [x] 🔵 Front : section statique de la home remplacée par un **carrousel fonctionnel** (`components/sections/testimonials.tsx`, shadcn `Carousel`/embla) alimenté par `/api/temoignages/public` (masquée si vide).
 
 ### 3.3 ❤️ Don — manuel + formulaire d'intention  🟢
 - [ ] 🔵 Finaliser la page `/don` : **vraies coordonnées** bancaires + Mobile Money (à fournir), bouton « copier », design soigné, retrait du bouton « Donner maintenant » inactif.

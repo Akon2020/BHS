@@ -330,4 +330,11 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `components/admin/sidebar.tsx` : entrée « Témoignages » (icône `Quote`).
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
-**Reste** : carrousel home alimenté par l'API (remplacer le témoignage statique).
+
+### Frontend — Carrousel home ✅
+
+- `components/sections/testimonials.tsx` : section « Témoignages » dynamique — fetch `getTemoignagesPublic`, **carrousel** shadcn (`Carousel`/embla, `loop` si > 1), carte crimson (photo/initiales, citation, auteur, fonction), flèches centrées. **Masquée** s'il n'y a aucun témoignage publié ; skeleton au chargement.
+- `app/home-client.tsx` : remplacement de la section statique (Samuel Diambu codé en dur + flèches inertes) par `<TestimonialsSection />` ; nettoyage des imports `ChevronLeft/Right` devenus inutiles.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Bilan 3.2** : témoignages dynamiques complets (backend CRUD + admin + carrousel public). **À tester en runtime** : créer un témoignage publié → vérifier l'apparition dans le carrousel de la home.
