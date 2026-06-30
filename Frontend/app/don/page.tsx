@@ -4,6 +4,22 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Faire un don | Burning Heart",
+  description:
+    "Soutenez la mission de Burning Heart – Pèlerins avec le Christ. Faites un don par virement bancaire ou Mobile Money.",
+  alternates: { canonical: "/don" },
+  openGraph: {
+    title: "Faire un don | Burning Heart",
+    description:
+      "Soutenez la mission spirituelle de Burning Heart – Pèlerins avec le Christ.",
+    url: "/don",
+    siteName: "Burning Heart",
+    type: "website",
+  },
+}
 
 export default function DonationPage() {
   return (

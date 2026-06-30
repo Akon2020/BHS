@@ -266,3 +266,11 @@ Passe groupée (même motif d'en-tête débordant que `blog/view`) :
 - `app/manifest.ts` : PWA légère (nom, description, `start_url`, `display standalone`, `theme_color #8B1538`, icônes `logon.png`).
 
 **Vérification** : `npm run build` génère `sitemap.xml`, `robots.txt`, `manifest.webmanifest` ; `tsc` → 0 erreur.
+
+### 2.2 Métadonnées par page (1/2) ✅
+
+- **Pages serveur** `a-propos`, `services`, `don` : métadonnées enrichies (`title`, `description`, `alternates.canonical`, `openGraph`) typées `Metadata`.
+- **Home** : convertie en wrapper **Server Component** (`app/page.tsx`) + contenu client déplacé dans `app/home-client.tsx`. Le wrapper expose `metadata` (title/description/canonical/OG) **et** un **JSON-LD `NGO`/Organization** (nom, logo, adresse Bukavu, contacts, réseaux sociaux).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → home en statique avec métadonnées.
+**Reste (2.2 — 2/2)** : pages liste client (`blog`, `events`, `files`, `contact`, `identity`) à passer en wrapper serveur, et `generateMetadata` sur `events/[slug]` & `files/[slug]` (+ JSON-LD Article/Event).
