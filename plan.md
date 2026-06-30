@@ -100,7 +100,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 `metadataBase` (fait en 0.2) ; favicons/apple-touch supplémentaires → optionnel (Lot 4).
 
 ### 2.2 Métadonnées par page
-- [~] 🟠 **Convertir les pages publiques `"use client"` en wrappers serveur** : `/` (home) **fait**. Restent les pages liste `/blog`, `/events`, `/files`, `/contact`, `/identity` → wrappers serveur à ajouter.
+- [x] 🟠 **Pages publiques `"use client"` en wrappers serveur** : `/` (home), `/blog`, `/events`, `/files`, `/contact`, `/identity` → toutes converties (contenu client dans `*-client.tsx`, métadonnées exposées par le `page.tsx` serveur).
 - [x] 🟢 `generateMetadata` sur `/events/[slug]` (+ JSON-LD Event) et `/files/[slug]` (titre, description, OG, canonical) — wrappers serveur créés (`event-detail-client.tsx`, `file-detail-client.tsx`).
 - [x] 🟢 Métadonnées dédiées pour `/a-propos`, `/services`, `/don` (+ home). `/contact` → avec la conversion de la page liste.
 

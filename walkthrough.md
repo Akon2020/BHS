@@ -281,4 +281,11 @@ Passe groupée (même motif d'en-tête débordant que `blog/view`) :
 - **Organization/`NGO`** : déjà sur la home (2.2).
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
-**Reste (2.2)** : pages liste client (`blog`, `events`, `files`, `contact`, `identity`) à passer en wrapper serveur pour leurs métadonnées ; OG image par défaut (2.3) ; perf images (2.4).
+### 2.2 — Pages liste en wrappers serveur ✅
+
+Les pages publiques restées `"use client"` sont passées en wrappers serveur (contenu déplacé dans `*-client.tsx`, `page.tsx` serveur exposant `metadata`) :
+- `/blog` → `blog-list-client.tsx` · `/events` → `events-list-client.tsx` · `/files` → `files-list-client.tsx` · `/contact` → `contact-client.tsx` · `/identity` → `identity-client.tsx`.
+- Chaque wrapper : `title`, `description`, `alternates.canonical`, `openGraph`.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès (pages en statique avec métadonnées).
+**Reste SEO** : OG image par défaut (2.3) ; `BreadcrumbList` (optionnel) ; perf/optimisation images (2.4).
