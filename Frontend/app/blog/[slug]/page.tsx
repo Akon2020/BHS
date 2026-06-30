@@ -118,5 +118,49 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({ params }: BlogPageProps) {
   const { slug } = await params;
-  return <BlogPostClient slug={slug} />;
+  const blog = await getBlogBySlugServer(slug);
+
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || "https://burningheartihs.org"
+  ).replace(/\/$/, "");
+
+  const jsonLd = blog
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: blog.titre,
+        description: truncate(
+          blog.extrait || stripHtml(blog.contenu) || blog.titre,
+          200,
+        ),
+        image: resolveImageUrl(blog.imageUne),
+        datePublished: blog.createdAt,
+        dateModified: blog.updatedAt || blog.createdAt,
+        author: {
+          "@type": "Person",
+          name: blog.auteur?.nomComplet || "Burning Heart",
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "Burning Heart",
+          logo: {
+            "@type": "ImageObject",
+            url: `${siteUrl}/images/logon.png`,
+          },
+        },
+        mainEntityOfPage: `${siteUrl}/blog/${blog.slug}`,
+      }
+    : null;
+
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <BlogPostClient slug={slug} />
+    </>
+  );
 }

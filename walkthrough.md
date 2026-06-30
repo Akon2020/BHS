@@ -273,4 +273,12 @@ Passe groupée (même motif d'en-tête débordant que `blog/view`) :
 - **Home** : convertie en wrapper **Server Component** (`app/page.tsx`) + contenu client déplacé dans `app/home-client.tsx`. Le wrapper expose `metadata` (title/description/canonical/OG) **et** un **JSON-LD `NGO`/Organization** (nom, logo, adresse Bukavu, contacts, réseaux sociaux).
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → home en statique avec métadonnées.
-**Reste (2.2 — 2/2)** : pages liste client (`blog`, `events`, `files`, `contact`, `identity`) à passer en wrapper serveur, et `generateMetadata` sur `events/[slug]` & `files/[slug]` (+ JSON-LD Article/Event).
+### 2.2 / 2.3 — Pages détail & JSON-LD ✅
+
+- **`events/[slug]`** : converti en wrapper serveur (`page.tsx` + `event-detail-client.tsx` recevant `slug` en prop) avec `generateMetadata` (title/description/canonical/OG/Twitter) **et JSON-LD `Event`** (dates, lieu, organisateur, image).
+- **`files/[slug]`** : wrapper serveur (`page.tsx` + `file-detail-client.tsx`) avec `generateMetadata`.
+- **`blog/[slug]`** : ajout du **JSON-LD `Article`** (headline, image, dates, auteur, publisher) au wrapper serveur existant.
+- **Organization/`NGO`** : déjà sur la home (2.2).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Reste (2.2)** : pages liste client (`blog`, `events`, `files`, `contact`, `identity`) à passer en wrapper serveur pour leurs métadonnées ; OG image par défaut (2.3) ; perf images (2.4).

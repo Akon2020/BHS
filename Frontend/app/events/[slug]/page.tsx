@@ -1,242 +1,129 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  ArrowLeft,
-  Users,
-  CheckCircle,
-} from "lucide-react";
-
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/use-toast";
-
-import { getEventBySlug } from "@/actions/event";
+import type { Metadata } from "next";
+import EventDetailsClient from "./event-detail-client";
 import type { Evenement } from "@/types/user";
-import { RegisterEventModal } from "@/components/modals/register-event-modal";
 
-export default function EventDetailsPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
+interface EventPageProps {
+  params: Promise<{ slug: string }>;
+}
 
-  const [event, setEvent] = useState<Evenement | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [openRegister, setOpenRegister] = useState(false);
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://burningheartihs.org"
+).replace(/\/$/, "");
 
-  const fetchEvent = async () => {
-    try {
-      setLoading(true);
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-      if (!slug) throw new Error("Slug invalide");
+function truncate(text: string, max = 180): string {
+  if (text.length <= max) return text;
+  return `${text.slice(0, max - 1).trim()}...`;
+}
 
-      const res = await getEventBySlug(slug);
-      const data = res.event;
+function resolveImageUrl(image?: string): string | undefined {
+  if (!image) return undefined;
+  if (image.startsWith("http")) return image;
+  if (!API_BASE_URL) return undefined;
+  return `${API_BASE_URL}/${image.replace(/^\/+/, "")}`;
+}
 
-      if (!data) throw new Error("Événement introuvable");
+async function getEventBySlugServer(slug: string): Promise<Evenement | null> {
+  if (!slug || !API_BASE_URL) return null;
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/evenements/slug/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 120 } },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.event ?? null;
+  } catch {
+    return null;
+  }
+}
 
-      setEvent(data);
-    } catch (error: any) {
-      toast({
-        title: "Erreur",
-        description:
-          error?.message || "Impossible de charger l'événement.",
-        variant: "destructive",
-      });
-      setEvent(null);
-    } finally {
-      setLoading(false);
-    }
+export async function generateMetadata({
+  params,
+}: EventPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const event = await getEventBySlugServer(slug);
+
+  if (!event) {
+    return {
+      title: "Événement introuvable | Burning Heart",
+      description: "L'événement demandé est introuvable.",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const description = truncate(stripHtml(event.description) || event.titre, 180);
+  const imageUrl = resolveImageUrl(event.imageEvenement);
+
+  return {
+    title: `${event.titre} | Burning Heart`,
+    description,
+    alternates: { canonical: `/events/${event.slug}` },
+    openGraph: {
+      type: "article",
+      url: `${SITE_URL}/events/${event.slug}`,
+      title: event.titre,
+      description,
+      siteName: "Burning Heart",
+      images: imageUrl ? [{ url: imageUrl, alt: event.titre }] : undefined,
+    },
+    twitter: {
+      card: imageUrl ? "summary_large_image" : "summary",
+      title: event.titre,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
   };
+}
 
-  useEffect(() => {
-    if (slug) fetchEvent();
-  }, [slug]);
+export default async function EventPage({ params }: EventPageProps) {
+  const { slug } = await params;
+  const event = await getEventBySlugServer(slug);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col">
-        <Header />
-        <div className="mx-auto max-w-4xl px-4 py-12 space-y-6">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-12 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-          <Skeleton className="h-64 w-full rounded-xl" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!event && !loading) {
-    return (
-      <div className="flex flex-col">
-        <Header />
-        <section className="py-12">
-          <div className="mx-auto max-w-4xl px-4 lg:px-8 text-center">
-            <h1 className="font-serif text-4xl font-bold">404</h1>
-            <h2 className="mt-4 text-2xl">Événement introuvable</h2>
-            <p className="mt-4 text-muted-foreground">
-              Cet événement n’existe pas ou a été supprimé.
-            </p>
-            <div className="mt-8">
-              <Link href="/events">
-                <Button>Retour aux événements</Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-        <Footer />
-      </div>
-    );
-  }
-
-  const isPast =
-    new Date(event!.dateEvenement).getTime() < Date.now();
-  const totalPlaces = event?.nombrePlaces ?? null;
-  const totalInscrits = event?.nombreInscrits ?? 0;
-  const placesRestantes =
-    typeof totalPlaces === "number"
-      ? Math.max(totalPlaces - totalInscrits, 0)
-      : null;
+  const jsonLd = event
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: event.titre,
+        startDate: `${event.dateEvenement}T${event.heureDebut}`,
+        endDate: event.heureFin
+          ? `${event.dateEvenement}T${event.heureFin}`
+          : undefined,
+        eventStatus:
+          event.statut === "annule"
+            ? "https://schema.org/EventCancelled"
+            : "https://schema.org/EventScheduled",
+        location: {
+          "@type": "Place",
+          name: event.lieu,
+        },
+        description: truncate(stripHtml(event.description), 300),
+        image: resolveImageUrl(event.imageEvenement),
+        url: `${SITE_URL}/events/${event.slug}`,
+        organizer: {
+          "@type": "Organization",
+          name: "Burning Heart",
+          url: SITE_URL,
+        },
+      }
+    : null;
 
   return (
-    <div className="flex flex-col">
-      <Header />
-
-      <section className="py-12">
-        <div className="mx-auto max-w-4xl px-4 lg:px-8">
-          <Link href="/events">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Retour aux événements
-            </Button>
-          </Link>
-
-          {/* Header */}
-          <div className="mt-8">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge
-                variant={
-                  placesRestantes === 0
-                    ? "destructive"
-                    : isPast
-                    ? "secondary"
-                    : "default"
-                }
-              >
-                {placesRestantes === 0
-                  ? "Complet"
-                  : isPast
-                  ? "Passé"
-                  : "À venir"}
-              </Badge>
-            </div>
-
-            <h1 className="mt-4 font-serif text-4xl font-bold leading-tight sm:text-5xl">
-              {event!.titre}
-            </h1>
-
-            <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {new Date(event!.dateEvenement).toLocaleDateString("fr-FR")}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>
-                  {event!.heureDebut}
-                  {event!.heureFin ? ` - ${event!.heureFin}` : ""}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span>{event!.lieu}</span>
-              </div>
-
-              {typeof totalPlaces === "number" && (
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span>
-                    {totalInscrits}/{totalPlaces} inscrits
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Image */}
-          <div className="mt-12 aspect-video overflow-hidden rounded-xl bg-muted">
-            {event!.imageEvenement ? (
-              <img
-                src={
-                  event!.imageEvenement.startsWith("http")
-                    ? event!.imageEvenement
-                    : `${process.env.NEXT_PUBLIC_API_URL}/${event!.imageEvenement}`
-                }
-                alt={event!.titre}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <Calendar className="h-20 w-20 text-muted-foreground/30" />
-              </div>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="prose prose-lg mt-12 max-w-none dark:prose-invert">
-            <div className="lead text-xl text-muted-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: event!.description }}/>
-            {/* <p className="lead text-xl text-muted-foreground leading-relaxed">
-              {event!.description}
-            </p> */}
-          </div>
-
-          {/* CTA */}
-          {!isPast && placesRestantes !== 0 && (
-            <div className="mt-12 rounded-xl bg-muted/50 p-8">
-              <h3 className="font-serif text-2xl font-bold">
-                Participez à cet événement
-              </h3>
-              <p className="mt-2 text-muted-foreground leading-relaxed">
-                Inscrivez-vous pour réserver votre place.
-              </p>
-
-              <div className="mt-6">
-                <Button
-                  size="lg"
-                  className="gap-2"
-                  onClick={() => setOpenRegister(true)}
-                >
-                  <CheckCircle className="h-5 w-5" />
-                  S’inscrire à l’événement
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <RegisterEventModal
-        open={openRegister}
-        onOpenChange={setOpenRegister}
-        slug={event!.slug}
-        onSuccess={fetchEvent}
-      />
-
-      <Footer />
-    </div>
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <EventDetailsClient slug={slug} />
+    </>
   );
 }

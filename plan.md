@@ -100,12 +100,12 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 `metadataBase` (fait en 0.2) ; favicons/apple-touch supplémentaires → optionnel (Lot 4).
 
 ### 2.2 Métadonnées par page
-- [ ] 🟠 **Convertir les pages publiques `"use client"` en Server Components** (ou extraire un wrapper client) pour exposer `generateMetadata` : `/`, `/contact`, `/events`, `/files`, `/blog`, `/identity`. (Modèle déjà correct : `app/blog/[slug]/page.tsx`.)
-- [ ] 🟢 `generateMetadata` sur `/events/[slug]` et `/files/[slug]` (titre, description, OG, canonical) comme pour le blog.
-- [ ] 🟢 Métadonnées dédiées pour `/a-propos`, `/services`, `/don`, `/contact`.
+- [~] 🟠 **Convertir les pages publiques `"use client"` en wrappers serveur** : `/` (home) **fait**. Restent les pages liste `/blog`, `/events`, `/files`, `/contact`, `/identity` → wrappers serveur à ajouter.
+- [x] 🟢 `generateMetadata` sur `/events/[slug]` (+ JSON-LD Event) et `/files/[slug]` (titre, description, OG, canonical) — wrappers serveur créés (`event-detail-client.tsx`, `file-detail-client.tsx`).
+- [x] 🟢 Métadonnées dédiées pour `/a-propos`, `/services`, `/don` (+ home). `/contact` → avec la conversion de la page liste.
 
 ### 2.3 Données structurées & social
-- [ ] 🟢 **JSON-LD** : `Organization`/`NGO` (global), `Article` (blog), `Event` (événements), `BreadcrumbList`.
+- [~] 🟢 **JSON-LD** : `NGO`/Organization (home) **fait**, `Article` (blog/[slug]) **fait**, `Event` (events/[slug]) **fait**. `BreadcrumbList` → optionnel (à ajouter).
 - [ ] 🟢 **Images OpenGraph** : `opengraph-image` par défaut + dynamiques pour blog/événements (ou réutiliser `imageUne`/`imageEvenement`).
 - [ ] 🔵 Balises `alt` systématiques, titres `h1` uniques par page, hiérarchie `h1→h6` propre.
 
