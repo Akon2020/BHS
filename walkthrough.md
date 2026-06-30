@@ -320,4 +320,14 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `routes/temoignage.route.js` : `GET /public` (public) ; `GET /`, `POST /`, `GET/PUT/DELETE /:id` (admin+editeur, upload `image` + `normalizeUploadPaths`) ; Swagger inline ; montage `app.use("/api/temoignages", …)`.
 
 **Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels`.
-**Reste** : frontend (page admin `/admin/temoignages` + actions/types ; carrousel home alimenté par l'API).
+
+### Frontend — Admin ✅
+
+- `types/user.ts` : `Temoignage`, `GetTemoignagesResponse`, `TemoignageStatut`.
+- `actions/temoignage.ts` : `getTemoignagesPublic`, `getTemoignages`, `createTemoignage`/`updateTemoignage` (FormData + photo), `deleteTemoignage`.
+- `app/admin/temoignages/page.tsx` : liste (avatar, extrait, badge statut, ordre) + dialog création/édition (auteur, fonction, contenu, statut, ordre, photo) + suppression (`DeleteConfirmationModal`).
+- `lib/permissions.ts` : `/admin/temoignages` ajouté pour `editeur` (admin via wildcard).
+- `components/admin/sidebar.tsx` : entrée « Témoignages » (icône `Quote`).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Reste** : carrousel home alimenté par l'API (remplacer le témoignage statique).

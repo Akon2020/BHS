@@ -710,3 +710,25 @@ export interface CreatePointagePayload {
   heureFin?: string;
   note?: string;
 }
+
+/* ------------------------------ Témoignages ------------------------------ */
+
+export type TemoignageStatut = "brouillon" | "publie";
+
+export interface Temoignage {
+  idTemoignage: number;
+  auteur: string;
+  fonction?: string | null;
+  contenu: string;
+  photo?: string | null;
+  statut: TemoignageStatut;
+  ordre: number;
+  createdBy?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetTemoignagesResponse {
+  nombre: number;
+  temoignages: Temoignage[];
+}

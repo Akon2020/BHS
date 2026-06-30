@@ -22,6 +22,7 @@ import {
   UserPlus,
   Tags,
   Timer,
+  Quote,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -92,6 +93,12 @@ export default function AdminSidebar({
       icon: FileText,
       href: "/admin/blog",
       active: pathname.startsWith("/admin/blog"),
+    },
+    {
+      label: "Témoignages",
+      icon: Quote,
+      href: "/admin/temoignages",
+      active: pathname.startsWith("/admin/temoignages"),
     },
     {
       label: "Messages",
