@@ -254,3 +254,15 @@ Passe groupée (même motif d'en-tête débordant que `blog/view`) :
 
 **Vérification** : `tsc --noEmit` → 0 erreur ; `npm run build` → succès.
 **À tester en runtime** : créer un profil (manuel + système), saisir des présences (avec/sans heure de fin), vérifier stats + graphique + récap par période, clôture a posteriori, exports PDF global et individuel.
+
+---
+
+## LOT 2 — SEO
+
+### 2.1 Fondations techniques ✅
+
+- `app/sitemap.ts` : sitemap **dynamique** — pages statiques publiques + blogs publiés + événements publiés + fichiers publics (fetch API server-side, `revalidate: 3600`, échec → liste vide non bloquante). Basé sur `NEXT_PUBLIC_SITE_URL` (fallback `https://burningheartihs.org`).
+- `app/robots.ts` : `allow /`, **`disallow /admin` et `/connexion`**, référence du `sitemap.xml`.
+- `app/manifest.ts` : PWA légère (nom, description, `start_url`, `display standalone`, `theme_color #8B1538`, icônes `logon.png`).
+
+**Vérification** : `npm run build` génère `sitemap.xml`, `robots.txt`, `manifest.webmanifest` ; `tsc` → 0 erreur.

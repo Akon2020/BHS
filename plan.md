@@ -94,10 +94,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 ## 🔍 LOT 2 — SEO  *(priorité 2)*
 
 ### 2.1 Fondations techniques
-- [ ] 🟢 **`app/sitemap.ts`** dynamique : pages statiques + blogs publiés + événements publiés + fichiers publics (via fetch API).
-- [ ] 🟢 **`app/robots.ts`** : autoriser le public, **bloquer `/admin` et `/connexion`**, référencer le sitemap.
-- [ ] 🟢 **`app/manifest.ts`** (PWA légère : nom, icônes, couleurs de marque crimson).
-- [ ] 🔵 `metadataBase` + favicons/icônes complets (déjà `logon.png`, ajouter tailles + apple-touch).
+- [x] 🟢 **`app/sitemap.ts`** dynamique : pages statiques + blogs publiés + événements publiés + fichiers publics (fetch API, `revalidate: 3600`).
+- [x] 🟢 **`app/robots.ts`** : `allow /`, **bloque `/admin` et `/connexion`**, référence le sitemap.
+- [x] 🟢 **`app/manifest.ts`** (PWA légère : nom, description, icônes `logon.png`, `theme_color` crimson).
+- [x] 🔵 `metadataBase` (fait en 0.2) ; favicons/apple-touch supplémentaires → optionnel (Lot 4).
 
 ### 2.2 Métadonnées par page
 - [ ] 🟠 **Convertir les pages publiques `"use client"` en Server Components** (ou extraire un wrapper client) pour exposer `generateMetadata` : `/`, `/contact`, `/events`, `/files`, `/blog`, `/identity`. (Modèle déjà correct : `app/blog/[slug]/page.tsx`.)
