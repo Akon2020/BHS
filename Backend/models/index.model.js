@@ -17,6 +17,8 @@ import Fichier from "./fichier.model.js";
 import MessageEnvoye from "./messageEnvoye.model.js";
 import ProfilPointage from "./profilPointage.model.js";
 import Pointage from "./pointage.model.js";
+import Temoignage from "./temoignage.model.js";
+import Don from "./don.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -167,6 +169,12 @@ Pointage.belongsTo(Utilisateur, {
   as: "createur",
 });
 
+// Témoignage associations
+Temoignage.belongsTo(Utilisateur, {
+  foreignKey: "createdBy",
+  as: "createur",
+});
+
 // Contact-Réponse associations
 ReponseContact.belongsTo(Contact, {
   foreignKey: "idContact",
@@ -234,5 +242,7 @@ export {
   MessageEnvoye,
   ProfilPointage,
   Pointage,
+  Temoignage,
+  Don,
   syncModels,
 };

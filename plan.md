@@ -57,7 +57,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 ### 0.3 Contenus factices / placeholders
 - [x] 🟠 **Notifications admin factices masquées** (`components/admin/header.tsx`) : badge à 0 + état vide « Aucune notification » tant qu'il n'y a pas de source réelle.
-- [ ] 🟠 ⏸️ Brancher la section **Témoignages** de la home (statique) sur le module dynamique — **bloqué par le Lot 3.2** (module pas encore créé).
+- [x] 🟠 Section **Témoignages** de la home branchée sur le module dynamique (Lot 3.2) — carrousel alimenté par l'API.
 - [x] 🟠 **Auth unifiée en cookie httpOnly** : le backend pose le token dans un cookie httpOnly (`secure` en prod uniquement, `sameSite=lax`, `domain` partagé via `COOKIE_DOMAIN`). Ajout de `cookie-parser` (manquant) dans `app.js`. Le front ne manipule plus de token JS (`lib/axios.ts` sans Bearer, `js-cookie`/`localStorage.token` retirés, `useAuth`/`getProfile` via cookie). Cookie parasite retiré de `/register` (n'écrase plus la session admin). ⚠️ **À tester en runtime** (login/logout/refresh) et **définir `COOKIE_DOMAIN=.burningheartihs.org` en prod**.
 
 ### 0.4 Qualité backend
@@ -147,15 +147,15 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 > ✅ **Décisions confirmées** : plusieurs sessions/jour **autorisées** · fuseau **Africa/Lubumbashi (UTC+2)** · **clôture a posteriori** d'une session ouverte **autorisée**.
 
 ### 3.2 💬 Témoignages dynamiques  🟢
-- [ ] 🟢 Backend : modèle `Temoignage` (`auteur`, `fonction/role`, `contenu`, `photo`, `statut` brouillon/publié, `ordre`), CRUD + endpoint public (publiés).
-- [ ] 🟢 Admin : page `/admin/temoignages` (CRUD + modération + ordre).
-- [ ] 🔵 Front : remplacer la section statique de la home par un **carrousel fonctionnel** (embla déjà présent) alimenté par l'API.
+- [x] 🟢 Backend : modèle `Temoignage` (`auteur`, `fonction`, `contenu`, `photo`, `statut` brouillon/publié, `ordre`), CRUD `/api/temoignages` + endpoint **public** `/api/temoignages/public` (publiés). Upload photo (`image`), accès admin+editeur, Swagger inline.
+- [x] 🟢 Admin : page `/admin/temoignages` (CRUD + photo + statut + ordre) ; actions/types ; entrée sidebar « Témoignages » ; permission `editeur` ajoutée.
+- [x] 🔵 Front : section statique de la home remplacée par un **carrousel fonctionnel** (`components/sections/testimonials.tsx`, shadcn `Carousel`/embla) alimenté par `/api/temoignages/public` (masquée si vide).
 
 ### 3.3 ❤️ Don — manuel + formulaire d'intention  🟢
-- [ ] 🔵 Finaliser la page `/don` : **vraies coordonnées** bancaires + Mobile Money (à fournir), bouton « copier », design soigné, retrait du bouton « Donner maintenant » inactif.
-- [ ] 🟢 Backend : modèle `Don` (`nom`, `email`, `montant`, `devise`, `moyen` carte/virement/mobile, `message`, `statut` annoncé/confirmé, timestamps) + endpoint de création + notification email (admin + reçu/merci au donateur via Nodemailer/templates existants).
-- [ ] 🟢 Front : **formulaire « Je déclare un don »** (montant, moyen, message) → enregistre l'intention.
-- [ ] 🟢 Admin : page `/admin/dons` (liste, statut, marquage « confirmé », export éventuel).
+- [x] 🔵 Page `/don` finalisée : coordonnées (Mobile Money réel + banque marquée « À compléter »), boutons **« copier »**, retrait du bouton « Donner maintenant » inactif, design soigné. ⚠️ Fournir les vraies coordonnées bancaires pour remplacer « À compléter » dans `donation-client.tsx`.
+- [x] 🟢 Front : **formulaire « Je déclare un don »** (nom, email, montant, devise, moyen, message) → `createDon`.
+- [x] 🟢 Backend : modèle `Don` (`nom`, `email`, `montant`, `devise`, `moyen` carte/virement/mobile, `message`, `statut` annonce/confirme) + endpoint public de création + **notification email** (admin + remerciement au donateur, templates dédiés). Liste/statut/suppression admin, Swagger inline.
+- [x] 🟢 Admin : page `/admin/dons` (liste, cartes récap, bascule statut annoncé/confirmé, vue message, suppression) ; entrée sidebar « Dons » ; permission éditeur.
 
 ### 3.4 🔎 Recherche globale  🟢
 - [ ] 🟢 Backend : endpoint `/api/recherche?q=` agrégeant blogs + événements + fichiers publics (titre/extrait/tags), résultats paginés et typés.

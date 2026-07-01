@@ -307,3 +307,66 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 **Vérification** : `npm run build` → succès.
 **À tester en runtime** : affichage des images distantes (blog/événements) en dev **et** prod ; Lighthouse ≥ 90 sur le site lancé.
 **Reste (optionnel)** : `BreadcrumbList` JSON-LD ; passe a11y (alt systématiques, hiérarchie h1).
+
+---
+
+## LOT 3.2 — Témoignages dynamiques
+
+### Backend ✅
+
+- `models/temoignage.model.js` : `Temoignage` (auteur, fonction, contenu, photo, `statut` brouillon/publié, `ordre`, createdBy). Table `temoignages`.
+- `models/index.model.js` : association `belongsTo Utilisateur (as createur)` + export.
+- `controllers/temoignage.controller.js` : `getTemoignagesPublic` (publiés, triés par `ordre`), `getTemoignages` (admin), `getTemoignageById`, `createTemoignage`, `updateTemoignage`, `deleteTemoignage` (upload photo via champ `image`).
+- `routes/temoignage.route.js` : `GET /public` (public) ; `GET /`, `POST /`, `GET/PUT/DELETE /:id` (admin+editeur, upload `image` + `normalizeUploadPaths`) ; Swagger inline ; montage `app.use("/api/temoignages", …)`.
+
+**Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels`.
+
+### Frontend — Admin ✅
+
+- `types/user.ts` : `Temoignage`, `GetTemoignagesResponse`, `TemoignageStatut`.
+- `actions/temoignage.ts` : `getTemoignagesPublic`, `getTemoignages`, `createTemoignage`/`updateTemoignage` (FormData + photo), `deleteTemoignage`.
+- `app/admin/temoignages/page.tsx` : liste (avatar, extrait, badge statut, ordre) + dialog création/édition (auteur, fonction, contenu, statut, ordre, photo) + suppression (`DeleteConfirmationModal`).
+- `lib/permissions.ts` : `/admin/temoignages` ajouté pour `editeur` (admin via wildcard).
+- `components/admin/sidebar.tsx` : entrée « Témoignages » (icône `Quote`).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+
+### Frontend — Carrousel home ✅
+
+- `components/sections/testimonials.tsx` : section « Témoignages » dynamique — fetch `getTemoignagesPublic`, **carrousel** shadcn (`Carousel`/embla, `loop` si > 1), carte crimson (photo/initiales, citation, auteur, fonction), flèches centrées. **Masquée** s'il n'y a aucun témoignage publié ; skeleton au chargement.
+- `app/home-client.tsx` : remplacement de la section statique (Samuel Diambu codé en dur + flèches inertes) par `<TestimonialsSection />` ; nettoyage des imports `ChevronLeft/Right` devenus inutiles.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Bilan 3.2** : témoignages dynamiques complets (backend CRUD + admin + carrousel public). **À tester en runtime** : créer un témoignage publié → vérifier l'apparition dans le carrousel de la home.
+
+---
+
+## LOT 3.3 — Don (manuel + formulaire d'intention)
+
+### Backend ✅
+
+- `models/don.model.js` : `Don` (nom, email, montant `DECIMAL`, devise, `moyen` carte/virement/mobile, message, `statut` annonce/confirme). Table `dons`.
+- `utils/email.template.js` : `donThankYouTemplate` (remerciement donateur) + `donIntentionAdminTemplate` (notification admin), via un wrapper de carte commun.
+- `controllers/don.controller.js` : `createDon` (public, valide, crée l'intention, **envoie 2 emails** non bloquants : admin + donateur), `getDons`, `getDonById`, `updateDonStatut` (annonce/confirme), `deleteDon`.
+- `routes/don.route.js` : `POST /` public ; `GET /`, `GET/PATCH /:id` (admin+editeur) ; `DELETE /:id` (admin) ; Swagger inline ; montage `app.use("/api/dons", …)`.
+
+**Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels`.
+
+### Frontend — Page publique `/don` ✅
+
+- `types/user.ts` : `Don`, `GetDonsResponse`, `CreateDonPayload`, `DonMoyen`, `DonStatut`.
+- `actions/don.ts` : `createDon` (public), `getDons`, `updateDonStatut`, `deleteDon`.
+- `app/don/donation-client.tsx` (client) : cartes des moyens (Virement avec coordonnées + **boutons Copier**, Mobile Money réel copiable, Carte « bientôt disponible ») + **formulaire « Je déclare un don »** (nom, email, montant, devise USD/CDF/EUR, moyen, message) → `createDon`.
+- `app/don/page.tsx` : reste **serveur** (métadonnées conservées), intro + `<DonationClient />` + carte de remerciement. Bouton « Donner maintenant » inactif supprimé.
+- ⚠️ Coordonnées bancaires : placeholders « À compléter » dans `donation-client.tsx` (`BANK_DETAILS`) à remplacer par les vraies infos.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+
+### Frontend — Admin `/admin/dons` ✅
+
+- `app/admin/dons/page.tsx` : cartes récap (total dons, confirmés, montant confirmé USD) + tableau (donateur, montant, moyen, statut, date) avec **bascule de statut** annoncé/confirmé, **vue du message** (dialog) et suppression (`DeleteConfirmationModal`).
+- `lib/permissions.ts` : `/admin/dons` ajouté pour `editeur`. `components/admin/sidebar.tsx` : entrée « Dons » (icône `HandHeart`).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Bilan 3.3** : dons complets (backend + page publique avec formulaire d'intention + suivi admin). **À tester en runtime** : déclarer un don sur `/don` → réception des 2 emails + apparition dans `/admin/dons` + bascule de statut.
+**À compléter** : vraies coordonnées bancaires dans `donation-client.tsx` (`BANK_DETAILS`).

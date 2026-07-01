@@ -1,0 +1,3220 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BurningHeart API",
+    "version": "1.0.0",
+    "description": "Documentation de l'API BurningHeart"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5500"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Entrez uniquement le JWT (sans le préfixe Bearer)"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Entrez uniquement le JWT (sans le préfixe Bearer)"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token",
+        "description": "Cookie token (optionnel)"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/abonnes": {
+      "get": {
+        "summary": "Récupérer tous les abonnés à la newsletter",
+        "tags": [
+          "Abonnes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des abonnés récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/abonnes/actifs": {
+      "get": {
+        "summary": "Récupérer tous les abonnés actifs à la newsletter",
+        "tags": [
+          "Abonnes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des abonnés récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/abonnes/{id}": {
+      "get": {
+        "summary": "Récupérer un abonné et son historique de réceptions",
+        "tags": [
+          "Abonnes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abonné récupéré avec succès"
+          },
+          "404": {
+            "description": "Abonné introuvable"
+          }
+        }
+      }
+    },
+    "/api/abonnes/subscribe": {
+      "post": {
+        "summary": "Envoyer un nouveau message de contact",
+        "tags": [
+          "Abonnes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nomComplet",
+                  "email"
+                ],
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Abonné(e) enregisté(e) avec succès"
+          }
+        }
+      }
+    },
+    "/api/abonnes/update/{id}": {
+      "patch": {
+        "summary": "Modifier un abonné",
+        "tags": [
+          "Abonnes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abonné mis à jour avec succès"
+          },
+          "404": {
+            "description": "Abonné introuvable"
+          }
+        }
+      }
+    },
+    "/api/abonnes/delete/{id}": {
+      "delete": {
+        "summary": "Supprimer un abonné",
+        "tags": [
+          "Abonnes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Abonné supprimé avec succès"
+          },
+          "404": {
+            "description": "Abonné introuvable"
+          }
+        }
+      }
+    },
+    "/api/auth/status": {
+      "get": {
+        "summary": "Vérifie si l'utilisateur est connecté",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statut d'authentification renvoyé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "summary": "Récupère les informations de l'utilisateur connecté",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informations de l'utilisateur"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Crée un nouveau compte utilisateur",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nomComplet",
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utilisateur créé avec succès"
+          },
+          "400": {
+            "description": "Données manquantes ou utilisateur déjà existant"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Connecte un utilisateur",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Connexion réussie"
+          },
+          "401": {
+            "description": "Email ou mot de passe incorrect"
+          }
+        }
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "summary": "Demande de réinitialisation de mot de passe",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email de réinitialisation envoyé"
+          },
+          "400": {
+            "description": "Email non trouvé ou invalide"
+          }
+        }
+      }
+    },
+    "/api/auth/resetpassword": {
+      "post": {
+        "summary": "Met à jour le mot de passe avec le token de réinitialisation",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Token de réinitialisation"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "newPassword"
+                ],
+                "properties": {
+                  "newPassword": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mot de passe mis à jour avec succès"
+          },
+          "400": {
+            "description": "Données invalides ou token manquant"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Déconnecte l'utilisateur",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Déconnexion réussie"
+          }
+        }
+      }
+    },
+    "/api/blogs": {
+      "get": {
+        "summary": "Récupérer tous les blogs (avec pagination)",
+        "tags": [
+          "Blogs"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Page courante"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Nombre d'éléments par page"
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Statut du blog (publie, brouillon)"
+          },
+          {
+            "in": "query",
+            "name": "categorie",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "ID de la catégorie"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des blogs récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/blogs/{id}": {
+      "get": {
+        "summary": "Récupérer un blog par ID",
+        "tags": [
+          "Blogs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID du blog"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog trouvé"
+          },
+          "404": {
+            "description": "Blog non trouvé"
+          }
+        }
+      }
+    },
+    "/api/blogs/search/slug/{slug}": {
+      "get": {
+        "summary": "Récupérer un blog par son slug",
+        "tags": [
+          "Blogs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Slug du blog"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog trouvé"
+          },
+          "404": {
+            "description": "Blog non trouvé"
+          }
+        }
+      }
+    },
+    "/api/blogs/auteur/{idAuteur}": {
+      "get": {
+        "summary": "Récupérer les blogs par auteur",
+        "tags": [
+          "Blogs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idAuteur",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de l'auteur"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blogs de l'auteur récupérés"
+          }
+        }
+      }
+    },
+    "/api/blogs/statut/{statut}": {
+      "get": {
+        "summary": "Récupérer les blogs par statut",
+        "tags": [
+          "Blogs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "statut",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Statut du blog (publie, brouillon)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blogs par statut récupérés"
+          }
+        }
+      }
+    },
+    "/api/blogs/add": {
+      "post": {
+        "summary": "Créer un nouveau blog",
+        "tags": [
+          "Blogs"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "titre",
+                  "slug",
+                  "contenu"
+                ],
+                "properties": {
+                  "titre": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "contenu": {
+                    "type": "string"
+                  },
+                  "extrait": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "type": "string"
+                  },
+                  "statut": {
+                    "type": "string"
+                  },
+                  "idCategorie": {
+                    "type": "integer"
+                  },
+                  "imageUne": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Blog créé avec succès"
+          }
+        }
+      }
+    },
+    "/api/blogs/update/{id}": {
+      "patch": {
+        "summary": "Mettre à jour un blog",
+        "tags": [
+          "Blogs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID du blog à mettre à jour"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "titre": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "contenu": {
+                    "type": "string"
+                  },
+                  "extrait": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "type": "string"
+                  },
+                  "statut": {
+                    "type": "string"
+                  },
+                  "idCategorie": {
+                    "type": "integer"
+                  },
+                  "imageUne": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Blog mis à jour avec succès"
+          },
+          "404": {
+            "description": "Blog non trouvé"
+          }
+        }
+      }
+    },
+    "/api/blogs/delete/{id}": {
+      "delete": {
+        "summary": "Supprimer un blog",
+        "tags": [
+          "Blogs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID du blog à supprimer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog supprimé avec succès"
+          },
+          "404": {
+            "description": "Blog non trouvé"
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "Récupérer toutes les catégories",
+        "tags": [
+          "Catégories"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des catégories récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "get": {
+        "summary": "Récupérer une catégorie par ID",
+        "tags": [
+          "Catégories"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de la catégorie"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catégorie trouvée"
+          },
+          "404": {
+            "description": "Catégorie non trouvée"
+          }
+        }
+      }
+    },
+    "/api/categories/slug/{slug}": {
+      "get": {
+        "summary": "Récupérer une catégorie par son slug",
+        "tags": [
+          "Catégories"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Slug de la catégorie"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catégorie trouvée"
+          },
+          "404": {
+            "description": "Catégorie non trouvée"
+          }
+        }
+      }
+    },
+    "/api/categories/add": {
+      "post": {
+        "summary": "Créer une nouvelle catégorie",
+        "tags": [
+          "Catégories"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nomCategorie"
+                ],
+                "properties": {
+                  "nomCategorie": {
+                    "type": "string",
+                    "example": "Développement Web"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Catégorie créée avec succès"
+          },
+          "400": {
+            "description": "Données invalides ou catégorie existante"
+          }
+        }
+      }
+    },
+    "/api/categories/update/{id}": {
+      "patch": {
+        "summary": "Mettre à jour une catégorie existante",
+        "tags": [
+          "Catégories"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de la catégorie à mettre à jour"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nomCategorie": {
+                    "type": "string",
+                    "example": "Développement Web"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Catégorie mise à jour"
+          },
+          "404": {
+            "description": "Catégorie non trouvée"
+          }
+        }
+      }
+    },
+    "/api/categories/delete/{id}": {
+      "delete": {
+        "summary": "Supprimer une catégorie",
+        "tags": [
+          "Catégories"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de la catégorie à supprimer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catégorie supprimée"
+          },
+          "404": {
+            "description": "Catégorie non trouvée"
+          }
+        }
+      }
+    },
+    "/api/contacts": {
+      "get": {
+        "summary": "Récupérer tous les messages de contact",
+        "tags": [
+          "Contacts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des messages récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/contacts/{id}": {
+      "get": {
+        "summary": "Récupérer un message de contact par ID",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "ID du message"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message trouvé"
+          },
+          "404": {
+            "description": "Message non trouvé"
+          }
+        }
+      }
+    },
+    "/api/contacts/search/email/{email}": {
+      "get": {
+        "summary": "Rechercher les messages par email",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "email",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Adresse email associée au message"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Messages trouvés"
+          },
+          "404": {
+            "description": "Aucun message trouvé avec cet email"
+          }
+        }
+      }
+    },
+    "/api/contacts/add": {
+      "post": {
+        "summary": "Envoyer un nouveau message de contact",
+        "tags": [
+          "Contacts"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nomComplet",
+                  "email",
+                  "message"
+                ],
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "sujet": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Message envoyé avec succès"
+          }
+        }
+      }
+    },
+    "/api/contacts/repondre/{id}": {
+      "post": {
+        "summary": "Répondre à un message de contact",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID du message de contact à répondre",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sujetReponse",
+                  "messageReponse"
+                ],
+                "properties": {
+                  "sujetReponse": {
+                    "type": "string",
+                    "example": "Merci pour votre retour"
+                  },
+                  "messageReponse": {
+                    "type": "string",
+                    "example": "Bonjour, nous avons bien reçu votre message et nous vous remercions pour votre intérêt."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Réponse envoyée avec succès"
+          },
+          "400": {
+            "description": "Sujet ou message de réponse manquant"
+          },
+          "404": {
+            "description": "Contact non trouvé"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/contacts/delete/{id}": {
+      "delete": {
+        "summary": "Supprimer un message de contact",
+        "tags": [
+          "Contacts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "ID du message à supprimer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message supprimé avec succès"
+          },
+          "404": {
+            "description": "Message non trouvé"
+          }
+        }
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "summary": "Récupérer les statistiques du tableau de bord",
+        "tags": [
+          "Dashboard"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques du dashboard récupérées avec succès",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "object",
+                      "properties": {
+                        "nombre": {
+                          "type": "number"
+                        },
+                        "data": {
+                          "type": "array"
+                        }
+                      }
+                    },
+                    "abonnes": {
+                      "type": "object",
+                      "properties": {
+                        "nombre": {
+                          "type": "number"
+                        },
+                        "data": {
+                          "type": "array"
+                        }
+                      }
+                    },
+                    "evenements": {
+                      "type": "object",
+                      "properties": {
+                        "nombre": {
+                          "type": "number"
+                        },
+                        "data": {
+                          "type": "array"
+                        }
+                      }
+                    },
+                    "blogs": {
+                      "type": "object",
+                      "properties": {
+                        "nombre": {
+                          "type": "number"
+                        },
+                        "data": {
+                          "type": "array"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/dons": {
+      "post": {
+        "summary": "Enregistrer une intention de don (public)",
+        "tags": [
+          "Dons"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nom",
+                  "email",
+                  "moyen"
+                ],
+                "properties": {
+                  "nom": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "montant": {
+                    "type": "number"
+                  },
+                  "devise": {
+                    "type": "string"
+                  },
+                  "moyen": {
+                    "type": "string",
+                    "enum": [
+                      "carte",
+                      "virement",
+                      "mobile"
+                    ]
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intention enregistrée"
+          }
+        }
+      },
+      "get": {
+        "summary": "Lister les intentions de don (admin)",
+        "tags": [
+          "Dons"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des dons"
+          }
+        }
+      }
+    },
+    "/api/dons/{id}": {
+      "get": {
+        "summary": "Récupérer un don",
+        "tags": [
+          "Dons"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Don"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Mettre à jour le statut d'un don (annonce/confirme)",
+        "tags": [
+          "Dons"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statut mis à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un don",
+        "tags": [
+          "Dons"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Don supprimé"
+          }
+        }
+      }
+    },
+    "/api/equipes": {
+      "get": {
+        "summary": "Récupérer tous les membres de l'équipe",
+        "tags": [
+          "Équipes"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des membres récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/equipes/{id}": {
+      "get": {
+        "summary": "Récupérer un membre par ID",
+        "tags": [
+          "Équipes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID du membre"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre trouvé"
+          },
+          "404": {
+            "description": "Membre non trouvé"
+          }
+        }
+      }
+    },
+    "/api/equipes/fonction/{fonction}": {
+      "get": {
+        "summary": "Récupérer un membre par sa fonction",
+        "tags": [
+          "Équipes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "fonction",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Fonction du membre"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre trouvé"
+          },
+          "404": {
+            "description": "Membre non trouvé"
+          }
+        }
+      }
+    },
+    "/api/equipes/add": {
+      "post": {
+        "summary": "Ajouter un nouveau membre",
+        "tags": [
+          "Équipes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nomComplet",
+                  "fonction"
+                ],
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "fonction": {
+                    "type": "string"
+                  },
+                  "biographie": {
+                    "type": "string"
+                  },
+                  "ordre": {
+                    "type": "integer"
+                  },
+                  "actif": {
+                    "type": "boolean"
+                  },
+                  "photoProfil": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Membre ajouté avec succès"
+          },
+          "400": {
+            "description": "Données invalides ou membre existant"
+          }
+        }
+      }
+    },
+    "/api/equipes/update/{id}": {
+      "patch": {
+        "summary": "Mettre à jour un membre",
+        "tags": [
+          "Équipes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID du membre à mettre à jour"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "fonction": {
+                    "type": "string"
+                  },
+                  "biographie": {
+                    "type": "string"
+                  },
+                  "ordre": {
+                    "type": "integer"
+                  },
+                  "actif": {
+                    "type": "boolean"
+                  },
+                  "photoProfil": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Membre mis à jour avec succès"
+          },
+          "404": {
+            "description": "Membre non trouvé"
+          }
+        }
+      }
+    },
+    "/api/equipes/delete/{id}": {
+      "delete": {
+        "summary": "Supprimer un membre",
+        "tags": [
+          "Équipes"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID du membre à supprimer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membre supprimé"
+          },
+          "404": {
+            "description": "Membre non trouvé"
+          }
+        }
+      }
+    },
+    "/api/evenements": {
+      "get": {
+        "summary": "Récupérer tous les événements publiés (pagination)",
+        "tags": [
+          "Événements"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Numéro de la page"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "required": false,
+            "description": "Nombre d'éléments par page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des événements récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/evenements/admin": {
+      "get": {
+        "summary": "Récupérer tous les événements (admin, tous statuts)",
+        "tags": [
+          "Événements"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Filtrer par statut (publie, brouillon, annule, etc.)"
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Recherche par titre ou lieu"
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": false,
+            "description": "Date de début"
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": false,
+            "description": "Date de fin"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des événements (admin) récupérée"
+          }
+        }
+      }
+    },
+    "/api/evenements/{id}": {
+      "get": {
+        "summary": "Récupérer un événement par ID",
+        "tags": [
+          "Événements"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de l'événement"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Événement trouvé"
+          },
+          "404": {
+            "description": "Événement non trouvé"
+          }
+        }
+      }
+    },
+    "/api/evenements/slug/{slug}": {
+      "get": {
+        "summary": "Récupérer un événement par son slug",
+        "tags": [
+          "Événements"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Slug de l'événement"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Événement trouvé"
+          },
+          "404": {
+            "description": "Événement non trouvé"
+          }
+        }
+      }
+    },
+    "/api/evenements/date/{date}": {
+      "get": {
+        "summary": "Récupérer les événements à une date donnée",
+        "tags": [
+          "Événements"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Date de l'événement (format AAAA-MM-JJ)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Événements trouvés"
+          }
+        }
+      }
+    },
+    "/api/evenements/admin/{id}": {
+      "get": {
+        "summary": "Récupérer un événement avec la liste complète des inscrits (admin)",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/evenements/add": {
+      "post": {
+        "summary": "Créer un nouvel événement",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "titre",
+                  "description",
+                  "dateEvenement",
+                  "heureDebut",
+                  "heureFin",
+                  "lieu"
+                ],
+                "properties": {
+                  "titre": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "dateEvenement": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "heureDebut": {
+                    "type": "string"
+                  },
+                  "heureFin": {
+                    "type": "string"
+                  },
+                  "lieu": {
+                    "type": "string"
+                  },
+                  "nombrePlaces": {
+                    "type": "integer"
+                  },
+                  "statut": {
+                    "type": "string"
+                  },
+                  "imageEvenement": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Événement créé avec succès"
+          }
+        }
+      }
+    },
+    "/api/evenements/update/{id}": {
+      "patch": {
+        "summary": "Mettre à jour un événement",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de l'événement à mettre à jour"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "titre": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "dateEvenement": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "heureDebut": {
+                    "type": "string"
+                  },
+                  "heureFin": {
+                    "type": "string"
+                  },
+                  "lieu": {
+                    "type": "string"
+                  },
+                  "nombrePlaces": {
+                    "type": "integer"
+                  },
+                  "statut": {
+                    "type": "string"
+                  },
+                  "imageEvenement": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Événement mis à jour avec succès"
+          },
+          "404": {
+            "description": "Événement non trouvé"
+          }
+        }
+      }
+    },
+    "/api/evenements/delete/{id}": {
+      "delete": {
+        "summary": "Supprimer un événement",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID de l'événement à supprimer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Événement supprimé/annulé avec succès"
+          },
+          "404": {
+            "description": "Événement non trouvé"
+          }
+        }
+      }
+    },
+    "/api/evenements/{id}/inscription": {
+      "post": {
+        "summary": "S'inscrire à un événement (connecté ou visiteur)",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "sexe": {
+                    "type": "string"
+                  },
+                  "telephone": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inscription réussie"
+          }
+        }
+      }
+    },
+    "/api/evenements/{id}/inscription/visiteur": {
+      "post": {
+        "summary": "Ajouter un visiteur à un événement (admin)",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/evenements/{id}/inscriptions/{inscriptionId}/renvoyer-ticket": {
+      "post": {
+        "summary": "Renvoyer le ticket PDF d'une inscription",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/evenements/{id}/inscriptions/doublons": {
+      "delete": {
+        "summary": "Supprimer les inscriptions en doublon par email",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/evenements/slug/{slug}/inscription": {
+      "post": {
+        "summary": "S'inscrire à un événement (connecté ou visiteur)",
+        "tags": [
+          "Événements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "sexe": {
+                    "type": "string"
+                  },
+                  "telephone": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Inscription réussie"
+          }
+        }
+      }
+    },
+    "/api/identites": {
+      "get": {
+        "summary": "Récupérer toutes les fiches d'identité",
+        "tags": [
+          "Identites"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des fiches d'identité récupérée avec succès"
+          }
+        }
+      }
+    },
+    "/api/identites/{id}": {
+      "get": {
+        "summary": "Récupérer une fiche d'identité par ID",
+        "tags": [
+          "Identites"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "ID de la fiche d'identité"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fiche trouvée"
+          },
+          "404": {
+            "description": "Fiche non trouvée"
+          }
+        }
+      }
+    },
+    "/api/identites/add": {
+      "post": {
+        "summary": "Soumettre une fiche d'identité",
+        "tags": [
+          "Identites"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Fiche d'identité soumise avec succès"
+          },
+          "400": {
+            "description": "Données invalides ou incomplètes"
+          }
+        }
+      }
+    },
+    "/api/identites/update/{id}": {
+      "patch": {
+        "summary": "Mettre à jour une fiche d'identité",
+        "tags": [
+          "Identites"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID de la fiche d'identité",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fiche mise à jour avec succès"
+          },
+          "404": {
+            "description": "Fiche non trouvée"
+          }
+        }
+      }
+    },
+    "/api/identites/approuver/{id}": {
+      "patch": {
+        "summary": "Approuver une fiche d'identité",
+        "tags": [
+          "Identites"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID de la fiche d'identité à approuver",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fiche approuvée avec succès"
+          },
+          "404": {
+            "description": "Fiche non trouvée"
+          }
+        }
+      }
+    },
+    "/api/identites/delete/{id}": {
+      "delete": {
+        "summary": "Supprimer une fiche d'identité",
+        "tags": [
+          "Identites"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "ID de la fiche d'identité à supprimer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fiche supprimée avec succès"
+          },
+          "404": {
+            "description": "Fiche non trouvée"
+          }
+        }
+      }
+    },
+    "/api/messages": {
+      "get": {
+        "summary": "Lister les messages envoyés",
+        "tags": [
+          "Messages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des messages envoyés"
+          }
+        }
+      },
+      "post": {
+        "summary": "Composer et envoyer un nouveau message",
+        "tags": [
+          "Messages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "destinataireEmail",
+                  "sujet",
+                  "message"
+                ],
+                "properties": {
+                  "destinataireEmail": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "destinataireNom": {
+                    "type": "string"
+                  },
+                  "sujet": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Message envoyé avec succès"
+          },
+          "400": {
+            "description": "Champs manquants ou email invalide"
+          },
+          "502": {
+            "description": "Échec de l'envoi de l'email"
+          }
+        }
+      }
+    },
+    "/api/messages/{id}": {
+      "get": {
+        "summary": "Récupérer un message envoyé par ID",
+        "tags": [
+          "Messages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message trouvé"
+          },
+          "404": {
+            "description": "Message non trouvé"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un message envoyé",
+        "tags": [
+          "Messages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message supprimé"
+          },
+          "404": {
+            "description": "Message non trouvé"
+          }
+        }
+      }
+    },
+    "/api/newsletters": {
+      "get": {
+        "summary": "Récupérer toutes les newsletters",
+        "tags": [
+          "Newsletters"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "brouillon",
+                "programme",
+                "envoye"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des newsletters"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer une nouvelle newsletter",
+        "tags": [
+          "Newsletters"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "titreInterne",
+                  "objetMail",
+                  "contenu",
+                  "writedBy"
+                ],
+                "properties": {
+                  "titreInterne": {
+                    "type": "string"
+                  },
+                  "objetMail": {
+                    "type": "string"
+                  },
+                  "contenu": {
+                    "type": "string"
+                  },
+                  "statut": {
+                    "type": "string",
+                    "enum": [
+                      "brouillon",
+                      "programme"
+                    ]
+                  },
+                  "dateProgrammee": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "writedBy": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Newsletter créée avec succès"
+          }
+        }
+      }
+    },
+    "/api/newsletters/{id}": {
+      "get": {
+        "summary": "Détails d'une newsletter",
+        "tags": [
+          "Newsletters"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Détails de la newsletter"
+          },
+          "404": {
+            "description": "Newsletter introuvable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Mettre à jour une newsletter",
+        "tags": [
+          "Newsletters"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Newsletter mise à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer une newsletter",
+        "tags": [
+          "Newsletters"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newsletter supprimée"
+          }
+        }
+      }
+    },
+    "/api/newsletters/{id}/stats": {
+      "get": {
+        "summary": "Statistiques d'envoi d'une newsletter",
+        "tags": [
+          "Newsletters"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques récupérées"
+          }
+        }
+      }
+    },
+    "/api/newsletters/{id}/send": {
+      "post": {
+        "summary": "Envoyer une newsletter",
+        "tags": [
+          "Newsletters"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newsletter envoyée avec succès"
+          }
+        }
+      }
+    },
+    "/api/pointages/profils": {
+      "get": {
+        "summary": "Lister les profils de pointage",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des profils"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un profil (manuel ou depuis un utilisateur système)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Profil créé"
+          }
+        }
+      }
+    },
+    "/api/pointages/profils/{id}": {
+      "put": {
+        "summary": "Mettre à jour un profil",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil mis à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un profil (et ses pointages)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil supprimé"
+          }
+        }
+      }
+    },
+    "/api/pointages/stats": {
+      "get": {
+        "summary": "Statistiques de pointage (filtre hebdo/mensuel/annuel)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "periode",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "hebdo",
+                "mensuel",
+                "annuel"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques calculées"
+          }
+        }
+      }
+    },
+    "/api/pointages/export": {
+      "get": {
+        "summary": "Exporter le pointage en PDF (global ou individuel)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "periode",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "hebdo",
+                "mensuel",
+                "annuel"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "global",
+                "individuel"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "idProfil",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fichier PDF"
+          }
+        }
+      }
+    },
+    "/api/pointages": {
+      "get": {
+        "summary": "Lister les pointages (filtres profil/période/dates)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des pointages"
+          }
+        }
+      },
+      "post": {
+        "summary": "Enregistrer une présence (saisie manuelle)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "idProfil",
+                  "date",
+                  "heureDebut"
+                ],
+                "properties": {
+                  "idProfil": {
+                    "type": "integer"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "heureDebut": {
+                    "type": "string",
+                    "example": "08:00"
+                  },
+                  "heureFin": {
+                    "type": "string",
+                    "example": "12:00"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pointage enregistré"
+          }
+        }
+      }
+    },
+    "/api/pointages/{id}": {
+      "put": {
+        "summary": "Mettre à jour un pointage (clôture a posteriori possible)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pointage mis à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un pointage",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pointage supprimé"
+          }
+        }
+      }
+    },
+    "/api/temoignages/public": {
+      "get": {
+        "summary": "Lister les témoignages publiés (public)",
+        "tags": [
+          "Temoignages"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des témoignages publiés"
+          }
+        }
+      }
+    },
+    "/api/temoignages": {
+      "get": {
+        "summary": "Lister tous les témoignages (admin)",
+        "tags": [
+          "Temoignages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des témoignages"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un témoignage",
+        "tags": [
+          "Temoignages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Témoignage créé"
+          }
+        }
+      }
+    },
+    "/api/temoignages/{id}": {
+      "get": {
+        "summary": "Récupérer un témoignage",
+        "tags": [
+          "Temoignages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Témoignage"
+          }
+        }
+      },
+      "put": {
+        "summary": "Mettre à jour un témoignage",
+        "tags": [
+          "Temoignages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Témoignage mis à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un témoignage",
+        "tags": [
+          "Temoignages"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Témoignage supprimé"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "Récupère tous les utilisateurs",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des utilisateurs récupérée avec succès"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "summary": "Récupère un utilisateur par son ID",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID de l'utilisateur",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateur trouvé"
+          },
+          "400": {
+            "description": "Utilisateur non trouvé"
+          }
+        }
+      }
+    },
+    "/api/users/email/{email}": {
+      "get": {
+        "summary": "Récupère un utilisateur par email",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Adresse email de l'utilisateur"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateur trouvé"
+          },
+          "400": {
+            "description": "Email invalide"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          }
+        }
+      }
+    },
+    "/api/users/add": {
+      "post": {
+        "summary": "Crée un nouvel utilisateur",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nomComplet",
+                  "email"
+                ],
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "admin",
+                      "auteur"
+                    ]
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Utilisateur créé avec succès"
+          },
+          "400": {
+            "description": "Utilisateur existant ou données invalides"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/users/update/{id}": {
+      "patch": {
+        "summary": "Met à jour un utilisateur",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID de l'utilisateur à mettre à jour",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nomComplet": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "admin",
+                      "auteur"
+                    ]
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Utilisateur mis à jour avec succès"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/users/update/{id}/password": {
+      "patch": {
+        "summary": "Met à jour le mot de passe d'un utilisateur",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID de l'utilisateur à mettre à jour",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "oldPassword": {
+                    "type": "string"
+                  },
+                  "newPassword": {
+                    "type": "string"
+                  },
+                  "confirmNewPassword": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mot de passe mis à jour avec succès"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    },
+    "/api/users/delete/{id}": {
+      "delete": {
+        "summary": "Supprime un utilisateur",
+        "tags": [
+          "Utilisateurs"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID de l'utilisateur à supprimer",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Utilisateur supprimé avec succès"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          },
+          "500": {
+            "description": "Erreur serveur"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Abonnes",
+      "description": "API pour gérer les abonnées à la newsletter"
+    },
+    {
+      "name": "Blogs",
+      "description": "API pour gérer les blogs"
+    },
+    {
+      "name": "Catégories",
+      "description": "API pour gérer les catégories de blog"
+    },
+    {
+      "name": "Contacts",
+      "description": "API pour gérer les messages de contact"
+    },
+    {
+      "name": "Dashboard",
+      "description": "API pour le tableau de bord administrateur"
+    },
+    {
+      "name": "Dons",
+      "description": "Intentions de don (formulaire public + suivi admin)"
+    },
+    {
+      "name": "Équipes",
+      "description": "API pour gérer les membres de l'équipe"
+    },
+    {
+      "name": "Événements",
+      "description": "API pour gérer les événements"
+    },
+    {
+      "name": "Identites",
+      "description": "API pour gérer les fiches d'identité"
+    },
+    {
+      "name": "Fichiers",
+      "description": "API de gestion des fichiers téléchargeables"
+    },
+    {
+      "name": "Messages",
+      "description": "Boîte d'envoi admin (messages composés et envoyés par email)"
+    },
+    {
+      "name": "Newsletters",
+      "description": "API pour la gestion des newsletters"
+    },
+    {
+      "name": "Pointage",
+      "description": "Gestion du temps passé au bureau (profils, présences, statistiques, export PDF)"
+    },
+    {
+      "name": "Temoignages",
+      "description": "Témoignages affichés sur le site public"
+    }
+  ]
+}

@@ -359,6 +359,68 @@ export const messageAdminTemplate = (destinataireNom, sujet, message) => {
   `;
 };
 
+const donCardWrapper = (titre, innerRows) => `
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4; padding: 40px 1rem;">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #ffffff; padding: 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.06); font-family: Arial, sans-serif;">
+          <tr>
+            <td align="center" style="padding-bottom: 20px;">
+              <img src="https://burningheart.netlify.app/img/NavLogo.png" alt="Logo" style="max-width: 100%; width: auto; height: 5rem;">
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="color: #a42223; font-size: 22px; font-weight: bold; padding-bottom: 16px;">
+              ${escapeHtml(titre)}
+            </td>
+          </tr>
+          ${innerRows}
+          <tr>
+            <td align="center" style="color: #999999; font-size: 12px; padding-top: 20px;">
+              &copy; ${currentYear} BurningHeart – Tous droits réservés
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+`;
+
+export const donThankYouTemplate = (nom, montant, devise) => {
+  const montantLigne =
+    montant && Number(montant) > 0
+      ? `<tr><td style="color:#555555;font-size:15px;padding-bottom:8px;">Montant annoncé : <strong>${escapeHtml(String(montant))} ${escapeHtml(devise || "")}</strong></td></tr>`
+      : "";
+  return donCardWrapper(
+    "Merci pour votre générosité 🙏",
+    `
+      <tr><td style="color:#333333;font-size:16px;padding-bottom:16px;">Bonjour ${escapeHtml(nom)},</td></tr>
+      <tr><td style="color:#555555;font-size:15px;line-height:1.6;padding-bottom:16px;">Nous avons bien reçu votre intention de don et nous vous en remercions chaleureusement. Votre soutien aide Burning Heart à poursuivre sa mission spirituelle.</td></tr>
+      ${montantLigne}
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:24px;">Un membre de notre équipe pourra vous recontacter pour finaliser votre don. Que Dieu vous bénisse !</td></tr>
+      <tr><td style="color:#555555;font-size:15px;">Cordialement,<br>L'équipe BurningHeart</td></tr>
+    `,
+  );
+};
+
+export const donIntentionAdminTemplate = (don) => {
+  const moyenLabel = {
+    carte: "Carte bancaire",
+    virement: "Virement bancaire",
+    mobile: "Mobile Money",
+  };
+  return donCardWrapper(
+    "Nouvelle intention de don",
+    `
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:8px;">Donateur : <strong>${escapeHtml(don.nom)}</strong></td></tr>
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:8px;">Email : <strong>${escapeHtml(don.email)}</strong></td></tr>
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:8px;">Montant : <strong>${don.montant ? `${escapeHtml(String(don.montant))} ${escapeHtml(don.devise || "")}` : "Non précisé"}</strong></td></tr>
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:8px;">Moyen : <strong>${escapeHtml(moyenLabel[don.moyen] || don.moyen)}</strong></td></tr>
+      ${don.message ? `<tr><td style="color:#555555;font-size:15px;padding-bottom:16px;">Message : <em>${formatPlainTextForEmail(don.message)}</em></td></tr>` : ""}
+    `,
+  );
+};
+
 export const identitySubmissionConfirmationTemplate = (
   nomComplet,
   dateSoumission,
