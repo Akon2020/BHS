@@ -155,7 +155,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 Page `/don` finalisée : coordonnées (Mobile Money réel + banque marquée « À compléter »), boutons **« copier »**, retrait du bouton « Donner maintenant » inactif, design soigné. ⚠️ Fournir les vraies coordonnées bancaires pour remplacer « À compléter » dans `donation-client.tsx`.
 - [x] 🟢 Front : **formulaire « Je déclare un don »** (nom, email, montant, devise, moyen, message) → `createDon`.
 - [x] 🟢 Backend : modèle `Don` (`nom`, `email`, `montant`, `devise`, `moyen` carte/virement/mobile, `message`, `statut` annonce/confirme) + endpoint public de création + **notification email** (admin + remerciement au donateur, templates dédiés). Liste/statut/suppression admin, Swagger inline.
-- [ ] 🟢 Admin : page `/admin/dons` (liste, statut, marquage « confirmé »).
+- [x] 🟢 Admin : page `/admin/dons` (liste, cartes récap, bascule statut annoncé/confirmé, vue message, suppression) ; entrée sidebar « Dons » ; permission éditeur.
 
 ### 3.4 🔎 Recherche globale  🟢
 - [ ] 🟢 Backend : endpoint `/api/recherche?q=` agrégeant blogs + événements + fichiers publics (titre/extrait/tags), résultats paginés et typés.

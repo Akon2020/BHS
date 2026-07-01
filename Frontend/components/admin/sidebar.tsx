@@ -23,6 +23,7 @@ import {
   Tags,
   Timer,
   Quote,
+  HandHeart,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -123,6 +124,12 @@ export default function AdminSidebar({
       icon: Calendar,
       href: "/admin/events",
       active: pathname.startsWith("/admin/events"),
+    },
+    {
+      label: "Dons",
+      icon: HandHeart,
+      href: "/admin/dons",
+      active: pathname.startsWith("/admin/dons"),
     },
     {
       label: "Équipe (Membre interne)",

@@ -361,4 +361,12 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - ⚠️ Coordonnées bancaires : placeholders « À compléter » dans `donation-client.tsx` (`BANK_DETAILS`) à remplacer par les vraies infos.
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
-**Reste** : page admin `/admin/dons` (suivi + statut).
+
+### Frontend — Admin `/admin/dons` ✅
+
+- `app/admin/dons/page.tsx` : cartes récap (total dons, confirmés, montant confirmé USD) + tableau (donateur, montant, moyen, statut, date) avec **bascule de statut** annoncé/confirmé, **vue du message** (dialog) et suppression (`DeleteConfirmationModal`).
+- `lib/permissions.ts` : `/admin/dons` ajouté pour `editeur`. `components/admin/sidebar.tsx` : entrée « Dons » (icône `HandHeart`).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Bilan 3.3** : dons complets (backend + page publique avec formulaire d'intention + suivi admin). **À tester en runtime** : déclarer un don sur `/don` → réception des 2 emails + apparition dans `/admin/dons` + bascule de statut.
+**À compléter** : vraies coordonnées bancaires dans `donation-client.tsx` (`BANK_DETAILS`).
