@@ -206,7 +206,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 **Frontend**
 - [x] 🟢 Création/édition événement : composant `EventPaymentFields` (toggle **payant** + montant + devise + **constructeur de champs** : ajouter/supprimer, type + label + requis + options) intégré aux pages new **et** edit.
-- [ ] 🟢 **Formulaire d'inscription public dynamique** (base + champs perso) ; si payant, message de paiement.
+- [x] 🟢 **Formulaire d'inscription public dynamique** (`register-event-modal`) : base + champs perso rendus par type (texte/email/tél/nombre/select/checkbox/date/textarea/**fichier**), validation des requis, soumission **FormData** (fichiers) ; bandeau + message paiement si payant.
 - [ ] 🟢 Admin inscriptions : colonne **statut paiement** + actions (marquer payé / partiel [saisir montant] / accepté non payé), (re)envoyer billet, **récap financier** par événement.
 - [x] 🟢 Types + actions mis à jour (`ChampPersonnalise`, `StatutPaiement`, `EvenementFinancesResponse` ; `registerToEvent` FormData/fichiers, `updateEvent` FormData, `mettreAJourPaiementInscription`, `getEventFinances`).
 

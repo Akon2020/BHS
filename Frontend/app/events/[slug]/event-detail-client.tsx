@@ -230,6 +230,10 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
         onOpenChange={setOpenRegister}
         slug={event!.slug}
         onSuccess={fetchEvent}
+        champs={event?.champsPersonnalises || []}
+        estPayant={event?.estPayant}
+        montant={event?.montant}
+        devise={event?.devise}
       />
 
       <Footer />

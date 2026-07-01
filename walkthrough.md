@@ -426,7 +426,14 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - **Constructeur admin** (`components/admin/event-payment-fields.tsx`, contrôlé) : carte Paiement (toggle `estPayant` + montant + devise) + constructeur de champs personnalisés (ajout/suppression, type parmi 9, libellé, requis, options pour `select`). Intégré aux pages `events/new` et `events/edit` (état `paymentFields`, init depuis l'événement en édition, append dans le submit).
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
-**Reste** : formulaire d'inscription public dynamique (base + champs perso + upload ; message paiement) ; suivi paiement + récap financier admin (page vue événement).
+
+### Frontend — étape 3 (inscription publique dynamique) ✅
+
+- `components/modals/register-event-modal.tsx` : reçoit `champs`, `estPayant`, `montant`, `devise`. Rend les champs de base + les champs personnalisés **par type** (input typé, textarea, select, checkbox, date, **fichier**). Validation des champs requis. Soumission en **FormData** (`reponsesPersonnalisees` JSON + fichiers appendus par id de champ). Bandeau « payant » + message adapté (billet immédiat si gratuit, sinon email « à payer »).
+- `app/events/[slug]/event-detail-client.tsx` : passe la config de l'événement au modal.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Reste** : suivi paiement + récap financier côté admin (page vue événement).
 
 ---
 
