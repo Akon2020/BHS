@@ -351,4 +351,14 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `routes/don.route.js` : `POST /` public ; `GET /`, `GET/PATCH /:id` (admin+editeur) ; `DELETE /:id` (admin) ; Swagger inline ; montage `app.use("/api/dons", …)`.
 
 **Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels`.
-**Reste** : page `/don` finalisée + formulaire d'intention (public) ; page `/admin/dons` (suivi).
+
+### Frontend — Page publique `/don` ✅
+
+- `types/user.ts` : `Don`, `GetDonsResponse`, `CreateDonPayload`, `DonMoyen`, `DonStatut`.
+- `actions/don.ts` : `createDon` (public), `getDons`, `updateDonStatut`, `deleteDon`.
+- `app/don/donation-client.tsx` (client) : cartes des moyens (Virement avec coordonnées + **boutons Copier**, Mobile Money réel copiable, Carte « bientôt disponible ») + **formulaire « Je déclare un don »** (nom, email, montant, devise USD/CDF/EUR, moyen, message) → `createDon`.
+- `app/don/page.tsx` : reste **serveur** (métadonnées conservées), intro + `<DonationClient />` + carte de remerciement. Bouton « Donner maintenant » inactif supprimé.
+- ⚠️ Coordonnées bancaires : placeholders « À compléter » dans `donation-client.tsx` (`BANK_DETAILS`) à remplacer par les vraies infos.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Reste** : page admin `/admin/dons` (suivi + statut).

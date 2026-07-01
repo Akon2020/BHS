@@ -152,9 +152,9 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 Front : section statique de la home remplacée par un **carrousel fonctionnel** (`components/sections/testimonials.tsx`, shadcn `Carousel`/embla) alimenté par `/api/temoignages/public` (masquée si vide).
 
 ### 3.3 ❤️ Don — manuel + formulaire d'intention  🟢
-- [ ] 🔵 Finaliser la page `/don` : **vraies coordonnées** bancaires + Mobile Money (à fournir), bouton « copier », design soigné, retrait du bouton « Donner maintenant » inactif.
+- [x] 🔵 Page `/don` finalisée : coordonnées (Mobile Money réel + banque marquée « À compléter »), boutons **« copier »**, retrait du bouton « Donner maintenant » inactif, design soigné. ⚠️ Fournir les vraies coordonnées bancaires pour remplacer « À compléter » dans `donation-client.tsx`.
+- [x] 🟢 Front : **formulaire « Je déclare un don »** (nom, email, montant, devise, moyen, message) → `createDon`.
 - [x] 🟢 Backend : modèle `Don` (`nom`, `email`, `montant`, `devise`, `moyen` carte/virement/mobile, `message`, `statut` annonce/confirme) + endpoint public de création + **notification email** (admin + remerciement au donateur, templates dédiés). Liste/statut/suppression admin, Swagger inline.
-- [ ] 🟢 Front : **formulaire « Je déclare un don »** (montant, moyen, message) → enregistre l'intention.
 - [ ] 🟢 Admin : page `/admin/dons` (liste, statut, marquage « confirmé »).
 
 ### 3.4 🔎 Recherche globale  🟢

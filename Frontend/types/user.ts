@@ -732,3 +732,35 @@ export interface GetTemoignagesResponse {
   nombre: number;
   temoignages: Temoignage[];
 }
+
+/* ---------------------------------- Dons ---------------------------------- */
+
+export type DonMoyen = "carte" | "virement" | "mobile";
+export type DonStatut = "annonce" | "confirme";
+
+export interface Don {
+  idDon: number;
+  nom: string;
+  email: string;
+  montant?: string | number | null;
+  devise: string;
+  moyen: DonMoyen;
+  message?: string | null;
+  statut: DonStatut;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetDonsResponse {
+  nombre: number;
+  dons: Don[];
+}
+
+export interface CreateDonPayload {
+  nom: string;
+  email: string;
+  montant?: number;
+  devise?: string;
+  moyen: DonMoyen;
+  message?: string;
+}
