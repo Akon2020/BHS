@@ -18,6 +18,7 @@ import {
   Folder,
   LogOut,
   MessageSquare,
+  MessageSquareText,
   IdCard,
   UserPlus,
   Tags,
@@ -100,6 +101,12 @@ export default function AdminSidebar({
       icon: Quote,
       href: "/admin/temoignages",
       active: pathname.startsWith("/admin/temoignages"),
+    },
+    {
+      label: "Commentaires",
+      icon: MessageSquareText,
+      href: "/admin/comments",
+      active: pathname.startsWith("/admin/comments"),
     },
     {
       label: "Messages",

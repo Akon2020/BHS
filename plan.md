@@ -167,10 +167,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 ### 3.5 🗨️ Commentaires blog (activation)  🟢
 > Le backend a déjà `Commentaire` + modération + endpoints (`actions/comment.ts`).
-- [ ] 🟢 Front : affichage des commentaires publiés sous chaque article (`/blog/[slug]`).
-- [ ] 🟢 Front : formulaire d'ajout de commentaire (+ réponses si supporté).
-- [ ] 🔵 Admin : interface de **modération** (approuver/supprimer) si absente.
-- [ ] 🟠 Anti-spam minimal (honeypot / rate-limit) sur la soumission publique.
+- [x] 🟢 Front : affichage des commentaires publiés sous chaque article (`/blog/[slug]`) — **déjà présent** (liste + réponses imbriquées + états).
+- [x] 🟢 Front : formulaire d'ajout de commentaire — **déjà présent** (nom/email/contenu → `attente`).
+- [x] 🔵 Admin : **interface de modération** créée (`/admin/comments`) : filtre par statut, approuver/refuser, supprimer + entrée sidebar + permission éditeur. **Indispensable** (les commentaires en `attente` ne s'affichent qu'une fois approuvés).
+- [x] 🟠 Anti-spam **honeypot** ajouté au formulaire public + **sécurisation** de `GET /api/commentaires` (auth admin/editeur/membre — évitait de fuiter emails/IP).
 
 ---
 

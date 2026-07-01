@@ -14,7 +14,13 @@ import {
 
 const commentaireRouter = Router();
 
-commentaireRouter.get("/", getAllCommentaires);
+// Liste complète (données sensibles : emails, IP) → réservée aux rôles admin.
+commentaireRouter.get(
+  "/",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAllCommentaires,
+);
 commentaireRouter.get("/blog/:idBlog", getCommentairesParBlog);
 commentaireRouter.get("/reponses/:id", getReponses);
 commentaireRouter.post("/add", createCommentaire);

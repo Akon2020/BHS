@@ -394,6 +394,22 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → route `/recherche` générée.
 **Bilan 3.4** : recherche globale complète. **À tester en runtime** : rechercher un terme → résultats blog/événements/fichiers cliquables.
 
+---
+
+## LOT 3.5 — Commentaires blog
+
+**Constat** : la partie **publique existait déjà** dans `app/blog/[slug]/blog-post-client.tsx` (formulaire nom/email/contenu → `createCommentaire`, liste des commentaires approuvés + réponses imbriquées, états chargement/vide). Il manquait la **modération admin** (sans elle, les commentaires en `attente` ne s'affichent jamais) et un **anti-spam**.
+
+### Modifications ✅
+
+- **Sécurité backend** : `GET /api/commentaires` (`getAllCommentaires`, données sensibles : emails/IP) passé derrière `authenticationJWT` + `authorizeRoles("admin","editeur","membre")` (était **public**).
+- **Action** : `actions/comment.ts` → ajout de `getAllCommentaires`.
+- **Modération admin** : `app/admin/comments/page.tsx` — liste filtrable par statut (en attente / approuvés / refusés / tous), **Approuver** / **Refuser** (`modererCommentaire`, `modereBy` = utilisateur courant), **Supprimer**. Entrée sidebar « Commentaires » (icône `MessageSquareText`) + permission `editeur` (`/admin/comments`).
+- **Anti-spam** : champ **honeypot** masqué (`website`) ajouté au formulaire public ; si rempli → soumission ignorée silencieusement.
+
+**Vérification** : Front `tsc` → 0 erreur, `build` → `/admin/comments` généré ; Back `node --check` OK.
+**Bilan 3.5** : commentaires activés de bout en bout. **À tester en runtime** : poster un commentaire → le modérer (approuver) dans `/admin/comments` → il apparaît sous l'article.
+
 ### Note Swagger
 
 - `swagger.js` exporte `swaggerSpec` ; `generate-swagger.js` + `npm run swagger:gen` régénèrent `api-docs.json` (à relancer après chaque changement d'API).
