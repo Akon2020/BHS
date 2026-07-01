@@ -198,11 +198,11 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 **Backend**
 - [x] 🔵 `Evenement` — colonnes additives : `estPayant` (bool), `montant` (decimal), `devise` (string, def. USD), `champsPersonnalises` (JSON). Backfill non destructif dans `syncModels` (`addColumnIfMissing`).
 - [x] 🔵 `InscriptionEvenement` — colonnes additives : `statutPaiement` (`non_paye`|`partiel`|`paye`|`accepte_non_paye`, def. `paye`), `montantPaye` (decimal, def. 0), `reponsesPersonnalisees` (JSON). `telephone`/`sexe` déjà présents. Backfill non destructif.
-- [ ] 🟢 Inscription : validation dynamique (base + champs perso), génération billet + email (gratuit) OU email « à payer » (payant).
-- [ ] 🟢 Endpoint admin : mise à jour du paiement d'une inscription (payé/partiel+montant/accepté-non-payé) → si payé, génère **billet + reçu** et envoie l'email.
-- [ ] 🟢 **Reçu PDF** (`utils/recu-pdf.js`) stylisé + templates emails (confirmation payant, invitation à payer, confirmation paiement + billet + reçu).
-- [ ] 🟢 **Stats financières par événement** : attendu, encaissé, partiels, non payés (distinct), nb inscrits.
-- [ ] 🟢 Swagger à jour.
+- [x] 🟢 Inscription (`registerToEvent`) : champs perso (texte + fichiers via `upload.any`), génération billet + email (gratuit) OU email « à payer » (payant, sans billet).
+- [x] 🟢 Endpoint admin `PATCH /:id/inscriptions/:inscriptionId/paiement` : payé/partiel+montant/accepté-non-payé → si **payé**, génère **billet + reçu** et envoie l'email.
+- [x] 🟢 **Reçu PDF** (`utils/recu-pdf.js`) stylisé + templates emails (`eventPaymentPendingTemplate`, `eventPaymentConfirmedTemplate`).
+- [x] 🟢 **Stats financières** `GET /:id/finances` : attendu, encaissé, reste, répartition par statut, nb inscrits.
+- [x] 🟢 Swagger régénéré (87 chemins).
 
 **Frontend**
 - [ ] 🟢 Création/édition événement : toggle **payant** (montant + devise) + **constructeur de champs personnalisés** (ajouter/réordonner/supprimer, type + label + requis + options).

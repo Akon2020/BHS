@@ -407,7 +407,19 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `models/index.model.js` : helper `addColumnIfMissing(table, column, def)` + backfill des tables `evenements` et `inscriptionsevenements` dans `syncModels` (non destructif).
 
 **Vérification** : `node --check` OK. Les colonnes sont ajoutées automatiquement au démarrage du backend sur une base existante, sans perte.
-**Reste** : contrôleurs (création/édition avec champs + paiement), inscription dynamique, suivi paiement + billet/reçu PDF + emails, front.
+
+### Contrôleurs & flux (backend) ✅
+
+- `createEvent`/`updateEvent` : acceptent `estPayant`, `montant`, `devise`, `champsPersonnalises` (parsing `FormData`/JSON).
+- `registerToEvent` : intègre `reponsesPersonnalisees` (texte + **fichiers** via `upload.any()`), fixe `statutPaiement` (`non_paye` si payant, sinon `paye`). **Gratuit** → billet + email (inchangé) ; **payant** → email « à payer » (sans billet). `ensureAbonne` factorisé.
+- `mettreAJourPaiement` (`PATCH /:id/inscriptions/:inscriptionId/paiement`, admin/editeur) : met à jour statut + montant ; si **payé** → génère **billet + reçu PDF** et envoie l'email (`eventPaymentConfirmedTemplate`).
+- `getStatsFinancieresEvenement` (`GET /:id/finances`, admin/editeur) : attendu / encaissé / reste / répartition par statut / nb inscrits.
+- `getSingleEventAdmin` : renvoie désormais `statutPaiement`, `montantPaye`, `reponsesPersonnalisees` par inscription.
+- `utils/recu-pdf.js` : reçu PDF stylisé (attend la fin d'écriture). Templates emails ajoutés.
+- Route d'inscription : `upload.any()` pour les champs `fichier`. Swagger régénéré (87 chemins).
+
+**Vérification** : `node --check` OK sur tous les fichiers ; `swagger:gen` OK.
+**Reste** : frontend (constructeur de champs à la création/édition, formulaire d'inscription public dynamique, suivi paiement + récap financier admin, types/actions).
 
 ---
 

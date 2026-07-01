@@ -12,9 +12,11 @@ import {
   eventPublishedNotificationTemplate,
   eventRegistrationWithPDFTemplate,
   eventPaymentPendingTemplate,
+  eventPaymentConfirmedTemplate,
 } from "../utils/email.template.js";
 import { valideEmail } from "../middlewares/email.middleware.js";
 import { generateEventTicketPDF } from "../utils/event-pdf.js";
+import { generateRecuPDF } from "../utils/recu-pdf.js";
 import { deleteFile } from "../utils/deletefile.js";
 
 const requiredFields = [
@@ -262,6 +264,9 @@ export const getSingleEventAdmin = async (req, res, next) => {
             "sexe",
             "telephone",
             "statut",
+            "statutPaiement",
+            "montantPaye",
+            "reponsesPersonnalisees",
             "typeInscription",
             "dateInscription",
           ],
@@ -1087,6 +1092,128 @@ export const supprimerDoublonsSelectionnes = async (req, res, next) => {
     return res.status(200).json({
       message: `${idsToDelete.length} doublon(s) sélectionné(s) supprimé(s).`,
       removedCount: idsToDelete.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Met à jour le statut de paiement d'une inscription (admin).
+// Si le paiement passe à "paye", génère billet + reçu et envoie l'email.
+export const mettreAJourPaiement = async (req, res, next) => {
+  let ticketPdf = null;
+  let recuPdf = null;
+  try {
+    const { id, inscriptionId } = req.params;
+    const { statutPaiement, montantPaye } = req.body;
+
+    const valides = ["non_paye", "partiel", "paye", "accepte_non_paye"];
+    if (statutPaiement && !valides.includes(statutPaiement)) {
+      return res.status(400).json({ message: "Statut de paiement invalide." });
+    }
+
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement non trouvé." });
+
+    const inscription = await InscriptionEvenement.findOne({
+      where: { idInscription: inscriptionId, idEvenement: id },
+    });
+    if (!inscription)
+      return res.status(404).json({ message: "Inscription non trouvée." });
+
+    if (montantPaye !== undefined)
+      inscription.montantPaye = Number(montantPaye) || 0;
+    if (statutPaiement) inscription.statutPaiement = statutPaiement;
+    await inscription.save();
+
+    if (inscription.statutPaiement === "paye") {
+      try {
+        ticketPdf = await generateEventTicketPDF({ event, inscription });
+        recuPdf = await generateRecuPDF({ event, inscription });
+
+        await transporter.sendMail({
+          from: `"BurningHeart IHS" <${EMAIL}>`,
+          to: inscription.email,
+          subject: `Paiement confirmé - ${event.titre}`,
+          html: eventPaymentConfirmedTemplate(
+            inscription.nomComplet,
+            event.titre,
+            new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
+            event.lieu,
+            `${inscription.montantPaye} ${event.devise}`,
+          ),
+          attachments: [
+            {
+              filename: ticketPdf.fileName,
+              path: ticketPdf.filePath,
+              contentType: "application/pdf",
+            },
+            {
+              filename: recuPdf.fileName,
+              path: recuPdf.filePath,
+              contentType: "application/pdf",
+            },
+          ],
+        });
+      } catch (mailError) {
+        console.error("Erreur email paiement confirmé :", mailError.message);
+      }
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Paiement mis à jour", data: inscription });
+  } catch (error) {
+    next(error);
+  } finally {
+    await deleteFile(ticketPdf?.filePath);
+    await deleteFile(recuPdf?.filePath);
+  }
+};
+
+// Statistiques financières d'un événement (admin).
+export const getStatsFinancieresEvenement = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement non trouvé." });
+
+    const inscriptions = await InscriptionEvenement.findAll({
+      where: { idEvenement: id },
+    });
+
+    const montant = Number(event.montant) || 0;
+    const parStatut = {
+      non_paye: 0,
+      partiel: 0,
+      paye: 0,
+      accepte_non_paye: 0,
+    };
+    let encaisse = 0;
+
+    for (const i of inscriptions) {
+      parStatut[i.statutPaiement] = (parStatut[i.statutPaiement] || 0) + 1;
+      encaisse += Number(i.montantPaye) || 0;
+    }
+
+    const nbInscrits = inscriptions.length;
+    const attendu = event.estPayant ? montant * nbInscrits : 0;
+
+    return res.status(200).json({
+      evenement: {
+        idEvenement: event.idEvenement,
+        titre: event.titre,
+        estPayant: event.estPayant,
+        montant,
+        devise: event.devise,
+      },
+      nbInscrits,
+      parStatut,
+      attendu,
+      encaisse,
+      reste: Math.max(attendu - encaisse, 0),
     });
   } catch (error) {
     next(error);
