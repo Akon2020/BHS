@@ -25,6 +25,15 @@
 | Langues | **FR uniquement** (i18n reporté) |
 | Priorité de démarrage | **Lot 0 (bugs) → Lot 1 (responsivité)** |
 | Nouvelles fonctionnalités | Pointage · Témoignages · Don (manuel + intention) · Recherche globale · Commentaires blog |
+| Événements payants | Suivi **manuel** (admin) : payé / partiel (montant reçu) / accepté non payé. **Pas** de passerelle en ligne |
+| Devise événements | **Configurable par événement** (USD/CDF/EUR) |
+| Champs d'inscription | Base (Prénom-Nom, Email, Tél, Sexe, Type auto, Date/heure auto) + **champs personnalisés** (texte, email, tél, nombre, select, case à cocher, date, zone de texte) |
+| Newsletter (envoi) | **Job en arrière-plan + polling** de progression (suivi en continuant à travailler) |
+| Coordinateur RDV | **Un seul**, configurable |
+| Réservation RDV | **Publique** (tout le monde) |
+| Anniversaires | Rappel en amont → **admins/équipe** ; alerte jour J → **tous (abonnés newsletter)** |
+| Todos | Assignation aux **admins/staff** |
+| **Sécurité des données** | Évolutions de modèles en **colonnes additives** (`queryInterface.addColumn` + backfill, pattern `fichiers`) et **nouvelles tables** (`db.sync({ alter:false })`). **Jamais** de `force/alter` destructeur → **aucune perte de données** |
 
 ---
 
@@ -172,6 +181,39 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🔵 Admin : **interface de modération** créée (`/admin/comments`) : filtre par statut, approuver/refuser, supprimer + entrée sidebar + permission éditeur. **Indispensable** (les commentaires en `attente` ne s'affichent qu'une fois approuvés).
 - [x] 🟠 Anti-spam **honeypot** ajouté au formulaire public + **sécurisation** de `GET /api/commentaires` (auth admin/editeur/membre — évitait de fuiter emails/IP).
 
+### 3.7 🎟️ Événement — inscription dynamique + paiement  🔵 **(TRÈS HAUTE PRIORITÉ)**
+
+> Refonte du flux d'inscription. **Données existantes préservées** (colonnes additives via `queryInterface`, aucune suppression).
+
+**Règles métier**
+- Champs de base (toujours) : **Prénom-Nom, Email, Téléphone, Sexe**, Type d'utilisateur (**auto** : utilisateur/visiteur), Date & heure d'inscription (**auto**).
+- **Événement gratuit & ouvert** → on s'arrête aux champs de base. Inscription → **email de confirmation + billet PDF** (QR, `event-pdf.js` existant).
+- **Événement payant** :
+  - Montant d'inscription **configuré au backend** par événement (+ **devise configurable** USD/CDF/EUR) → suivi financier par événement.
+  - À l'inscription : email de confirmation **sans billet**, invitant à venir **payer** la somme due.
+  - Suivi de paiement **manuel** par l'admin, statuts : **payé** · **partiellement payé** (saisir le **montant reçu**) · **accepté mais non payé** (comptabilisé **distinctement**).
+  - Une fois **payé** → email avec **billet PDF + reçu de paiement PDF**.
+- **Champs personnalisés** ajoutables à la création de l'événement : type (`texte`, `email`, `téléphone`, `nombre`, `select`, `case à cocher`, `date`, `zone de texte`) + **label** affiché (« Entrez votre X ») + requis (oui/non) + options (pour select).
+
+**Backend**
+- [ ] 🔵 `Evenement` — colonnes additives : `estPayant` (bool), `montant` (decimal), `devise` (string), `champsPersonnalises` (JSON : `[{ id, type, label, requis, options? }]`). Backfill non destructif.
+- [ ] 🔵 `InscriptionEvenement` — colonnes additives : `telephone`, `sexe` (si absents), `statutPaiement` (`non_paye`|`partiel`|`paye`|`accepte_non_paye`), `montantPaye` (decimal), `reponsesPersonnalisees` (JSON). Backfill : inscriptions existantes → `paye`/`non_paye` selon gratuité de l'événement.
+- [ ] 🟢 Inscription : validation dynamique (base + champs perso), génération billet + email (gratuit) OU email « à payer » (payant).
+- [ ] 🟢 Endpoint admin : mise à jour du paiement d'une inscription (payé/partiel+montant/accepté-non-payé) → si payé, génère **billet + reçu** et envoie l'email.
+- [ ] 🟢 **Reçu PDF** (`utils/recu-pdf.js`) stylisé + templates emails (confirmation payant, invitation à payer, confirmation paiement + billet + reçu).
+- [ ] 🟢 **Stats financières par événement** : attendu, encaissé, partiels, non payés (distinct), nb inscrits.
+- [ ] 🟢 Swagger à jour.
+
+**Frontend**
+- [ ] 🟢 Création/édition événement : toggle **payant** (montant + devise) + **constructeur de champs personnalisés** (ajouter/réordonner/supprimer, type + label + requis + options).
+- [ ] 🟢 **Formulaire d'inscription public dynamique** (base + champs perso) ; si payant, message de paiement.
+- [ ] 🟢 Admin inscriptions : colonne **statut paiement** + actions (marquer payé / partiel [saisir montant] / accepté non payé), (re)envoyer billet, **récap financier** par événement.
+- [ ] 🟢 Types + actions mises à jour.
+
+### 3.8 📧 Newsletter — progression d'envoi (job + polling)  🔵
+- [ ] 🟢 Backend : envoi **en arrière-plan** (job non bloquant), suivi de progression (`total`, `envoyes`, `echecs`, `statut`) — via la table `NewsletterAbonne` existante + statut global. `POST /send` renvoie immédiatement (202) ; `GET /:id/progress`.
+- [ ] 🟢 Front : UI d'envoi avec **barre de progression** (polling toutes N s), navigation possible ailleurs pendant l'envoi (indicateur consultable au retour).
+
 ---
 
 ## 🧹 LOT 4 — Polish, accessibilité & finitions  *(priorité 3)*
@@ -183,6 +225,41 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [ ] 🔵 README projet (remplacer le boilerplate Next) : setup, variables d'env, scripts, déploiement.
 - [ ] 🔵 Variables d'environnement documentées (`.env.example` front & back).
 - [ ] 🔵 Vérifier le tracking newsletter / emails (templates) et les liens de désabonnement.
+
+---
+
+## 🗓️ LOT 5 — Modules internes (back-office)  🟢 *(nouveaux modules)*
+
+> **Prérequis technique** : ajouter un **planificateur** (`node-cron`) au backend pour les rappels/alertes (anniversaires, échéances de tâches). Toutes les tables/colonnes créées de façon **non destructive**.
+
+### 5.1 📅 Agenda / RDV avec le Père Coordinateur  🟢
+> Coordinateur **unique configurable** ; réservation **publique**.
+
+- [ ] 🟢 Backend : paramètre **Coordinateur** (nom, éventuelle photo) ; modèle `Disponibilite`/`CreneauRdv` (jour/heure, durée, récurrence hebdo ou date, capacité, actif) ; modèle `RendezVous` (nom, email, tél, motif, créneau/date-heure, `statut` `en_attente`|`approuve`|`refuse`|`reprogramme`, nouvelleDate si report, note).
+- [ ] 🟢 Backend : endpoints — config des créneaux (admin), **créneaux disponibles** (public), **réserver** (public), lister (admin), **approuver / refuser / reporter** (admin), suivi de statut (public via lien/email). Emails aux étapes clés.
+- [ ] 🟢 Front public : voir les créneaux disponibles, réserver, **suivre le statut** (en attente/approuvé/refusé/reprogrammé), **historique**.
+- [ ] 🟢 Front admin : configuration des créneaux + gestion des RDV (approuver/refuser/reporter).
+
+### 5.2 🗓️ Vue calendrier agrégée + export natif  🟢
+- [ ] 🟢 Vue **mensuelle / liste** agrégeant : événements publics + **son propre RDV** + **anniversaires** configurés.
+- [ ] 🟢 **Export vers calendrier natif** (fichier `.ics`, Google/Apple) **par item**.
+- [ ] 🟢 Accessible public (son RDV/événements) et admin (vue globale).
+
+### 5.3 🎂 Anniversaires  🟢
+> Rappel **en amont** → admins/équipe ; alerte **jour J** → tous (abonnés newsletter).
+
+- [ ] 🟢 Backend : modèle `Anniversaire` (nom, date [jour/mois, année optionnelle], email?, lien/catégorie) ; config du **délai de rappel** en amont.
+- [ ] 🟢 Backend : **planificateur quotidien** (`node-cron`) → alerte **jour J** par mail à **tous les abonnés newsletter** ; **rappel en amont** (X jours) aux **admins/équipe**.
+- [ ] 🟢 Front admin : liste + CRUD des anniversaires + réglage du rappel.
+
+### 5.4 ✅ Todos / Kanban  🟢
+> Assignation aux **admins/staff** (personnels **ou** communautaires).
+
+- [ ] 🟢 Backend : modèle `Tache` (titre, description, `statut` `a_faire`|`en_cours`|`fait`, échéance, **récurrence** `aucune`|`quotidien`|`hebdo`|`mensuel`, createdBy) + assignation **multi-admins** + modèle `TacheCommentaire` + rappels (à l'échéance / avant, via `node-cron`).
+- [ ] 🟢 Front admin : **vue Kanban** (À faire / En cours / Fait), création/édition (assignés, échéance, récurrence), commentaires, rappels configurables.
+
+### 5.5 📊 Dashboard admin — mise à jour  🔵
+- [ ] 🔵 Intégrer au tableau de bord : **prochains RDV**, **anniversaires à venir**, **tâches** en cours / à échéance, stats **pointage**, **dons** récents, inscriptions/finances **événements**.
 
 ---
 
@@ -199,11 +276,13 @@ Un goal est « fait » quand :
 
 ## 🗺️ Ordre d'exécution recommandé
 
-1. **Lot 0** (bugs/permissions/config) — base saine.
-2. **Lot 1** (responsivité admin + public).
-3. **Lot 3.1** (Pointage) — fonctionnalité phare.
-4. **Lot 2** (SEO).
-5. **Lot 3.2 → 3.5** (témoignages, don, recherche, commentaires).
-6. **Lot 4** (polish final).
+**✅ Déjà fait** : Lot 0 (bugs/config/sécurité) · Lot 1 (responsivité admin + public) · Lot 2 (SEO) · Lot 3.1 (Pointage) · 3.2 (Témoignages) · 3.3 (Don) · 3.4 (Recherche) · 3.5 (Commentaires) · 3.6 (Boîte d'envoi contact).
+
+**⏭️ Reste à faire (par priorité)** :
+1. **Lot 3.7 — Événement : inscription dynamique + paiement** 🔺 *(très haute priorité)*.
+2. **Lot 3.8 — Newsletter : progression d'envoi**.
+3. **Lot 5 — Modules internes** : 5.4 Todos/Kanban · 5.1 Agenda/RDV · 5.3 Anniversaires · 5.2 Calendrier agrégé · 5.5 Dashboard.
+4. **Lot 4 — Polish & finitions** (403/not-found, README, `.env.example`, a11y, nettoyage `js-cookie`, limites d'upload…).
 
 > Validation **lot par lot** : à la fin de chaque lot, revue + ajustements avant d'enchaîner.
+> **Garde-fou données** : chaque évolution de modèle = colonnes additives (`queryInterface`) ou nouvelle table ; **jamais** `force/alter` destructeur.
