@@ -208,7 +208,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [ ] 🟢 Création/édition événement : toggle **payant** (montant + devise) + **constructeur de champs personnalisés** (ajouter/réordonner/supprimer, type + label + requis + options).
 - [ ] 🟢 **Formulaire d'inscription public dynamique** (base + champs perso) ; si payant, message de paiement.
 - [ ] 🟢 Admin inscriptions : colonne **statut paiement** + actions (marquer payé / partiel [saisir montant] / accepté non payé), (re)envoyer billet, **récap financier** par événement.
-- [ ] 🟢 Types + actions mises à jour.
+- [x] 🟢 Types + actions mis à jour (`ChampPersonnalise`, `StatutPaiement`, `EvenementFinancesResponse` ; `registerToEvent` FormData/fichiers, `updateEvent` FormData, `mettreAJourPaiementInscription`, `getEventFinances`).
 
 ### 3.8 📧 Newsletter — progression d'envoi (job + polling)  🔵
 - [ ] 🟢 Backend : envoi **en arrière-plan** (job non bloquant), suivi de progression (`total`, `envoyes`, `echecs`, `statut`) — via la table `NewsletterAbonne` existante + statut global. `POST /send` renvoie immédiatement (202) ; `GET /:id/progress`.
