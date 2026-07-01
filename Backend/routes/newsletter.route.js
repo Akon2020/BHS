@@ -4,6 +4,7 @@ import {
   getAllNewsletters,
   updateNewsletter,
   sendNewsletter,
+  getNewsletterProgress,
   getNewsletterStats,
   deleteNewsletter,
   getSingleNewsletter,
@@ -165,6 +166,29 @@ newsletterRouter.post(
   authenticationJWT,
   authorizeRoles("admin", "editeur", "membre"),
   sendNewsletter,
+);
+
+/**
+ * @swagger
+ * /api/newsletters/{id}/progress:
+ *   get:
+ *     summary: Progression de l'envoi d'une newsletter
+ *     tags: [Newsletters]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Progression (total, envoye, echec, attente, pourcentage, statut)
+ */
+newsletterRouter.get(
+  "/:id/progress",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getNewsletterProgress,
 );
 
 /**

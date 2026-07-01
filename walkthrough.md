@@ -444,6 +444,23 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 
 ---
 
+## LOT 3.8 — Newsletter : progression d'envoi
+
+### Backend ✅
+
+- `controllers/newsletter.controller.js` : refonte de `sendNewsletter` en **job d'arrière-plan**.
+  - `startNewsletterSend(newsletter)` : garde anti-double-envoi (lignes `attente`), repart d'une base propre, `bulkCreate` des lignes de suivi `NewsletterAbonne` (`attente`), lance `runNewsletterSend` **sans await**.
+  - `runNewsletterSend` : envoie chaque email et passe la ligne à `envoye`/`echec` ; à la fin, `newsletter.statut = "envoye"`.
+  - `sendNewsletter` (handler) répond **202** immédiatement (`{ message, total }`).
+  - `getNewsletterProgress` : compte les lignes par statut → `{ total, envoye, echec, attente, traite, pourcentage, statut }`.
+  - `processScheduledNewsletters` réutilise `startNewsletterSend` (plus de faux `res`).
+- `routes/newsletter.route.js` : `GET /:id/progress` (admin/editeur/membre). Swagger régénéré (88 chemins).
+
+**Vérification** : `node --check` OK ; `swagger:gen` OK.
+**Reste** : front (redirection vers la vue après envoi + barre de progression par polling).
+
+---
+
 ## LOT 3.5 — Commentaires blog
 
 **Constat** : la partie **publique existait déjà** dans `app/blog/[slug]/blog-post-client.tsx` (formulaire nom/email/contenu → `createCommentaire`, liste des commentaires approuvés + réponses imbriquées, états chargement/vide). Il manquait la **modération admin** (sans elle, les commentaires en `attente` ne s'affichent jamais) et un **anti-spam**.

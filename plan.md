@@ -211,7 +211,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟢 Types + actions mis à jour (`ChampPersonnalise`, `StatutPaiement`, `EvenementFinancesResponse` ; `registerToEvent` FormData/fichiers, `updateEvent` FormData, `mettreAJourPaiementInscription`, `getEventFinances`).
 
 ### 3.8 📧 Newsletter — progression d'envoi (job + polling)  🔵
-- [ ] 🟢 Backend : envoi **en arrière-plan** (job non bloquant), suivi de progression (`total`, `envoyes`, `echecs`, `statut`) — via la table `NewsletterAbonne` existante + statut global. `POST /send` renvoie immédiatement (202) ; `GET /:id/progress`.
+- [x] 🟢 Backend : envoi **en arrière-plan** (`runNewsletterSend`, non bloquant), `POST /send` répond **202** immédiatement (crée les lignes `NewsletterAbonne` en `attente` puis les passe `envoye`/`echec`) ; `GET /:id/progress` (total/envoye/echec/attente/pourcentage/statut). Cœur partagé `startNewsletterSend` réutilisé par l'envoi programmé. Swagger 88 chemins.
 - [ ] 🟢 Front : UI d'envoi avec **barre de progression** (polling toutes N s), navigation possible ailleurs pendant l'envoi (indicateur consultable au retour).
 
 ---

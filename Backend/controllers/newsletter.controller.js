@@ -156,63 +156,141 @@ export const updateNewsletter = async (req, res, next) => {
 };
 
 
+// Envoi effectif en arrière-plan : met à jour chaque ligne de suivi (attente -> envoye/echec).
+const runNewsletterSend = async (newsletter, abonnes) => {
+  for (const abonne of abonnes) {
+    try {
+      const unsubscribeUrl = `${FRONT_URL}/unsubscribe/${abonne.idAbonne}`;
+      await transporter.sendMail({
+        from: `"BurningHeart IHS" <${EMAIL}>`,
+        to: abonne.email,
+        subject: newsletter.objetMail,
+        html: newsletterEmailTemplate(
+          abonne.nomComplet,
+          newsletter.objetMail,
+          newsletter.contenu,
+          unsubscribeUrl,
+        ),
+      });
+      await NewsletterAbonne.update(
+        { statut: "envoye", dateEnvoi: new Date() },
+        {
+          where: {
+            idNewsletter: newsletter.idNewsletter,
+            idAbonne: abonne.idAbonne,
+          },
+        },
+      );
+    } catch (err) {
+      console.error(`Erreur envoi newsletter à ${abonne.email}:`, err.message);
+      await NewsletterAbonne.update(
+        { statut: "echec" },
+        {
+          where: {
+            idNewsletter: newsletter.idNewsletter,
+            idAbonne: abonne.idAbonne,
+          },
+        },
+      );
+    }
+  }
+  await newsletter.update({ statut: "envoye", dateEnvoi: new Date() });
+};
+
+// Prépare le suivi et démarre le job (non bloquant). Retourne le résultat du démarrage.
+const startNewsletterSend = async (newsletter) => {
+  if (newsletter.statut === "envoye") {
+    return { started: false, reason: "deja_envoye" };
+  }
+  const enAttente = await NewsletterAbonne.count({
+    where: { idNewsletter: newsletter.idNewsletter, statut: "attente" },
+  });
+  if (enAttente > 0) return { started: false, reason: "en_cours" };
+
+  const abonnes = await Abonne.findAll({ where: { statut: "actif" } });
+  if (abonnes.length === 0) return { started: false, reason: "aucun_abonne" };
+
+  // Repart d'une base propre + crée les lignes de suivi (attente).
+  await NewsletterAbonne.destroy({
+    where: { idNewsletter: newsletter.idNewsletter },
+  });
+  await NewsletterAbonne.bulkCreate(
+    abonnes.map((a) => ({
+      idNewsletter: newsletter.idNewsletter,
+      idAbonne: a.idAbonne,
+      statut: "attente",
+    })),
+  );
+
+  // Job en arrière-plan (non attendu) : la requête peut répondre immédiatement.
+  runNewsletterSend(newsletter, abonnes).catch((e) =>
+    console.error("Erreur job newsletter:", e.message),
+  );
+
+  return { started: true, total: abonnes.length };
+};
+
 export const sendNewsletter = async (req, res, next) => {
   try {
     const { id } = req.params;
-
     const newsletter = await Newsletter.findByPk(id);
     if (!newsletter) {
       return res.status(404).json({ message: "Newsletter introuvable" });
     }
 
-    if (newsletter.statut === "envoye") {
-      return res.status(400).json({ message: "Newsletter déjà envoyée" });
+    const result = await startNewsletterSend(newsletter);
+    if (!result.started) {
+      const map = {
+        deja_envoye: [400, "Newsletter déjà envoyée"],
+        en_cours: [409, "Un envoi est déjà en cours pour cette newsletter."],
+        aucun_abonne: [400, "Aucun abonné actif."],
+      };
+      const [code, message] = map[result.reason] || [400, "Envoi impossible"];
+      return res.status(code).json({ message });
     }
 
-    const abonnes = await Abonne.findAll({
-      where: { statut: "actif" },
+    return res
+      .status(202)
+      .json({ message: "Envoi démarré", total: result.total });
+  } catch (error) {
+    if (!res.headersSent) res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
+// Progression de l'envoi (polling).
+export const getNewsletterProgress = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const newsletter = await Newsletter.findByPk(id, {
+      attributes: ["idNewsletter", "statut"],
     });
-
-    for (const abonne of abonnes) {
-      try {
-        const unsubscribeUrl = `${FRONT_URL}/unsubscribe/${abonne.idAbonne}`;
-
-        const mailOptions = {
-          from: `"BurningHeart IHS" <${EMAIL}>`,
-          to: abonne.email,
-          subject: newsletter.objetMail,
-          html: newsletterEmailTemplate(
-            abonne.nomComplet,
-            newsletter.objetMail,
-            newsletter.contenu,
-            unsubscribeUrl
-          ),
-        };
-
-        await transporter.sendMail(mailOptions);
-
-        await NewsletterAbonne.create({
-          idNewsletter: newsletter.idNewsletter,
-          idAbonne: abonne.idAbonne,
-          statut: "envoye",
-          dateEnvoi: new Date(),
-        });
-      } catch (err) {
-        console.log(`Erreur envoi newsletter à ${abonne.email}:`, err);
-        await NewsletterAbonne.create({
-          idNewsletter: newsletter.idNewsletter,
-          idAbonne: abonne.idAbonne,
-          statut: "echec",
-        });
-      }
+    if (!newsletter) {
+      return res.status(404).json({ message: "Newsletter introuvable" });
     }
 
-    await newsletter.update({
-      statut: "envoye",
-      dateEnvoi: new Date(),
+    const rows = await NewsletterAbonne.findAll({
+      where: { idNewsletter: id },
+      attributes: ["statut"],
     });
+    const total = rows.length;
+    const envoye = rows.filter((r) => r.statut === "envoye").length;
+    const echec = rows.filter((r) => r.statut === "echec").length;
+    const attente = rows.filter((r) => r.statut === "attente").length;
+    const traite = envoye + echec;
+    const pourcentage = total > 0 ? Math.round((traite / total) * 100) : 0;
+    const statut =
+      newsletter.statut === "envoye"
+        ? "termine"
+        : attente > 0
+          ? "en_cours"
+          : total > 0
+            ? "termine"
+            : "inconnu";
 
-    res.status(200).json({ message: "Newsletter envoyée avec succès" });
+    return res
+      .status(200)
+      .json({ total, envoye, echec, attente, traite, pourcentage, statut });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
     next(error);
@@ -228,11 +306,7 @@ export const processScheduledNewsletters = async () => {
   });
 
   for (const newsletter of newsletters) {
-    await sendNewsletter(
-      { params: { id: newsletter.idNewsletter } },
-      { json: () => {} },
-      () => {}
-    );
+    await startNewsletterSend(newsletter);
   }
 };
 
