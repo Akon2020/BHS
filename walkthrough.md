@@ -370,3 +370,94 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
 **Bilan 3.3** : dons complets (backend + page publique avec formulaire d'intention + suivi admin). **À tester en runtime** : déclarer un don sur `/don` → réception des 2 emails + apparition dans `/admin/dons` + bascule de statut.
 **À compléter** : vraies coordonnées bancaires dans `donation-client.tsx` (`BANK_DETAILS`).
+
+---
+
+## LOT 3.4 — Recherche globale
+
+### Backend ✅
+
+- `controllers/recherche.controller.js` : `rechercheGlobale` — recherche publique (`q` ≥ 2 caractères) sur **blogs publiés** (titre/extrait/tags), **événements publiés** (titre/description/lieu) et **fichiers publics** (nomReference/description, + catégorie), via `Op.like`, limite 8 par type, résultats **groupés** (`{ query, total, blogs, evenements, fichiers }`).
+- `routes/recherche.route.js` : `GET /api/recherche` (public) + Swagger inline ; montage `app.use("/api/recherche", …)`.
+- `api-docs.json` régénéré (85 chemins).
+
+**Vérification** : `node --check` OK.
+
+### Frontend ✅
+
+- `types/user.ts` : `RechercheResponse` + items (blog/event/fichier).
+- `actions/recherche.ts` : `rechercheGlobale(q)`.
+- `app/recherche/page.tsx` : wrapper serveur (métadonnées, `robots: noindex`) + `Suspense` autour du client + Header/Footer.
+- `app/recherche/search-client.tsx` : input (prérempli depuis `?q=`), fetch sur changement d'URL, résultats **groupés** (Articles / Événements / Ressources) avec liens, états chargement/vide.
+- `components/header.tsx` : bouton **Recherche** (icône) dans les actions desktop + lien « Rechercher » dans le menu mobile.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → route `/recherche` générée.
+**Bilan 3.4** : recherche globale complète. **À tester en runtime** : rechercher un terme → résultats blog/événements/fichiers cliquables.
+
+---
+
+## LOT 3.7 — Événement : inscription dynamique + paiement
+
+> ⚠️ **Garde-fou données** : toutes les évolutions de schéma sont **additives** (`queryInterface.addColumn` si la colonne est absente) — aucune donnée existante n'est perdue.
+
+### Schéma (colonnes additives) ✅
+
+- `models/evenement.model.js` : `estPayant` (bool, def. false), `montant` (decimal), `devise` (string, def. USD), `champsPersonnalises` (JSON, config des champs additionnels).
+- `models/inscriptionEvenement.model.js` : `statutPaiement` (`non_paye`|`partiel`|`paye`|`accepte_non_paye`, def. `paye`), `montantPaye` (decimal, def. 0), `reponsesPersonnalisees` (JSON). Les champs de base (nomComplet, email, sexe, telephone, typeInscription auto) existaient déjà.
+- `models/index.model.js` : helper `addColumnIfMissing(table, column, def)` + backfill des tables `evenements` et `inscriptionsevenements` dans `syncModels` (non destructif).
+
+**Vérification** : `node --check` OK. Les colonnes sont ajoutées automatiquement au démarrage du backend sur une base existante, sans perte.
+
+### Contrôleurs & flux (backend) ✅
+
+- `createEvent`/`updateEvent` : acceptent `estPayant`, `montant`, `devise`, `champsPersonnalises` (parsing `FormData`/JSON).
+- `registerToEvent` : intègre `reponsesPersonnalisees` (texte + **fichiers** via `upload.any()`), fixe `statutPaiement` (`non_paye` si payant, sinon `paye`). **Gratuit** → billet + email (inchangé) ; **payant** → email « à payer » (sans billet). `ensureAbonne` factorisé.
+- `mettreAJourPaiement` (`PATCH /:id/inscriptions/:inscriptionId/paiement`, admin/editeur) : met à jour statut + montant ; si **payé** → génère **billet + reçu PDF** et envoie l'email (`eventPaymentConfirmedTemplate`).
+- `getStatsFinancieresEvenement` (`GET /:id/finances`, admin/editeur) : attendu / encaissé / reste / répartition par statut / nb inscrits.
+- `getSingleEventAdmin` : renvoie désormais `statutPaiement`, `montantPaye`, `reponsesPersonnalisees` par inscription.
+- `utils/recu-pdf.js` : reçu PDF stylisé (attend la fin d'écriture). Templates emails ajoutés.
+- Route d'inscription : `upload.any()` pour les champs `fichier`. Swagger régénéré (87 chemins).
+
+**Vérification** : `node --check` OK sur tous les fichiers ; `swagger:gen` OK.
+
+### Frontend — étapes 1 & 2 ✅
+
+- **Types + actions** : `ChampPersonnalise`, `StatutPaiement`, `EvenementFinancesResponse` ; `Evenement`/`Inscription` enrichis. `registerToEvent` (FormData/fichiers), `updateEvent` (FormData/objet), `mettreAJourPaiementInscription`, `getEventFinances`.
+- **Constructeur admin** (`components/admin/event-payment-fields.tsx`, contrôlé) : carte Paiement (toggle `estPayant` + montant + devise) + constructeur de champs personnalisés (ajout/suppression, type parmi 9, libellé, requis, options pour `select`). Intégré aux pages `events/new` et `events/edit` (état `paymentFields`, init depuis l'événement en édition, append dans le submit).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+
+### Frontend — étape 3 (inscription publique dynamique) ✅
+
+- `components/modals/register-event-modal.tsx` : reçoit `champs`, `estPayant`, `montant`, `devise`. Rend les champs de base + les champs personnalisés **par type** (input typé, textarea, select, checkbox, date, **fichier**). Validation des champs requis. Soumission en **FormData** (`reponsesPersonnalisees` JSON + fichiers appendus par id de champ). Bandeau « payant » + message adapté (billet immédiat si gratuit, sinon email « à payer »).
+- `app/events/[slug]/event-detail-client.tsx` : passe la config de l'événement au modal.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+
+### Frontend — étape 4 (suivi paiement admin) ✅
+
+- `app/admin/events/view/[id]/page.tsx` : pour les événements **payants**, colonne **Paiement** dans la table des inscrits (Select : non payé / partiel [+ montant via prompt] / payé / accepté non payé → `mettreAJourPaiementInscription`, mise à jour locale + refetch finances) + **carte « Suivi financier »** (attendu / encaissé / reste / inscrits + répartition par statut) via `getEventFinances`.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+
+**Bilan 3.7** ✅ : événement à inscription dynamique + paiement **complet** (backend schéma additif + flux + PDF billet/reçu + finances ; frontend constructeur admin + inscription publique dynamique + suivi paiement). **À tester en runtime** : créer un événement payant avec champs perso → s'inscrire (public) → email « à payer » → marquer payé en admin → réception billet + reçu → vérifier le suivi financier. **Garde-fou données respecté** (colonnes additives).
+
+---
+
+## LOT 3.5 — Commentaires blog
+
+**Constat** : la partie **publique existait déjà** dans `app/blog/[slug]/blog-post-client.tsx` (formulaire nom/email/contenu → `createCommentaire`, liste des commentaires approuvés + réponses imbriquées, états chargement/vide). Il manquait la **modération admin** (sans elle, les commentaires en `attente` ne s'affichent jamais) et un **anti-spam**.
+
+### Modifications ✅
+
+- **Sécurité backend** : `GET /api/commentaires` (`getAllCommentaires`, données sensibles : emails/IP) passé derrière `authenticationJWT` + `authorizeRoles("admin","editeur","membre")` (était **public**).
+- **Action** : `actions/comment.ts` → ajout de `getAllCommentaires`.
+- **Modération admin** : `app/admin/comments/page.tsx` — liste filtrable par statut (en attente / approuvés / refusés / tous), **Approuver** / **Refuser** (`modererCommentaire`, `modereBy` = utilisateur courant), **Supprimer**. Entrée sidebar « Commentaires » (icône `MessageSquareText`) + permission `editeur` (`/admin/comments`).
+- **Anti-spam** : champ **honeypot** masqué (`website`) ajouté au formulaire public ; si rempli → soumission ignorée silencieusement.
+
+**Vérification** : Front `tsc` → 0 erreur, `build` → `/admin/comments` généré ; Back `node --check` OK.
+**Bilan 3.5** : commentaires activés de bout en bout. **À tester en runtime** : poster un commentaire → le modérer (approuver) dans `/admin/comments` → il apparaît sous l'article.
+
+### Note Swagger
+
+- `swagger.js` exporte `swaggerSpec` ; `generate-swagger.js` + `npm run swagger:gen` régénèrent `api-docs.json` (à relancer après chaque changement d'API).

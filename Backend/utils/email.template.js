@@ -421,6 +421,41 @@ export const donIntentionAdminTemplate = (don) => {
   );
 };
 
+export const eventPaymentPendingTemplate = (
+  nom,
+  titreEvenement,
+  date,
+  lieu,
+  montant,
+) =>
+  donCardWrapper(
+    "Inscription enregistrée",
+    `
+      <tr><td style="color:#333333;font-size:16px;padding-bottom:16px;">Bonjour ${escapeHtml(nom)},</td></tr>
+      <tr><td style="color:#555555;font-size:15px;line-height:1.6;padding-bottom:16px;">Votre inscription à <strong>${escapeHtml(titreEvenement)}</strong> (${escapeHtml(date)}, ${escapeHtml(lieu)}) a bien été enregistrée.</td></tr>
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:8px;">Cet événement est <strong>payant</strong>. Montant à régler : <strong>${escapeHtml(montant)}</strong>.</td></tr>
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:24px;">Merci de venir vous acquitter du montant dû. Dès réception du paiement, vous recevrez votre <strong>billet</strong> et un <strong>reçu</strong> par email.</td></tr>
+      <tr><td style="color:#555555;font-size:15px;">Cordialement,<br>L'équipe BurningHeart</td></tr>
+    `,
+  );
+
+export const eventPaymentConfirmedTemplate = (
+  nom,
+  titreEvenement,
+  date,
+  lieu,
+  montantPaye,
+) =>
+  donCardWrapper(
+    "Paiement confirmé 🎉",
+    `
+      <tr><td style="color:#333333;font-size:16px;padding-bottom:16px;">Bonjour ${escapeHtml(nom)},</td></tr>
+      <tr><td style="color:#555555;font-size:15px;line-height:1.6;padding-bottom:16px;">Nous confirmons la réception de votre paiement (<strong>${escapeHtml(montantPaye)}</strong>) pour <strong>${escapeHtml(titreEvenement)}</strong> (${escapeHtml(date)}, ${escapeHtml(lieu)}).</td></tr>
+      <tr><td style="color:#555555;font-size:15px;padding-bottom:24px;">Vous trouverez ci-joint votre <strong>billet</strong> ainsi que votre <strong>reçu de paiement</strong>. À très bientôt !</td></tr>
+      <tr><td style="color:#555555;font-size:15px;">Cordialement,<br>L'équipe BurningHeart</td></tr>
+    `,
+  );
+
 export const identitySubmissionConfirmationTemplate = (
   nomComplet,
   dateSoumission,

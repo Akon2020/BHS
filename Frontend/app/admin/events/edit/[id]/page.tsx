@@ -3,6 +3,10 @@
 import { Badge } from "@/components/ui/badge";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import {
+  EventPaymentFields,
+  type PaymentFieldsValue,
+} from "@/components/admin/event-payment-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,6 +62,12 @@ export default function EditEventPage() {
     requiresRegistration: false,
     image: null as File | null,
   });
+  const [paymentFields, setPaymentFields] = useState<PaymentFieldsValue>({
+    estPayant: false,
+    montant: "",
+    devise: "USD",
+    champs: [],
+  });
 
   // Charger l'événement
   useEffect(() => {
@@ -76,6 +86,15 @@ export default function EditEventPage() {
           maxAttendees: ev.nombrePlaces?.toString() || "",
           requiresRegistration: Boolean(ev.nombrePlaces),
           image: null,
+        });
+
+        setPaymentFields({
+          estPayant: Boolean(ev.estPayant),
+          montant: ev.montant != null ? String(ev.montant) : "",
+          devise: ev.devise || "USD",
+          champs: Array.isArray(ev.champsPersonnalises)
+            ? ev.champsPersonnalises
+            : [],
         });
 
         setDate(new Date(ev.dateEvenement));
@@ -161,6 +180,13 @@ export default function EditEventPage() {
           : undefined,
         statut: status,
         imageEvenement: eventData.image || undefined,
+        estPayant: paymentFields.estPayant,
+        montant:
+          paymentFields.estPayant && paymentFields.montant
+            ? Number(paymentFields.montant)
+            : undefined,
+        devise: paymentFields.devise,
+        champsPersonnalises: paymentFields.champs,
       });
 
       toast({
@@ -381,6 +407,12 @@ export default function EditEventPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Paiement + champs personnalisés */}
+          <EventPaymentFields
+            value={paymentFields}
+            onChange={setPaymentFields}
+          />
 
           {/* Image */}
           <Card>

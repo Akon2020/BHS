@@ -11,6 +11,7 @@ import {
   User,
   Settings,
   LogOut,
+  Search,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTheme } from "@/contexts/theme-context";
@@ -116,6 +117,12 @@ export function Header() {
 
         {/* Right side actions */}
         <div className="flex flex-1 items-center justify-end gap-x-2 sm:gap-x-4">
+          <Link href="/recherche" aria-label="Rechercher">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Search className="h-5 w-5" />
+            </Button>
+          </Link>
+
           <Link href="/don" className="hidden sm:block">
             <Button variant="default" size="sm" className="gap-2">
               <Heart className="h-4 w-4" />
@@ -250,6 +257,18 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
+            <Link
+              href="/recherche"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`flex items-center gap-2 rounded-md px-3 py-2 text-base font-medium transition-colors ${
+                pathname === "/recherche"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-foreground hover:bg-accent"
+              }`}
+            >
+              <Search className="h-4 w-4" />
+              Rechercher
+            </Link>
             <div className="pt-4 space-y-2">
               <Link href="/don" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="default" size="sm" className="w-full gap-2">

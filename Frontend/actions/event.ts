@@ -9,6 +9,9 @@ import {
   DeleteEvenementResponse,
   InscriptionEvenementResponse,
   InscriptionEvenementBody,
+  EvenementFinancesResponse,
+  StatutPaiement,
+  InscriptionEvenement,
 } from "@/types/user";
 
 export const getAllEvents = async (params?: {
@@ -179,27 +182,39 @@ export const createEvent = async (
 
 export const updateEvent = async (
   id: number,
-  data: Partial<{
-    titre: string;
-    slug: string;
-    description: string;
-    dateEvenement: string;
-    heureDebut: string;
-    heureFin: string;
-    lieu: string;
-    nombrePlaces: number;
-    statut: string;
-    imageEvenement: File;
-  }>,
+  data:
+    | FormData
+    | Partial<{
+        titre: string;
+        slug: string;
+        description: string;
+        dateEvenement: string;
+        heureDebut: string;
+        heureFin: string;
+        lieu: string;
+        nombrePlaces: number;
+        statut: string;
+        imageEvenement: File;
+        estPayant: boolean;
+        montant: number;
+        devise: string;
+        champsPersonnalises: unknown;
+      }>,
 ): Promise<UpdateEvenementResponse> => {
   try {
-    const formData = new FormData();
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
-        formData.append(key, value as any);
-      }
-    });
+    let formData: FormData;
+    if (data instanceof FormData) {
+      formData = data;
+    } else {
+      formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value === undefined) return;
+        if (value instanceof File) formData.append(key, value);
+        else if (value !== null && typeof value === "object")
+          formData.append(key, JSON.stringify(value));
+        else formData.append(key, value as any);
+      });
+    }
 
     const res = await api.patch<UpdateEvenementResponse>(
       `/api/evenements/update/${id}`,
@@ -254,12 +269,16 @@ export const inscrireAUnEvenement = async (
 
 export const registerToEvent = async (
   slug: string,
-  data?: InscriptionEvenementBody,
+  data?: FormData | InscriptionEvenementBody,
 ): Promise<InscriptionEvenementResponse> => {
   try {
+    const isForm = typeof FormData !== "undefined" && data instanceof FormData;
     const res = await api.post<InscriptionEvenementResponse>(
       `/api/evenements/slug/${slug}/inscription`,
-      data || {},
+      data ?? {},
+      isForm
+        ? { headers: { "Content-Type": "multipart/form-data" } }
+        : undefined,
     );
     return res.data;
   } catch (error: any) {
@@ -334,6 +353,43 @@ export const removeSelectedDuplicateEventInscriptions = async (
     throw new Error(
       error.response?.data?.message ||
         "Erreur lors de la suppression des doublons sélectionnés",
+    );
+  }
+};
+
+// Met à jour le statut de paiement d'une inscription (admin).
+export const mettreAJourPaiementInscription = async (
+  idEvenement: number,
+  inscriptionId: number,
+  payload: { statutPaiement?: StatutPaiement; montantPaye?: number },
+): Promise<InscriptionEvenement> => {
+  try {
+    const res = await api.patch<{ message: string; data: InscriptionEvenement }>(
+      `/api/evenements/${idEvenement}/inscriptions/${inscriptionId}/paiement`,
+      payload,
+    );
+    return res.data.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Erreur lors de la mise à jour du paiement",
+    );
+  }
+};
+
+// Statistiques financières d'un événement (admin).
+export const getEventFinances = async (
+  idEvenement: number,
+): Promise<EvenementFinancesResponse> => {
+  try {
+    const res = await api.get<EvenementFinancesResponse>(
+      `/api/evenements/${idEvenement}/finances`,
+    );
+    return res.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Erreur lors de la récupération des finances",
     );
   }
 };

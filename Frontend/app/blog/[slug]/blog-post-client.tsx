@@ -47,6 +47,8 @@ export default function BlogPostClient({ slug }: BlogPostClientProps) {
   const [email, setEmail] = useState("");
   const [contenu, setContenu] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  // Honeypot anti-spam : champ masqué que seuls les bots remplissent.
+  const [website, setWebsite] = useState("");
 
   const fetchBlog = async () => {
     try {
@@ -90,6 +92,14 @@ export default function BlogPostClient({ slug }: BlogPostClientProps) {
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Honeypot rempli → probablement un bot : on ignore silencieusement.
+    if (website.trim()) {
+      setNomComplet("");
+      setEmail("");
+      setContenu("");
+      return;
+    }
 
     if (!nomComplet.trim() || !email.trim() || !contenu.trim()) {
       toast({
@@ -352,6 +362,17 @@ export default function BlogPostClient({ slug }: BlogPostClientProps) {
                 Laisser un commentaire
               </h3>
               <form onSubmit={handleSubmitComment} className="space-y-4">
+                {/* Honeypot anti-spam (masqué visuellement) */}
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  className="absolute left-[-9999px] h-0 w-0 opacity-0"
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Nom</label>

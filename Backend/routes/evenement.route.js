@@ -15,6 +15,8 @@ import {
   renvoyerTicketInscription,
   supprimerDoublonsInscriptions,
   supprimerDoublonsSelectionnes,
+  mettreAJourPaiement,
+  getStatsFinancieresEvenement,
 } from "../controllers/evenement.controller.js";
 import {
   authenticationJWT,
@@ -456,7 +458,64 @@ evenementRouter.post(
 evenementRouter.post(
   "/slug/:slug/inscription",
   optionalAuthJWT,
+  upload.any(),
   registerToEvent,
+);
+
+/**
+ * @swagger
+ * /api/evenements/{id}/inscriptions/{inscriptionId}/paiement:
+ *   patch:
+ *     summary: Mettre à jour le statut de paiement d'une inscription (admin)
+ *     tags: [Evenements]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *       - in: path
+ *         name: inscriptionId
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               statutPaiement: { type: string, enum: [non_paye, partiel, paye, accepte_non_paye] }
+ *               montantPaye: { type: number }
+ *     responses:
+ *       200: { description: Paiement mis à jour (billet + reçu envoyés si payé) }
+ */
+evenementRouter.patch(
+  "/:id/inscriptions/:inscriptionId/paiement",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  mettreAJourPaiement,
+);
+
+/**
+ * @swagger
+ * /api/evenements/{id}/finances:
+ *   get:
+ *     summary: Statistiques financières d'un événement (admin)
+ *     tags: [Evenements]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200: { description: Attendu, encaissé, reste, répartition par statut }
+ */
+evenementRouter.get(
+  "/:id/finances",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  getStatsFinancieresEvenement,
 );
 
 export default evenementRouter;

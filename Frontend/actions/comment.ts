@@ -4,8 +4,23 @@ import {
   CreateCommentairePayload,
   CreateCommentaireResponse,
   GetCommentairesParBlogResponse,
+  GetCommentairesResponse,
   ModererCommentairePayload,
 } from "@/types/user";
+
+
+export const getAllCommentaires =
+  async (): Promise<GetCommentairesResponse> => {
+    try {
+      const res = await api.get<GetCommentairesResponse>("/api/commentaires");
+      return res.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message ||
+          "Erreur lors de la récupération des commentaires",
+      );
+    }
+  };
 
 
 export const getCommentairesParBlog = async (

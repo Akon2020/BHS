@@ -16,6 +16,7 @@ export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
   editeur: [
     "/admin",
     "/admin/blog",
+    "/admin/comments",
     "/admin/categories",
     "/admin/events",
     "/admin/files",

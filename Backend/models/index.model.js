@@ -217,6 +217,50 @@ const syncModels = async () => {
       }
     }
 
+    // Ajoute une colonne uniquement si elle est absente (non destructif).
+    const addColumnIfMissing = async (table, column, definition) => {
+      const desc = await queryInterface.describeTable(table).catch(() => null);
+      if (desc && !desc[column]) {
+        await queryInterface.addColumn(table, column, definition);
+      }
+    };
+
+    // Backfill événements — paiement + champs personnalisés (Lot 3.7).
+    await addColumnIfMissing("evenements", "estPayant", {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    });
+    await addColumnIfMissing("evenements", "montant", {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+    });
+    await addColumnIfMissing("evenements", "devise", {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+      defaultValue: "USD",
+    });
+    await addColumnIfMissing("evenements", "champsPersonnalises", {
+      type: DataTypes.JSON,
+      allowNull: true,
+    });
+
+    // Backfill inscriptions — statut de paiement + réponses personnalisées.
+    await addColumnIfMissing("inscriptionsevenements", "statutPaiement", {
+      type: DataTypes.ENUM("non_paye", "partiel", "paye", "accepte_non_paye"),
+      allowNull: false,
+      defaultValue: "paye",
+    });
+    await addColumnIfMissing("inscriptionsevenements", "montantPaye", {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    });
+    await addColumnIfMissing("inscriptionsevenements", "reponsesPersonnalisees", {
+      type: DataTypes.JSON,
+      allowNull: true,
+    });
+
     console.log("Modèles synchronisés avec succès");
   } catch (error) {
     console.error("Erreur lors de la synchronisation des modèles:", error);

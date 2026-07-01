@@ -440,6 +440,31 @@ export interface EvenementCreateur {
   email: string;
 }
 
+export type TypeChampPersonnalise =
+  | "texte"
+  | "email"
+  | "telephone"
+  | "nombre"
+  | "select"
+  | "checkbox"
+  | "date"
+  | "textarea"
+  | "fichier";
+
+export interface ChampPersonnalise {
+  id: string;
+  type: TypeChampPersonnalise;
+  label: string;
+  requis?: boolean;
+  options?: string[];
+}
+
+export type StatutPaiement =
+  | "non_paye"
+  | "partiel"
+  | "paye"
+  | "accepte_non_paye";
+
 export interface InscriptionEvenement {
   idInscription: number;
   nomComplet: string;
@@ -447,6 +472,9 @@ export interface InscriptionEvenement {
   sexe: Sexe;
   telephone: string;
   statut: StatutInscription;
+  statutPaiement?: StatutPaiement;
+  montantPaye?: string | number;
+  reponsesPersonnalisees?: Record<string, string> | null;
   typeInscription: TypeInscription;
   dateInscription: string;
   utilisateur: EvenementCreateur | null;
@@ -465,10 +493,29 @@ export interface Evenement {
   nombreInscrits: number;
   imageEvenement: string;
   statut: EvenementStatut;
+  estPayant?: boolean;
+  montant?: string | number | null;
+  devise?: string;
+  champsPersonnalises?: ChampPersonnalise[] | null;
   createdBy: number;
   createdAt: string;
   updatedAt: string;
   createur: EvenementCreateur;
+}
+
+export interface EvenementFinancesResponse {
+  evenement: {
+    idEvenement: number;
+    titre: string;
+    estPayant: boolean;
+    montant: number;
+    devise: string;
+  };
+  nbInscrits: number;
+  parStatut: Record<StatutPaiement, number>;
+  attendu: number;
+  encaisse: number;
+  reste: number;
 }
 
 export interface GetAllEventsResponse {
@@ -763,4 +810,39 @@ export interface CreateDonPayload {
   devise?: string;
   moyen: DonMoyen;
   message?: string;
+}
+
+/* ------------------------------- Recherche ------------------------------- */
+
+export interface RechercheBlogItem {
+  idBlog: number;
+  titre: string;
+  slug: string;
+  extrait?: string | null;
+  imageUne?: string | null;
+}
+
+export interface RechercheEventItem {
+  idEvenement: number;
+  titre: string;
+  slug: string;
+  lieu: string;
+  dateEvenement: string;
+  imageEvenement?: string | null;
+}
+
+export interface RechercheFichierItem {
+  idFichier: number;
+  nomReference: string;
+  slug: string;
+  description?: string | null;
+  categorie?: { nomCategorie: string } | null;
+}
+
+export interface RechercheResponse {
+  query: string;
+  total: number;
+  blogs: RechercheBlogItem[];
+  evenements: RechercheEventItem[];
+  fichiers: RechercheFichierItem[];
 }
