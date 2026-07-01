@@ -47,8 +47,16 @@ import {
   getSingleEventAdmin,
   removeSelectedDuplicateEventInscriptions,
   resendEventTicket,
+  mettreAJourPaiementInscription,
+  getEventFinances,
 } from "@/actions/event";
-import type { EvenementAdmin, InscriptionEvenement, Sexe } from "@/types/user";
+import type {
+  EvenementAdmin,
+  EvenementFinancesResponse,
+  InscriptionEvenement,
+  Sexe,
+  StatutPaiement,
+} from "@/types/user";
 import {
   Select,
   SelectContent,
@@ -108,9 +116,81 @@ export default function ViewEventAdminPage() {
     }
   };
 
+  const [finances, setFinances] = useState<EvenementFinancesResponse | null>(
+    null,
+  );
+
+  const fetchFinances = async () => {
+    try {
+      const res = await getEventFinances(id);
+      setFinances(res);
+    } catch {
+      /* silencieux */
+    }
+  };
+
   useEffect(() => {
     if (!Number.isNaN(id)) fetchEvent();
   }, [id, router]);
+
+  useEffect(() => {
+    if (event?.estPayant && !Number.isNaN(id)) fetchFinances();
+  }, [event?.estPayant, id]);
+
+  const handlePaiement = async (
+    ins: InscriptionEvenement,
+    statutPaiement: StatutPaiement,
+  ) => {
+    let montantPaye: number | undefined;
+    if (statutPaiement === "paye") {
+      montantPaye = Number(event?.montant) || 0;
+    } else if (statutPaiement === "partiel") {
+      const v = window.prompt(
+        "Montant reçu :",
+        String(ins.montantPaye ?? ""),
+      );
+      if (v === null) return;
+      montantPaye = Number(v) || 0;
+    }
+
+    try {
+      const updated = await mettreAJourPaiementInscription(
+        id,
+        ins.idInscription,
+        { statutPaiement, montantPaye },
+      );
+      setEvent((prev) =>
+        prev
+          ? {
+              ...prev,
+              inscriptions: prev.inscriptions.map((i) =>
+                i.idInscription === ins.idInscription
+                  ? {
+                      ...i,
+                      statutPaiement: updated.statutPaiement,
+                      montantPaye: updated.montantPaye,
+                    }
+                  : i,
+              ),
+            }
+          : prev,
+      );
+      fetchFinances();
+      toast({
+        title: "Paiement mis à jour",
+        description:
+          statutPaiement === "paye"
+            ? "Billet + reçu envoyés par email."
+            : undefined,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error?.message || "Mise à jour impossible.",
+      });
+    }
+  };
 
   const totalPlaces = event?.nombrePlaces ?? null;
   const totalInscrits = event?.inscriptions?.length ?? 0;
@@ -571,6 +651,52 @@ export default function ViewEventAdminPage() {
         />
       </div>
 
+      {event?.estPayant && finances && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Suivi financier</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Attendu</p>
+                <p className="text-xl font-bold">
+                  {finances.attendu} {finances.evenement.devise}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Encaissé</p>
+                <p className="text-xl font-bold text-green-600">
+                  {finances.encaisse} {finances.evenement.devise}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Reste</p>
+                <p className="text-xl font-bold text-amber-600">
+                  {finances.reste} {finances.evenement.devise}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Inscrits</p>
+                <p className="text-xl font-bold">{finances.nbInscrits}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs">
+              <Badge variant="default">Payé : {finances.parStatut.paye}</Badge>
+              <Badge variant="secondary">
+                Partiel : {finances.parStatut.partiel}
+              </Badge>
+              <Badge variant="outline">
+                Non payé : {finances.parStatut.non_paye}
+              </Badge>
+              <Badge variant="outline">
+                Accepté non payé : {finances.parStatut.accepte_non_paye}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader className="border-b bg-muted/25">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -620,6 +746,9 @@ export default function ViewEventAdminPage() {
                   <th className="p-3 text-left">Téléphone</th>
                   <th className="p-3 text-left">Sexe</th>
                   <th className="p-3 text-left">Type</th>
+                  {event?.estPayant && (
+                    <th className="p-3 text-left">Paiement</th>
+                  )}
                   <th className="p-3 text-left">Date et heure</th>
                   <th className="p-3 text-left">Actions</th>
                 </tr>
@@ -658,6 +787,33 @@ export default function ViewEventAdminPage() {
                         {ins.utilisateur ? "Utilisateur" : "Visiteur"}
                       </Badge>
                     </td>
+                    {event?.estPayant && (
+                      <td className="p-3">
+                        <Select
+                          value={ins.statutPaiement || "non_paye"}
+                          onValueChange={(v) =>
+                            handlePaiement(ins, v as StatutPaiement)
+                          }
+                        >
+                          <SelectTrigger className="h-8 w-[180px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="non_paye">Non payé</SelectItem>
+                            <SelectItem value="partiel">
+                              Partiel
+                              {ins.montantPaye
+                                ? ` (${ins.montantPaye} ${event.devise})`
+                                : ""}
+                            </SelectItem>
+                            <SelectItem value="paye">Payé</SelectItem>
+                            <SelectItem value="accepte_non_paye">
+                              Accepté non payé
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+                    )}
                     <td className="p-3">
                       {new Date(ins.dateInscription).toLocaleString("fr-FR", {
                         year: "numeric",
@@ -687,7 +843,7 @@ export default function ViewEventAdminPage() {
                 {filteredInscriptions.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={event?.estPayant ? 8 : 7}
                       className="p-4 text-center text-muted-foreground"
                     >
                       Aucun inscrit trouvé

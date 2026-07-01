@@ -433,7 +433,14 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `app/events/[slug]/event-detail-client.tsx` : passe la config de l'événement au modal.
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
-**Reste** : suivi paiement + récap financier côté admin (page vue événement).
+
+### Frontend — étape 4 (suivi paiement admin) ✅
+
+- `app/admin/events/view/[id]/page.tsx` : pour les événements **payants**, colonne **Paiement** dans la table des inscrits (Select : non payé / partiel [+ montant via prompt] / payé / accepté non payé → `mettreAJourPaiementInscription`, mise à jour locale + refetch finances) + **carte « Suivi financier »** (attendu / encaissé / reste / inscrits + répartition par statut) via `getEventFinances`.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+
+**Bilan 3.7** ✅ : événement à inscription dynamique + paiement **complet** (backend schéma additif + flux + PDF billet/reçu + finances ; frontend constructeur admin + inscription publique dynamique + suivi paiement). **À tester en runtime** : créer un événement payant avec champs perso → s'inscrire (public) → email « à payer » → marquer payé en admin → réception billet + reçu → vérifier le suivi financier. **Garde-fou données respecté** (colonnes additives).
 
 ---
 
