@@ -26,6 +26,7 @@ import messageEnvoyeRouter from "./routes/messageEnvoye.route.js";
 import pointageRouter from "./routes/pointage.route.js";
 import temoignageRouter from "./routes/temoignage.route.js";
 import donRouter from "./routes/don.route.js";
+import rechercheRouter from "./routes/recherche.route.js";
 
 const app = express();
 
@@ -86,6 +87,7 @@ app.use("/api/messages", messageEnvoyeRouter);
 app.use("/api/pointages", pointageRouter);
 app.use("/api/temoignages", temoignageRouter);
 app.use("/api/dons", donRouter);
+app.use("/api/recherche", rechercheRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);

@@ -370,3 +370,19 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
 **Bilan 3.3** : dons complets (backend + page publique avec formulaire d'intention + suivi admin). **À tester en runtime** : déclarer un don sur `/don` → réception des 2 emails + apparition dans `/admin/dons` + bascule de statut.
 **À compléter** : vraies coordonnées bancaires dans `donation-client.tsx` (`BANK_DETAILS`).
+
+---
+
+## LOT 3.4 — Recherche globale
+
+### Backend ✅
+
+- `controllers/recherche.controller.js` : `rechercheGlobale` — recherche publique (`q` ≥ 2 caractères) sur **blogs publiés** (titre/extrait/tags), **événements publiés** (titre/description/lieu) et **fichiers publics** (nomReference/description, + catégorie), via `Op.like`, limite 8 par type, résultats **groupés** (`{ query, total, blogs, evenements, fichiers }`).
+- `routes/recherche.route.js` : `GET /api/recherche` (public) + Swagger inline ; montage `app.use("/api/recherche", …)`.
+- `api-docs.json` régénéré (85 chemins).
+
+**Vérification** : `node --check` OK. **Reste** : front (barre header + page `/recherche`).
+
+### Note Swagger
+
+- `swagger.js` exporte `swaggerSpec` ; `generate-swagger.js` + `npm run swagger:gen` régénèrent `api-docs.json` (à relancer après chaque changement d'API).

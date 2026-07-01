@@ -158,8 +158,8 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟢 Admin : page `/admin/dons` (liste, cartes récap, bascule statut annoncé/confirmé, vue message, suppression) ; entrée sidebar « Dons » ; permission éditeur.
 
 ### 3.4 🔎 Recherche globale  🟢
-- [ ] 🟢 Backend : endpoint `/api/recherche?q=` agrégeant blogs + événements + fichiers publics (titre/extrait/tags), résultats paginés et typés.
-- [ ] 🟢 Front : composant de recherche (barre dans le header public + page `/recherche` de résultats), command palette (`cmdk` déjà présent) en option.
+- [x] 🟢 Backend : endpoint public `/api/recherche?q=` agrégeant blogs publiés + événements publiés + fichiers publics (recherche `LIKE` sur titre/extrait/tags/description/lieu), résultats groupés (limite 8/type). Swagger régénéré.
+- [ ] 🟢 Front : composant de recherche (barre dans le header public + page `/recherche` de résultats).
 
 ### 3.6 ✉️ Boîte d'envoi admin (Contact)  🟢 — *fait*
 - [x] 🟢 Backend : modèle `MessageEnvoye` + endpoints `/api/messages` (POST envoyer, GET liste, GET détail, DELETE), envoi réel via Nodemailer (template `messageAdminTemplate`), statut `envoye`/`echec`, Swagger à jour, `cookie-parser`/Helmet déjà en place. Accès `admin`+`editeur` (DELETE `admin`).
