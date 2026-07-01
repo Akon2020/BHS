@@ -153,9 +153,9 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 ### 3.3 ❤️ Don — manuel + formulaire d'intention  🟢
 - [ ] 🔵 Finaliser la page `/don` : **vraies coordonnées** bancaires + Mobile Money (à fournir), bouton « copier », design soigné, retrait du bouton « Donner maintenant » inactif.
-- [ ] 🟢 Backend : modèle `Don` (`nom`, `email`, `montant`, `devise`, `moyen` carte/virement/mobile, `message`, `statut` annoncé/confirmé, timestamps) + endpoint de création + notification email (admin + reçu/merci au donateur via Nodemailer/templates existants).
+- [x] 🟢 Backend : modèle `Don` (`nom`, `email`, `montant`, `devise`, `moyen` carte/virement/mobile, `message`, `statut` annonce/confirme) + endpoint public de création + **notification email** (admin + remerciement au donateur, templates dédiés). Liste/statut/suppression admin, Swagger inline.
 - [ ] 🟢 Front : **formulaire « Je déclare un don »** (montant, moyen, message) → enregistre l'intention.
-- [ ] 🟢 Admin : page `/admin/dons` (liste, statut, marquage « confirmé », export éventuel).
+- [ ] 🟢 Admin : page `/admin/dons` (liste, statut, marquage « confirmé »).
 
 ### 3.4 🔎 Recherche globale  🟢
 - [ ] 🟢 Backend : endpoint `/api/recherche?q=` agrégeant blogs + événements + fichiers publics (titre/extrait/tags), résultats paginés et typés.

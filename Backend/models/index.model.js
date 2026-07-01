@@ -18,6 +18,7 @@ import MessageEnvoye from "./messageEnvoye.model.js";
 import ProfilPointage from "./profilPointage.model.js";
 import Pointage from "./pointage.model.js";
 import Temoignage from "./temoignage.model.js";
+import Don from "./don.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -242,5 +243,6 @@ export {
   ProfilPointage,
   Pointage,
   Temoignage,
+  Don,
   syncModels,
 };

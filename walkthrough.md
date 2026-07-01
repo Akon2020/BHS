@@ -338,3 +338,17 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 
 **Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
 **Bilan 3.2** : témoignages dynamiques complets (backend CRUD + admin + carrousel public). **À tester en runtime** : créer un témoignage publié → vérifier l'apparition dans le carrousel de la home.
+
+---
+
+## LOT 3.3 — Don (manuel + formulaire d'intention)
+
+### Backend ✅
+
+- `models/don.model.js` : `Don` (nom, email, montant `DECIMAL`, devise, `moyen` carte/virement/mobile, message, `statut` annonce/confirme). Table `dons`.
+- `utils/email.template.js` : `donThankYouTemplate` (remerciement donateur) + `donIntentionAdminTemplate` (notification admin), via un wrapper de carte commun.
+- `controllers/don.controller.js` : `createDon` (public, valide, crée l'intention, **envoie 2 emails** non bloquants : admin + donateur), `getDons`, `getDonById`, `updateDonStatut` (annonce/confirme), `deleteDon`.
+- `routes/don.route.js` : `POST /` public ; `GET /`, `GET/PATCH /:id` (admin+editeur) ; `DELETE /:id` (admin) ; Swagger inline ; montage `app.use("/api/dons", …)`.
+
+**Vérification** : `node --check` OK sur tous les fichiers. Table créée par `syncModels`.
+**Reste** : page `/don` finalisée + formulaire d'intention (public) ; page `/admin/dons` (suivi).
