@@ -56,6 +56,28 @@ const Evenement = db.define(
       type: DataTypes.ENUM("brouillon", "publie", "annule", "termine"),
       defaultValue: "brouillon",
     },
+    estPayant: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    montant: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: true,
+      comment: "Montant d'inscription si l'événement est payant",
+    },
+    devise: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+      defaultValue: "USD",
+    },
+    champsPersonnalises: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+      comment:
+        "Config des champs additionnels : [{ id, type, label, requis, options? }]",
+    },
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: false,

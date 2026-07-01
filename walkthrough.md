@@ -396,6 +396,21 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 
 ---
 
+## LOT 3.7 — Événement : inscription dynamique + paiement
+
+> ⚠️ **Garde-fou données** : toutes les évolutions de schéma sont **additives** (`queryInterface.addColumn` si la colonne est absente) — aucune donnée existante n'est perdue.
+
+### Schéma (colonnes additives) ✅
+
+- `models/evenement.model.js` : `estPayant` (bool, def. false), `montant` (decimal), `devise` (string, def. USD), `champsPersonnalises` (JSON, config des champs additionnels).
+- `models/inscriptionEvenement.model.js` : `statutPaiement` (`non_paye`|`partiel`|`paye`|`accepte_non_paye`, def. `paye`), `montantPaye` (decimal, def. 0), `reponsesPersonnalisees` (JSON). Les champs de base (nomComplet, email, sexe, telephone, typeInscription auto) existaient déjà.
+- `models/index.model.js` : helper `addColumnIfMissing(table, column, def)` + backfill des tables `evenements` et `inscriptionsevenements` dans `syncModels` (non destructif).
+
+**Vérification** : `node --check` OK. Les colonnes sont ajoutées automatiquement au démarrage du backend sur une base existante, sans perte.
+**Reste** : contrôleurs (création/édition avec champs + paiement), inscription dynamique, suivi paiement + billet/reçu PDF + emails, front.
+
+---
+
 ## LOT 3.5 — Commentaires blog
 
 **Constat** : la partie **publique existait déjà** dans `app/blog/[slug]/blog-post-client.tsx` (formulaire nom/email/contenu → `createCommentaire`, liste des commentaires approuvés + réponses imbriquées, états chargement/vide). Il manquait la **modération admin** (sans elle, les commentaires en `attente` ne s'affichent jamais) et un **anti-spam**.

@@ -56,6 +56,24 @@ const InscriptionEvenement = db.define(
       type: DataTypes.ENUM("confirme", "en_attente", "annule"),
       defaultValue: "confirme",
     },
+    statutPaiement: {
+      type: DataTypes.ENUM("non_paye", "partiel", "paye", "accepte_non_paye"),
+      allowNull: false,
+      defaultValue: "paye",
+      comment:
+        "Statut de paiement (pertinent pour les événements payants ; 'paye' par défaut pour les gratuits)",
+    },
+    montantPaye: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    reponsesPersonnalisees: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: {},
+      comment: "Réponses aux champs personnalisés de l'événement",
+    },
     typeInscription: {
       type: DataTypes.ENUM("utilisateur", "visiteur"),
       allowNull: false,

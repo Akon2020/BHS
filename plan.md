@@ -196,8 +196,8 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - **Champs personnalisés** ajoutables à la création de l'événement : type (`texte`, `email`, `téléphone`, `nombre`, `select`, `case à cocher`, `date`, `zone de texte`, `fichier` [téléversement]) + **label** affiché (« Entrez votre X ») + requis (oui/non) + options (pour select). Les fichiers téléversés sont stockés côté serveur (Multer) et référencés dans `reponsesPersonnalisees`.
 
 **Backend**
-- [ ] 🔵 `Evenement` — colonnes additives : `estPayant` (bool), `montant` (decimal), `devise` (string), `champsPersonnalises` (JSON : `[{ id, type, label, requis, options? }]`). Backfill non destructif.
-- [ ] 🔵 `InscriptionEvenement` — colonnes additives : `telephone`, `sexe` (si absents), `statutPaiement` (`non_paye`|`partiel`|`paye`|`accepte_non_paye`), `montantPaye` (decimal), `reponsesPersonnalisees` (JSON). Backfill : inscriptions existantes → `paye`/`non_paye` selon gratuité de l'événement.
+- [x] 🔵 `Evenement` — colonnes additives : `estPayant` (bool), `montant` (decimal), `devise` (string, def. USD), `champsPersonnalises` (JSON). Backfill non destructif dans `syncModels` (`addColumnIfMissing`).
+- [x] 🔵 `InscriptionEvenement` — colonnes additives : `statutPaiement` (`non_paye`|`partiel`|`paye`|`accepte_non_paye`, def. `paye`), `montantPaye` (decimal, def. 0), `reponsesPersonnalisees` (JSON). `telephone`/`sexe` déjà présents. Backfill non destructif.
 - [ ] 🟢 Inscription : validation dynamique (base + champs perso), génération billet + email (gratuit) OU email « à payer » (payant).
 - [ ] 🟢 Endpoint admin : mise à jour du paiement d'une inscription (payé/partiel+montant/accepté-non-payé) → si payé, génère **billet + reçu** et envoie l'email.
 - [ ] 🟢 **Reçu PDF** (`utils/recu-pdf.js`) stylisé + templates emails (confirmation payant, invitation à payer, confirmation paiement + billet + reçu).
