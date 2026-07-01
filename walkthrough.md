@@ -457,7 +457,16 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `routes/newsletter.route.js` : `GET /:id/progress` (admin/editeur/membre). Swagger régénéré (88 chemins).
 
 **Vérification** : `node --check` OK ; `swagger:gen` OK.
-**Reste** : front (redirection vers la vue après envoi + barre de progression par polling).
+
+### Frontend ✅
+
+- `types/user.ts` : `NewsletterProgress`. `actions/newsletter.ts` : `sendNewsletter` renvoie `{ message, total? }` ; `getNewsletterProgress`.
+- `app/admin/newsletter/new/page.tsx` : après « Envoyer », toast « Envoi démarré » + redirection vers `/admin/newsletter/view/{id}`.
+- `components/admin/newsletter-progress.tsx` (`NewsletterProgressBar`) : polling (2,5 s) de la progression tant que `en_cours`, barre `Progress` + compteurs (envoyés/échecs/en attente) + message « l'envoi continue en arrière-plan ».
+- `app/admin/newsletter/view/[id]/page.tsx` : intègre la barre au-dessus des stats.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Bilan 3.8** ✅ : envoi non bloquant + suivi de progression. **À tester en runtime** : envoyer une newsletter → suivre la barre ; naviguer ailleurs puis revenir → progression toujours visible.
 
 ---
 

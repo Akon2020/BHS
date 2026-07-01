@@ -122,19 +122,25 @@ export default function NewNewsletterPage() {
             action === "draft"
               ? "Brouillon enregistré"
               : action === "send"
-              ? "Newsletter envoyée"
+              ? "Envoi démarré"
               : "Newsletter programmée",
           description:
             action === "schedule"
               ? `Envoi prévu pour le ${format(date!, "PPP", {
                   locale: fr,
                 })}`
+              : action === "send"
+              ? "L'envoi se poursuit en arrière-plan. Suivez la progression."
               : "Opération réalisée avec succès",
         });
 
-        // 3️⃣ Redirection (même pattern que blog)
+        // 3️⃣ Redirection : vers la vue (progression) si envoi, sinon la liste.
         setTimeout(() => {
-          router.push("/admin/newsletter");
+          if (action === "send") {
+            router.push(`/admin/newsletter/view/${result.data.idNewsletter}`);
+          } else {
+            router.push("/admin/newsletter");
+          }
           router.refresh();
         }, 1200);
       } catch (error: any) {

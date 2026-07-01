@@ -212,7 +212,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 ### 3.8 📧 Newsletter — progression d'envoi (job + polling)  🔵
 - [x] 🟢 Backend : envoi **en arrière-plan** (`runNewsletterSend`, non bloquant), `POST /send` répond **202** immédiatement (crée les lignes `NewsletterAbonne` en `attente` puis les passe `envoye`/`echec`) ; `GET /:id/progress` (total/envoye/echec/attente/pourcentage/statut). Cœur partagé `startNewsletterSend` réutilisé par l'envoi programmé. Swagger 88 chemins.
-- [ ] 🟢 Front : UI d'envoi avec **barre de progression** (polling toutes N s), navigation possible ailleurs pendant l'envoi (indicateur consultable au retour).
+- [x] 🟢 Front : après « Envoyer », redirection vers la vue de la newsletter qui affiche une **barre de progression** (`NewsletterProgressBar`, polling 2,5 s jusqu'à « terminé ») + compteurs (envoyés/échecs/en attente) ; message « l'envoi continue en arrière-plan ».
 
 ---
 

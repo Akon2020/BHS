@@ -846,3 +846,13 @@ export interface RechercheResponse {
   evenements: RechercheEventItem[];
   fichiers: RechercheFichierItem[];
 }
+
+export interface NewsletterProgress {
+  total: number;
+  envoye: number;
+  echec: number;
+  attente: number;
+  traite: number;
+  pourcentage: number;
+  statut: "en_cours" | "termine" | "inconnu";
+}
