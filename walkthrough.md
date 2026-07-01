@@ -419,7 +419,14 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - Route d'inscription : `upload.any()` pour les champs `fichier`. Swagger régénéré (87 chemins).
 
 **Vérification** : `node --check` OK sur tous les fichiers ; `swagger:gen` OK.
-**Reste** : frontend (constructeur de champs à la création/édition, formulaire d'inscription public dynamique, suivi paiement + récap financier admin, types/actions).
+
+### Frontend — étapes 1 & 2 ✅
+
+- **Types + actions** : `ChampPersonnalise`, `StatutPaiement`, `EvenementFinancesResponse` ; `Evenement`/`Inscription` enrichis. `registerToEvent` (FormData/fichiers), `updateEvent` (FormData/objet), `mettreAJourPaiementInscription`, `getEventFinances`.
+- **Constructeur admin** (`components/admin/event-payment-fields.tsx`, contrôlé) : carte Paiement (toggle `estPayant` + montant + devise) + constructeur de champs personnalisés (ajout/suppression, type parmi 9, libellé, requis, options pour `select`). Intégré aux pages `events/new` et `events/edit` (état `paymentFields`, init depuis l'événement en édition, append dans le submit).
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Reste** : formulaire d'inscription public dynamique (base + champs perso + upload ; message paiement) ; suivi paiement + récap financier admin (page vue événement).
 
 ---
 

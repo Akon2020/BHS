@@ -3,6 +3,10 @@
 import { Badge } from "@/components/ui/badge";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import {
+  EventPaymentFields,
+  type PaymentFieldsValue,
+} from "@/components/admin/event-payment-fields";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +57,12 @@ export default function NewEventPage() {
     maxAttendees: "",
     requiresRegistration: false,
     image: null as File | null,
+  });
+  const [paymentFields, setPaymentFields] = useState<PaymentFieldsValue>({
+    estPayant: false,
+    montant: "",
+    devise: "USD",
+    champs: [],
   });
 
   useEffect(() => {
@@ -151,6 +161,16 @@ export default function NewEventPage() {
       if (eventData.maxAttendees)
         formData.append("nombrePlaces", eventData.maxAttendees);
       formData.append("statut", status === "publie" ? "publie" : "brouillon");
+
+      // Paiement + champs personnalisés
+      formData.append("estPayant", String(paymentFields.estPayant));
+      if (paymentFields.estPayant && paymentFields.montant)
+        formData.append("montant", paymentFields.montant);
+      formData.append("devise", paymentFields.devise);
+      formData.append(
+        "champsPersonnalises",
+        JSON.stringify(paymentFields.champs),
+      );
 
       if (eventData.image) formData.append("imageEvenement", eventData.image);
 
@@ -374,6 +394,12 @@ export default function NewEventPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Paiement + champs personnalisés */}
+          <EventPaymentFields
+            value={paymentFields}
+            onChange={setPaymentFields}
+          />
 
           {/* Image */}
           <Card>

@@ -205,7 +205,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟢 Swagger régénéré (87 chemins).
 
 **Frontend**
-- [ ] 🟢 Création/édition événement : toggle **payant** (montant + devise) + **constructeur de champs personnalisés** (ajouter/réordonner/supprimer, type + label + requis + options).
+- [x] 🟢 Création/édition événement : composant `EventPaymentFields` (toggle **payant** + montant + devise + **constructeur de champs** : ajouter/supprimer, type + label + requis + options) intégré aux pages new **et** edit.
 - [ ] 🟢 **Formulaire d'inscription public dynamique** (base + champs perso) ; si payant, message de paiement.
 - [ ] 🟢 Admin inscriptions : colonne **statut paiement** + actions (marquer payé / partiel [saisir montant] / accepté non payé), (re)envoyer billet, **récap financier** par événement.
 - [x] 🟢 Types + actions mis à jour (`ChampPersonnalise`, `StatutPaiement`, `EvenementFinancesResponse` ; `registerToEvent` FormData/fichiers, `updateEvent` FormData, `mettreAJourPaiementInscription`, `getEventFinances`).
