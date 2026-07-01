@@ -381,7 +381,18 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `routes/recherche.route.js` : `GET /api/recherche` (public) + Swagger inline ; montage `app.use("/api/recherche", …)`.
 - `api-docs.json` régénéré (85 chemins).
 
-**Vérification** : `node --check` OK. **Reste** : front (barre header + page `/recherche`).
+**Vérification** : `node --check` OK.
+
+### Frontend ✅
+
+- `types/user.ts` : `RechercheResponse` + items (blog/event/fichier).
+- `actions/recherche.ts` : `rechercheGlobale(q)`.
+- `app/recherche/page.tsx` : wrapper serveur (métadonnées, `robots: noindex`) + `Suspense` autour du client + Header/Footer.
+- `app/recherche/search-client.tsx` : input (prérempli depuis `?q=`), fetch sur changement d'URL, résultats **groupés** (Articles / Événements / Ressources) avec liens, états chargement/vide.
+- `components/header.tsx` : bouton **Recherche** (icône) dans les actions desktop + lien « Rechercher » dans le menu mobile.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → route `/recherche` générée.
+**Bilan 3.4** : recherche globale complète. **À tester en runtime** : rechercher un terme → résultats blog/événements/fichiers cliquables.
 
 ### Note Swagger
 

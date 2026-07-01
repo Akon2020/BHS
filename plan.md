@@ -159,7 +159,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 ### 3.4 🔎 Recherche globale  🟢
 - [x] 🟢 Backend : endpoint public `/api/recherche?q=` agrégeant blogs publiés + événements publiés + fichiers publics (recherche `LIKE` sur titre/extrait/tags/description/lieu), résultats groupés (limite 8/type). Swagger régénéré.
-- [ ] 🟢 Front : composant de recherche (barre dans le header public + page `/recherche` de résultats).
+- [x] 🟢 Front : page `/recherche` (input + résultats groupés articles/événements/ressources, états chargement/vide) + entrée **Recherche** dans le header public (desktop icône + mobile). Page en `robots: noindex`.
 
 ### 3.6 ✉️ Boîte d'envoi admin (Contact)  🟢 — *fait*
 - [x] 🟢 Backend : modèle `MessageEnvoye` + endpoints `/api/messages` (POST envoyer, GET liste, GET détail, DELETE), envoi réel via Nodemailer (template `messageAdminTemplate`), statut `envoye`/`echec`, Swagger à jour, `cookie-parser`/Helmet déjà en place. Accès `admin`+`editeur` (DELETE `admin`).

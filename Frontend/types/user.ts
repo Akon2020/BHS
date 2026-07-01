@@ -764,3 +764,38 @@ export interface CreateDonPayload {
   moyen: DonMoyen;
   message?: string;
 }
+
+/* ------------------------------- Recherche ------------------------------- */
+
+export interface RechercheBlogItem {
+  idBlog: number;
+  titre: string;
+  slug: string;
+  extrait?: string | null;
+  imageUne?: string | null;
+}
+
+export interface RechercheEventItem {
+  idEvenement: number;
+  titre: string;
+  slug: string;
+  lieu: string;
+  dateEvenement: string;
+  imageEvenement?: string | null;
+}
+
+export interface RechercheFichierItem {
+  idFichier: number;
+  nomReference: string;
+  slug: string;
+  description?: string | null;
+  categorie?: { nomCategorie: string } | null;
+}
+
+export interface RechercheResponse {
+  query: string;
+  total: number;
+  blogs: RechercheBlogItem[];
+  evenements: RechercheEventItem[];
+  fichiers: RechercheFichierItem[];
+}
