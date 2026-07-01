@@ -27,7 +27,7 @@
 | Nouvelles fonctionnalités | Pointage · Témoignages · Don (manuel + intention) · Recherche globale · Commentaires blog |
 | Événements payants | Suivi **manuel** (admin) : payé / partiel (montant reçu) / accepté non payé. **Pas** de passerelle en ligne |
 | Devise événements | **Configurable par événement** (USD/CDF/EUR) |
-| Champs d'inscription | Base (Prénom-Nom, Email, Tél, Sexe, Type auto, Date/heure auto) + **champs personnalisés** (texte, email, tél, nombre, select, case à cocher, date, zone de texte) |
+| Champs d'inscription | Base (Prénom-Nom, Email, Tél, Sexe, Type auto, Date/heure auto) + **champs personnalisés** (texte, email, tél, nombre, select, case à cocher, date, zone de texte, **téléversement de fichier**) |
 | Newsletter (envoi) | **Job en arrière-plan + polling** de progression (suivi en continuant à travailler) |
 | Coordinateur RDV | **Un seul**, configurable |
 | Réservation RDV | **Publique** (tout le monde) |
@@ -193,7 +193,7 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
   - À l'inscription : email de confirmation **sans billet**, invitant à venir **payer** la somme due.
   - Suivi de paiement **manuel** par l'admin, statuts : **payé** · **partiellement payé** (saisir le **montant reçu**) · **accepté mais non payé** (comptabilisé **distinctement**).
   - Une fois **payé** → email avec **billet PDF + reçu de paiement PDF**.
-- **Champs personnalisés** ajoutables à la création de l'événement : type (`texte`, `email`, `téléphone`, `nombre`, `select`, `case à cocher`, `date`, `zone de texte`) + **label** affiché (« Entrez votre X ») + requis (oui/non) + options (pour select).
+- **Champs personnalisés** ajoutables à la création de l'événement : type (`texte`, `email`, `téléphone`, `nombre`, `select`, `case à cocher`, `date`, `zone de texte`, `fichier` [téléversement]) + **label** affiché (« Entrez votre X ») + requis (oui/non) + options (pour select). Les fichiers téléversés sont stockés côté serveur (Multer) et référencés dans `reponsesPersonnalisees`.
 
 **Backend**
 - [ ] 🔵 `Evenement` — colonnes additives : `estPayant` (bool), `montant` (decimal), `devise` (string), `champsPersonnalises` (JSON : `[{ id, type, label, requis, options? }]`). Backfill non destructif.
