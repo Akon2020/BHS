@@ -456,6 +456,7 @@ evenementRouter.post(
 evenementRouter.post(
   "/slug/:slug/inscription",
   optionalAuthJWT,
+  upload.any(),
   registerToEvent,
 );
 

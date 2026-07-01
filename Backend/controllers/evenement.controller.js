@@ -11,6 +11,7 @@ import transporter from "../config/nodemailer.js";
 import {
   eventPublishedNotificationTemplate,
   eventRegistrationWithPDFTemplate,
+  eventPaymentPendingTemplate,
 } from "../utils/email.template.js";
 import { valideEmail } from "../middlewares/email.middleware.js";
 import { generateEventTicketPDF } from "../utils/event-pdf.js";
@@ -29,6 +30,48 @@ const hasMissingFields = (obj) =>
   requiredFields.some(
     (field) => !obj[field] || obj[field].toString().trim() === "",
   );
+
+// Parse la config des champs personnalisés (peut arriver en JSON string via FormData).
+const parseChampsPersonnalises = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+// Parse les réponses personnalisées d'une inscription (JSON string via FormData).
+const parseReponsesPersonnalisees = (value) => {
+  if (!value) return {};
+  if (typeof value === "object") return value;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+// Ajoute l'inscrit à la liste des abonnés s'il n'y est pas déjà (non bloquant).
+const ensureAbonne = async (nomComplet, email) => {
+  try {
+    const deja = await Abonne.findOne({ where: { email } });
+    if (!deja) {
+      await Abonne.create({
+        nomComplet,
+        email,
+        statut: "actif",
+        dateAbonnement: new Date(),
+        dateDesabonnement: null,
+      });
+    }
+  } catch (e) {
+    console.error("ensureAbonne :", e.message);
+  }
+};
 
 export const getAllEvents = async (req, res, next) => {
   try {
@@ -290,6 +333,9 @@ export const createEvent = async (req, res, next) => {
       : "https://placehold.co/600x400?text=Image+Evenement";
     const createdBy = req.user?.idUtilisateur;
 
+    const estPayant =
+      req.body.estPayant === "true" || req.body.estPayant === true;
+
     const newEvent = await Evenement.create({
       titre,
       slug: finalSlug,
@@ -301,6 +347,10 @@ export const createEvent = async (req, res, next) => {
       nombrePlaces: nombrePlaces || 100,
       imageEvenement,
       statut: statut || "brouillon",
+      estPayant,
+      montant: estPayant && req.body.montant ? Number(req.body.montant) : null,
+      devise: req.body.devise || "USD",
+      champsPersonnalises: parseChampsPersonnalises(req.body.champsPersonnalises),
       createdBy,
     });
 
@@ -381,6 +431,24 @@ export const updateEvent = async (req, res, next) => {
 
     if (req.body.titre && !req.body.slug) {
       event.slug = slugify(req.body.titre, { lower: true, strict: true });
+    }
+
+    // Champs paiement + config des champs personnalisés.
+    if (req.body.estPayant !== undefined) {
+      event.estPayant =
+        req.body.estPayant === "true" || req.body.estPayant === true;
+    }
+    if (req.body.montant !== undefined) {
+      event.montant =
+        event.estPayant && req.body.montant ? Number(req.body.montant) : null;
+    }
+    if (req.body.devise !== undefined) {
+      event.devise = req.body.devise || "USD";
+    }
+    if (req.body.champsPersonnalises !== undefined) {
+      event.champsPersonnalises = parseChampsPersonnalises(
+        req.body.champsPersonnalises,
+      );
     }
 
     if (req.file) event.imageEvenement = req.file.path;
@@ -667,14 +735,56 @@ export const registerToEvent = async (req, res, next) => {
       };
     }
 
+    // Champs personnalisés : réponses texte (+ fichiers téléversés via upload.any).
+    const reponses = parseReponsesPersonnalisees(
+      req.body.reponsesPersonnalisees,
+    );
+    if (Array.isArray(req.files)) {
+      for (const f of req.files) {
+        reponses[f.fieldname] = f.path.replace(/\\/g, "/");
+      }
+    }
+    dataInscription.reponsesPersonnalisees = reponses;
+    dataInscription.statutPaiement = event.estPayant ? "non_paye" : "paye";
+
     const inscription = await InscriptionEvenement.create(dataInscription);
     event.nombreInscrits += 1;
     await event.save();
 
-    pdf = await generateEventTicketPDF({
-      event,
-      inscription,
-    });
+    // Événement payant : pas de billet immédiat, on invite à régler le montant.
+    if (event.estPayant) {
+      try {
+        await transporter.sendMail({
+          from: `"BurningHeart IHS" <${EMAIL}>`,
+          to: inscription.email,
+          subject: `Inscription enregistrée - ${event.titre}`,
+          html: eventPaymentPendingTemplate(
+            inscription.nomComplet,
+            event.titre,
+            new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
+            event.lieu,
+            event.montant != null ? `${event.montant} ${event.devise}` : "—",
+          ),
+        });
+      } catch (mailError) {
+        console.error(
+          "Erreur email inscription payante :",
+          mailError.message,
+        );
+      }
+
+      await ensureAbonne(inscription.nomComplet, inscription.email);
+
+      return res.status(201).json({
+        message:
+          "Inscription enregistrée. Un email vous invite à régler le montant dû.",
+        inscription,
+        aPayer: true,
+      });
+    }
+
+    // Événement gratuit : billet immédiat + email.
+    pdf = await generateEventTicketPDF({ event, inscription });
 
     await transporter.sendMail({
       from: `"BurningHeart IHS" <${EMAIL}>`,
@@ -696,22 +806,7 @@ export const registerToEvent = async (req, res, next) => {
       ],
     });
 
-    const dejaAbonne = await Abonne.findOne({ where: { email } });
-    if (dejaAbonne) {
-      return res.status(201).json({
-        message: "Inscription réussie 🎉",
-        inscription,
-        pdfUrl: `${HOST_URL}${pdf.url}`,
-      });
-    }
-
-    await Abonne.create({
-      nomComplet,
-      email,
-      statut: "actif",
-      dateAbonnement: new Date(),
-      dateDesabonnement: null,
-    });
+    await ensureAbonne(inscription.nomComplet, inscription.email);
 
     return res.status(201).json({
       message: "Inscription réussie 🎉",
