@@ -529,3 +529,10 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - `routes/agenda.route.js` : `/api/agenda` (routes spécifiques avant `:id`). Swagger 93 chemins.
 
 Vérification : `node --check` OK ; `swagger:gen` OK. Reste : front admin (config créneaux + coordinateur + gestion RDV) + front public (créneaux, réservation, suivi).
+
+### Frontend ✅ (admin + public)
+- `actions/agenda.ts` + types (`CreneauRdv`, `RendezVous`, `ParametreAgenda`, `RdvStatut`).
+- `app/admin/agenda/page.tsx` : coordinateur (édition), créneaux (ajout + table + actif + suppression), demandes de RDV (filtre statut, approuver/refuser/reprogrammer via modal, suppression). Sidebar « Agenda / RDV » + permission éditeur.
+- `app/rendez-vous/page.tsx` (+ `rdv-client.tsx`) : page publique — réservation d'un créneau disponible + suivi par email. Lien « Rendez-vous » ajouté au header public.
+
+Vérification : `tsc` 0 erreur ; `build` OK. **Bilan 5.1** : agenda/RDV complet. **À tester runtime** : créer des créneaux (admin) → réserver (public) → email confirmation → approuver/refuser/reprogrammer (admin) → email de statut → suivi public par email.

@@ -237,8 +237,8 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 
 - [x] 🟢 Backend : `ParametreAgenda` (singleton coordinateur : nom, fonction, message) ; `CreneauRdv` (date, heureDebut/Fin, capacité, actif) ; `RendezVous` (nom, email, tél, motif, date/heure dénormalisées, `statut` en_attente/approuve/refuse/reprogramme, note).
 - [x] 🟢 Backend : endpoints `/api/agenda` — paramètre (get public / put admin), créneaux (get admin, **disponibles** public, create/update/delete admin), **réserver** (public, contrôle capacité), lister (admin), **suivi** public (par email), **statut** (PATCH admin : approuver/refuser/**reprogrammer** avec nouvelle date), supprimer. Emails dédiés (`agenda-email.template.js`) en arrière-plan. Swagger 93 chemins.
-- [ ] 🟢 Front public : voir les créneaux disponibles, réserver, **suivre le statut**, **historique**.
-- [ ] 🟢 Front admin : configuration des créneaux + coordinateur + gestion des RDV (approuver/refuser/reporter).
+- [x] 🟢 Front public : page `/rendez-vous` — voir les créneaux disponibles, **réserver**, **suivre le statut** par email. Lien « Rendez-vous » dans le header.
+- [x] 🟢 Front admin : page `/admin/agenda` — config coordinateur, CRUD créneaux (+ actif/reste), gestion des RDV (approuver/refuser/**reprogrammer** via modal/supprimer) ; entrée sidebar + permission éditeur.
 
 ### 5.2 🗓️ Vue calendrier agrégée + export natif  🟢
 - [ ] 🟢 Vue **mensuelle / liste** agrégeant : événements publics + **son propre RDV** + **anniversaires** configurés.

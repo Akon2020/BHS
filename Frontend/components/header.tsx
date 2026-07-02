@@ -43,6 +43,7 @@ const navigation = [
   { name: "Événements", href: "/events" },
   { name: "Blog", href: "/blog" },
   { name: "Fichiers", href: "/files" },
+  { name: "Rendez-vous", href: "/rendez-vous" },
   { name: "Contact", href: "/contact" },
 ];
 
