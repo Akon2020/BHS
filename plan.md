@@ -207,12 +207,12 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 **Frontend**
 - [x] 🟢 Création/édition événement : composant `EventPaymentFields` (toggle **payant** + montant + devise + **constructeur de champs** : ajouter/supprimer, type + label + requis + options) intégré aux pages new **et** edit.
 - [x] 🟢 **Formulaire d'inscription public dynamique** (`register-event-modal`) : base + champs perso rendus par type (texte/email/tél/nombre/select/checkbox/date/textarea/**fichier**), validation des requis, soumission **FormData** (fichiers) ; bandeau + message paiement si payant.
-- [x] 🟢 Admin inscriptions (page vue événement) : colonne **statut paiement** (select payé/partiel[+montant]/non payé/accepté-non-payé → `mettreAJourPaiementInscription`), renvoi billet existant, **carte de suivi financier** (attendu/encaissé/reste/inscrits + répartition par statut) via `getEventFinances`.
+- [x] 🟢 Admin inscriptions (page vue événement) : colonne **statut paiement** (select payé/partiel[+montant via modal]/non payé/accepté-non-payé), **modal Détails** (réponses aux champs perso + fichiers), renvoi **billet + reçu** (arrière-plan), **carte de suivi financier** + **export PDF « Rapport financier »** (`utils/event-finances-pdf.js`, résumé + tableau des inscrits par statut/montant).
 - [x] 🟢 Types + actions mis à jour (`ChampPersonnalise`, `StatutPaiement`, `EvenementFinancesResponse` ; `registerToEvent` FormData/fichiers, `updateEvent` FormData, `mettreAJourPaiementInscription`, `getEventFinances`).
 
 ### 3.8 📧 Newsletter — progression d'envoi (job + polling)  🔵
-- [ ] 🟢 Backend : envoi **en arrière-plan** (job non bloquant), suivi de progression (`total`, `envoyes`, `echecs`, `statut`) — via la table `NewsletterAbonne` existante + statut global. `POST /send` renvoie immédiatement (202) ; `GET /:id/progress`.
-- [ ] 🟢 Front : UI d'envoi avec **barre de progression** (polling toutes N s), navigation possible ailleurs pendant l'envoi (indicateur consultable au retour).
+- [x] 🟢 Backend : envoi **en arrière-plan** (`runNewsletterSend`, non bloquant), `POST /send` répond **202** immédiatement (crée les lignes `NewsletterAbonne` en `attente` puis les passe `envoye`/`echec`) ; `GET /:id/progress` (total/envoye/echec/attente/pourcentage/statut). Cœur partagé `startNewsletterSend` réutilisé par l'envoi programmé. Swagger 88 chemins.
+- [x] 🟢 Front : après « Envoyer », redirection vers la vue de la newsletter qui affiche une **barre de progression** (`NewsletterProgressBar`, polling 2,5 s jusqu'à « terminé ») + compteurs (envoyés/échecs/en attente) ; message « l'envoi continue en arrière-plan ».
 
 ---
 
@@ -235,10 +235,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 ### 5.1 📅 Agenda / RDV avec le Père Coordinateur  🟢
 > Coordinateur **unique configurable** ; réservation **publique**.
 
-- [ ] 🟢 Backend : paramètre **Coordinateur** (nom, éventuelle photo) ; modèle `Disponibilite`/`CreneauRdv` (jour/heure, durée, récurrence hebdo ou date, capacité, actif) ; modèle `RendezVous` (nom, email, tél, motif, créneau/date-heure, `statut` `en_attente`|`approuve`|`refuse`|`reprogramme`, nouvelleDate si report, note).
-- [ ] 🟢 Backend : endpoints — config des créneaux (admin), **créneaux disponibles** (public), **réserver** (public), lister (admin), **approuver / refuser / reporter** (admin), suivi de statut (public via lien/email). Emails aux étapes clés.
-- [ ] 🟢 Front public : voir les créneaux disponibles, réserver, **suivre le statut** (en attente/approuvé/refusé/reprogrammé), **historique**.
-- [ ] 🟢 Front admin : configuration des créneaux + gestion des RDV (approuver/refuser/reporter).
+- [x] 🟢 Backend : `ParametreAgenda` (singleton coordinateur : nom, fonction, message) ; `CreneauRdv` (date, heureDebut/Fin, capacité, actif) ; `RendezVous` (nom, email, tél, motif, date/heure dénormalisées, `statut` en_attente/approuve/refuse/reprogramme, note).
+- [x] 🟢 Backend : endpoints `/api/agenda` — paramètre (get public / put admin), créneaux (get admin, **disponibles** public, create/update/delete admin), **réserver** (public, contrôle capacité), lister (admin), **suivi** public (par email), **statut** (PATCH admin : approuver/refuser/**reprogrammer** avec nouvelle date), supprimer. Emails dédiés (`agenda-email.template.js`) en arrière-plan. Swagger 93 chemins.
+- [x] 🟢 Front public : page `/rendez-vous` — voir les créneaux disponibles, **réserver**, **suivre le statut** par email. Lien « Rendez-vous » dans le header.
+- [x] 🟢 Front admin : page `/admin/agenda` — config coordinateur, CRUD créneaux (+ actif/reste), gestion des RDV (approuver/refuser/**reprogrammer** via modal/supprimer) ; entrée sidebar + permission éditeur.
 
 ### 5.2 🗓️ Vue calendrier agrégée + export natif  🟢
 - [ ] 🟢 Vue **mensuelle / liste** agrégeant : événements publics + **son propre RDV** + **anniversaires** configurés.

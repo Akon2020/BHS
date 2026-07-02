@@ -25,6 +25,7 @@ export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
     "/admin/pointage",
     "/admin/temoignages",
     "/admin/dons",
+    "/admin/agenda",
     "/admin/profile",
   ],
   membre: ["/admin", "/admin/team", "/admin/profile"],

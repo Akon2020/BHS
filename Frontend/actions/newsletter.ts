@@ -4,6 +4,7 @@ import {
   GetAllNewslettersResponse,
   NewsletterMutationResponse,
   NewsletterStatsResponse,
+  NewsletterProgress,
 } from "@/types/user";
 
 export const getAllNewsletters = async (params?: {
@@ -102,9 +103,9 @@ export const updateNewsletter = async (
 
 export const sendNewsletter = async (
   id: number
-): Promise<{ message: string }> => {
+): Promise<{ message: string; total?: number }> => {
   try {
-    const res = await api.post<{ message: string }>(
+    const res = await api.post<{ message: string; total?: number }>(
       `/api/newsletters/${id}/send`
     );
     return res.data;
@@ -112,6 +113,22 @@ export const sendNewsletter = async (
     throw new Error(
       error.response?.data?.message ||
         "Erreur lors de l’envoi de la newsletter"
+    );
+  }
+};
+
+export const getNewsletterProgress = async (
+  id: number
+): Promise<NewsletterProgress> => {
+  try {
+    const res = await api.get<NewsletterProgress>(
+      `/api/newsletters/${id}/progress`
+    );
+    return res.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message ||
+        "Erreur lors de la récupération de la progression"
     );
   }
 };

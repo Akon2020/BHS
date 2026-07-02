@@ -393,3 +393,9 @@ export const getEventFinances = async (
     );
   }
 };
+
+// URL d'export PDF du rapport financier (à ouvrir dans un nouvel onglet ; cookie httpOnly envoyé).
+export const getEventFinancesExportUrl = (idEvenement: number): string => {
+  const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";
+  return `${base}/api/evenements/${idEvenement}/finances/export`;
+};

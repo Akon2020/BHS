@@ -17,6 +17,7 @@ import {
 import { valideEmail } from "../middlewares/email.middleware.js";
 import { generateEventTicketPDF } from "../utils/event-pdf.js";
 import { generateRecuPDF } from "../utils/recu-pdf.js";
+import { generateEventFinancesPdf } from "../utils/event-finances-pdf.js";
 import { deleteFile } from "../utils/deletefile.js";
 
 const requiredFields = [
@@ -913,31 +914,11 @@ export const inscrireVisiteurParAdmin = async (req, res, next) => {
   }
 };
 
-export const renvoyerTicketInscription = async (req, res, next) => {
+// Renvoi du billet seul (événement gratuit), en arrière-plan.
+const renvoyerTicketSeul = async (event, inscription) => {
   let pdf = null;
-
   try {
-    const { id, inscriptionId } = req.params;
-
-    const event = await Evenement.findByPk(id);
-    if (!event)
-      return res.status(404).json({ message: "Événement introuvable." });
-
-    const inscription = await InscriptionEvenement.findOne({
-      where: {
-        idInscription: inscriptionId,
-        idEvenement: id,
-      },
-    });
-
-    if (!inscription) {
-      return res
-        .status(404)
-        .json({ message: "Inscription introuvable pour cet événement." });
-    }
-
     pdf = await generateEventTicketPDF({ event, inscription });
-
     await transporter.sendMail({
       from: `"BurningHeart IHS" <${EMAIL}>`,
       to: inscription.email,
@@ -957,15 +938,55 @@ export const renvoyerTicketInscription = async (req, res, next) => {
         },
       ],
     });
-
-    return res.status(200).json({
-      message: `Ticket renvoyé à ${inscription.email}`,
-      pdfUrl: `${HOST_URL}${pdf.url}`,
-    });
-  } catch (error) {
-    next(error);
+  } catch (e) {
+    console.error("Erreur renvoi ticket :", e.message);
   } finally {
     await deleteFile(pdf?.filePath);
+  }
+};
+
+export const renvoyerTicketInscription = async (req, res, next) => {
+  try {
+    const { id, inscriptionId } = req.params;
+
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement introuvable." });
+
+    const inscription = await InscriptionEvenement.findOne({
+      where: { idInscription: inscriptionId, idEvenement: id },
+    });
+    if (!inscription) {
+      return res
+        .status(404)
+        .json({ message: "Inscription introuvable pour cet événement." });
+    }
+
+    // Événement payant non réglé : aucun billet à renvoyer.
+    if (event.estPayant && inscription.statutPaiement !== "paye") {
+      return res.status(400).json({
+        message:
+          "Le paiement n'est pas confirmé : aucun billet à renvoyer pour cette inscription.",
+      });
+    }
+
+    // Réponse immédiate ; l'envoi (billet, + reçu si payant réglé) part en arrière-plan.
+    res
+      .status(200)
+      .json({ message: `Envoi en cours vers ${inscription.email}` });
+
+    if (event.estPayant && inscription.statutPaiement === "paye") {
+      envoyerBilletEtRecu(event, inscription).catch((e) =>
+        console.error("Erreur renvoi billet+reçu :", e.message),
+      );
+    } else {
+      renvoyerTicketSeul(event, inscription).catch((e) =>
+        console.error("Erreur renvoi ticket :", e.message),
+      );
+    }
+  } catch (error) {
+    if (!res.headersSent) res.status(500).json({ message: "Erreur serveur" });
+    next(error);
   }
 };
 
@@ -1098,11 +1119,50 @@ export const supprimerDoublonsSelectionnes = async (req, res, next) => {
   }
 };
 
-// Met à jour le statut de paiement d'une inscription (admin).
-// Si le paiement passe à "paye", génère billet + reçu et envoie l'email.
-export const mettreAJourPaiement = async (req, res, next) => {
+// Génère billet + reçu et les envoie par email, puis nettoie les fichiers.
+// Utilisé en arrière-plan (non bloquant) pour ne pas retarder la réponse HTTP.
+export const envoyerBilletEtRecu = async (event, inscription) => {
   let ticketPdf = null;
   let recuPdf = null;
+  try {
+    ticketPdf = await generateEventTicketPDF({ event, inscription });
+    recuPdf = await generateRecuPDF({ event, inscription });
+
+    await transporter.sendMail({
+      from: `"BurningHeart IHS" <${EMAIL}>`,
+      to: inscription.email,
+      subject: `Paiement confirmé - ${event.titre}`,
+      html: eventPaymentConfirmedTemplate(
+        inscription.nomComplet,
+        event.titre,
+        new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
+        event.lieu,
+        `${inscription.montantPaye} ${event.devise}`,
+      ),
+      attachments: [
+        {
+          filename: ticketPdf.fileName,
+          path: ticketPdf.filePath,
+          contentType: "application/pdf",
+        },
+        {
+          filename: recuPdf.fileName,
+          path: recuPdf.filePath,
+          contentType: "application/pdf",
+        },
+      ],
+    });
+  } catch (mailError) {
+    console.error("Erreur email billet + reçu :", mailError.message);
+  } finally {
+    await deleteFile(ticketPdf?.filePath);
+    await deleteFile(recuPdf?.filePath);
+  }
+};
+
+// Met à jour le statut de paiement d'une inscription (admin).
+// Répond immédiatement ; si "paye", l'email (billet + reçu) part en arrière-plan.
+export const mettreAJourPaiement = async (req, res, next) => {
   try {
     const { id, inscriptionId } = req.params;
     const { statutPaiement, montantPaye } = req.body;
@@ -1127,48 +1187,18 @@ export const mettreAJourPaiement = async (req, res, next) => {
     if (statutPaiement) inscription.statutPaiement = statutPaiement;
     await inscription.save();
 
+    // Réponse immédiate : l'admin peut continuer à travailler.
+    res.status(200).json({ message: "Paiement mis à jour", data: inscription });
+
+    // Envoi du billet + reçu en arrière-plan (non attendu).
     if (inscription.statutPaiement === "paye") {
-      try {
-        ticketPdf = await generateEventTicketPDF({ event, inscription });
-        recuPdf = await generateRecuPDF({ event, inscription });
-
-        await transporter.sendMail({
-          from: `"BurningHeart IHS" <${EMAIL}>`,
-          to: inscription.email,
-          subject: `Paiement confirmé - ${event.titre}`,
-          html: eventPaymentConfirmedTemplate(
-            inscription.nomComplet,
-            event.titre,
-            new Date(event.dateEvenement).toLocaleDateString("fr-FR"),
-            event.lieu,
-            `${inscription.montantPaye} ${event.devise}`,
-          ),
-          attachments: [
-            {
-              filename: ticketPdf.fileName,
-              path: ticketPdf.filePath,
-              contentType: "application/pdf",
-            },
-            {
-              filename: recuPdf.fileName,
-              path: recuPdf.filePath,
-              contentType: "application/pdf",
-            },
-          ],
-        });
-      } catch (mailError) {
-        console.error("Erreur email paiement confirmé :", mailError.message);
-      }
+      envoyerBilletEtRecu(event, inscription).catch((e) =>
+        console.error("Erreur job billet+reçu :", e.message),
+      );
     }
-
-    return res
-      .status(200)
-      .json({ message: "Paiement mis à jour", data: inscription });
   } catch (error) {
+    if (!res.headersSent) res.status(500).json({ message: "Erreur serveur" });
     next(error);
-  } finally {
-    await deleteFile(ticketPdf?.filePath);
-    await deleteFile(recuPdf?.filePath);
   }
 };
 
@@ -1216,6 +1246,64 @@ export const getStatsFinancieresEvenement = async (req, res, next) => {
       reste: Math.max(attendu - encaisse, 0),
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// Export PDF du rapport financier d'un événement (admin).
+export const exporterFinancesEvenement = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement non trouvé." });
+
+    const inscriptions = await InscriptionEvenement.findAll({
+      where: { idEvenement: id },
+      order: [["dateInscription", "ASC"]],
+    });
+
+    const montant = Number(event.montant) || 0;
+    const parStatut = {
+      non_paye: 0,
+      partiel: 0,
+      paye: 0,
+      accepte_non_paye: 0,
+    };
+    let encaisse = 0;
+    for (const i of inscriptions) {
+      parStatut[i.statutPaiement] = (parStatut[i.statutPaiement] || 0) + 1;
+      encaisse += Number(i.montantPaye) || 0;
+    }
+    const nbInscrits = inscriptions.length;
+    const attendu = event.estPayant ? montant * nbInscrits : 0;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="finances-${event.slug}.pdf"`,
+    );
+
+    return generateEventFinancesPdf(res, {
+      event: {
+        titre: event.titre,
+        dateEvenement: event.dateEvenement,
+        lieu: event.lieu,
+        montant,
+        devise: event.devise,
+      },
+      finances: {
+        attendu,
+        encaisse,
+        reste: Math.max(attendu - encaisse, 0),
+        nbInscrits,
+        parStatut,
+      },
+      inscriptions,
+      generatedAt: new Date().toLocaleString("fr-FR"),
+    });
+  } catch (error) {
+    if (!res.headersSent) res.status(500).json({ message: "Erreur serveur" });
     next(error);
   }
 };

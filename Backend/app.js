@@ -27,6 +27,7 @@ import pointageRouter from "./routes/pointage.route.js";
 import temoignageRouter from "./routes/temoignage.route.js";
 import donRouter from "./routes/don.route.js";
 import rechercheRouter from "./routes/recherche.route.js";
+import agendaRouter from "./routes/agenda.route.js";
 
 const app = express();
 
@@ -88,6 +89,7 @@ app.use("/api/pointages", pointageRouter);
 app.use("/api/temoignages", temoignageRouter);
 app.use("/api/dons", donRouter);
 app.use("/api/recherche", rechercheRouter);
+app.use("/api/agenda", agendaRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);

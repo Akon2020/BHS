@@ -444,6 +444,62 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 
 ---
 
+## LOT 3.8 — Newsletter : progression d'envoi
+
+### Backend ✅
+
+- `controllers/newsletter.controller.js` : refonte de `sendNewsletter` en **job d'arrière-plan**.
+  - `startNewsletterSend(newsletter)` : garde anti-double-envoi (lignes `attente`), repart d'une base propre, `bulkCreate` des lignes de suivi `NewsletterAbonne` (`attente`), lance `runNewsletterSend` **sans await**.
+  - `runNewsletterSend` : envoie chaque email et passe la ligne à `envoye`/`echec` ; à la fin, `newsletter.statut = "envoye"`.
+  - `sendNewsletter` (handler) répond **202** immédiatement (`{ message, total }`).
+  - `getNewsletterProgress` : compte les lignes par statut → `{ total, envoye, echec, attente, traite, pourcentage, statut }`.
+  - `processScheduledNewsletters` réutilise `startNewsletterSend` (plus de faux `res`).
+- `routes/newsletter.route.js` : `GET /:id/progress` (admin/editeur/membre). Swagger régénéré (88 chemins).
+
+**Vérification** : `node --check` OK ; `swagger:gen` OK.
+
+### Frontend ✅
+
+- `types/user.ts` : `NewsletterProgress`. `actions/newsletter.ts` : `sendNewsletter` renvoie `{ message, total? }` ; `getNewsletterProgress`.
+- `app/admin/newsletter/new/page.tsx` : après « Envoyer », toast « Envoi démarré » + redirection vers `/admin/newsletter/view/{id}`.
+- `components/admin/newsletter-progress.tsx` (`NewsletterProgressBar`) : polling (2,5 s) de la progression tant que `en_cours`, barre `Progress` + compteurs (envoyés/échecs/en attente) + message « l'envoi continue en arrière-plan ».
+- `app/admin/newsletter/view/[id]/page.tsx` : intègre la barre au-dessus des stats.
+
+**Vérification** : `tsc` → 0 erreur ; `npm run build` → succès.
+**Bilan 3.8** ✅ : envoi non bloquant + suivi de progression. **À tester en runtime** : envoyer une newsletter → suivre la barre ; naviguer ailleurs puis revenir → progression toujours visible.
+
+---
+
+## Correctifs de test
+
+### Inscription événement — plus de redirection vers le PDF ✅
+
+- **Symptôme** : après inscription, ouverture d'un onglet `…/uploads/tickets/ticket-….pdf` → **404**.
+- **Cause** : le contrôleur attache le billet à l'email puis **supprime** le fichier temporaire (`deleteFile`) → `pdfUrl` renvoyé pointe vers un fichier déjà supprimé. Le billet est en réalité **dans l'email** (pièce jointe).
+- **Correctif** : `components/modals/register-event-modal.tsx` n'ouvre plus `pdfUrl`. Message adapté : gratuit → « billet envoyé par email » ; payant → « email pour régler, billet après paiement ».
+
+### Améliorations événement payant (retours de test) ✅
+
+1. **Détails d'inscription visibles (admin)** : bouton « Détails » par inscrit → modal affichant les champs de base + les **réponses aux champs personnalisés** (lien « Voir le fichier » pour les uploads).
+2. **Montant partiel → modal** : `window.prompt` remplacé par un modal dédié (saisie du montant reçu).
+3. **Reçu PDF stylisé + QR** : `utils/recu-pdf.js` réécrit — en-tête, bandeau statut (payé/partiel), carte détails, **QR code de vérification** (contenu auto-porteur `BHS-RECU|REC-…`), pied de page.
+4. **Paiement → email en arrière-plan** : `mettreAJourPaiement` répond **immédiatement** ; billet + reçu envoyés via `envoyerBilletEtRecu` (job non bloquant + nettoyage des fichiers).
+5. **Renvoi billet + reçu** : `renvoyerTicketInscription` répond immédiatement et envoie en arrière-plan **billet + reçu** si l'inscription payante est réglée (sinon billet seul pour un gratuit ; refus si payant non réglé). Le bouton admin s'intitule « Renvoyer billet + reçu » dans ce cas.
+
+**Vérification** : Back `node --check` OK ; Front `tsc` 0 erreur + `build` OK.
+**Note** : `Backend/utils/email.template.js` reste ta modification locale (templates paiement) — non commitée par moi ; pense à la committer.
+
+### Export PDF du rapport financier (événement payant) ✅
+
+- `utils/event-finances-pdf.js` : `generateEventFinancesPdf(stream, data)` — en-tête (logo + titre + infos événement), **cartes résumé** (attendu/encaissé/reste/inscrits), répartition par statut, **tableau des inscrits** (nom, email, téléphone, statut, montant) avec en-tête coloré/zébrage + pagination, pied de page.
+- `controllers/evenement.controller.js` : `exporterFinancesEvenement` (calcule les finances + liste, streame le PDF en réponse).
+- `routes/evenement.route.js` : `GET /api/evenements/:id/finances/export` (admin/editeur). Swagger 89 chemins.
+- Front : `getEventFinancesExportUrl` + bouton **« Exporter le rapport (PDF) »** dans la carte « Suivi financier » (ouverture nouvel onglet, cookie httpOnly envoyé).
+
+**Vérification** : Back `node --check` OK ; Front `tsc` 0 erreur + `build` OK.
+
+---
+
 ## LOT 3.5 — Commentaires blog
 
 **Constat** : la partie **publique existait déjà** dans `app/blog/[slug]/blog-post-client.tsx` (formulaire nom/email/contenu → `createCommentaire`, liste des commentaires approuvés + réponses imbriquées, états chargement/vide). Il manquait la **modération admin** (sans elle, les commentaires en `attente` ne s'affichent jamais) et un **anti-spam**.
@@ -461,3 +517,22 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 ### Note Swagger
 
 - `swagger.js` exporte `swaggerSpec` ; `generate-swagger.js` + `npm run swagger:gen` régénèrent `api-docs.json` (à relancer après chaque changement d'API).
+
+---
+
+## LOT 5.1 — Agenda / RDV
+
+### Backend ✅
+- Modèles : `creneauRdv` (date, heures, capacité, actif), `rendezVous` (coordonnées, motif, date/heure, statut en_attente/approuve/refuse/reprogramme, note), `parametreAgenda` (singleton coordinateur). Associations RDV↔créneau. Tables créées par `syncModels` (non destructif).
+- `utils/agenda-email.template.js` (séparé de `email.template.js`) : confirmation + changement de statut.
+- `controllers/agenda.controller.js` : paramètre (get/put), créneaux (admin CRUD + disponibles public avec calcul du reste), reserverRdv (public, contrôle capacité, email arrière-plan), getRendezVous (admin), suiviRdv (public par email), updateStatutRdv (approuver/refuser/reprogrammer, email arrière-plan), deleteRdv.
+- `routes/agenda.route.js` : `/api/agenda` (routes spécifiques avant `:id`). Swagger 93 chemins.
+
+Vérification : `node --check` OK ; `swagger:gen` OK. Reste : front admin (config créneaux + coordinateur + gestion RDV) + front public (créneaux, réservation, suivi).
+
+### Frontend ✅ (admin + public)
+- `actions/agenda.ts` + types (`CreneauRdv`, `RendezVous`, `ParametreAgenda`, `RdvStatut`).
+- `app/admin/agenda/page.tsx` : coordinateur (édition), créneaux (ajout + table + actif + suppression), demandes de RDV (filtre statut, approuver/refuser/reprogrammer via modal, suppression). Sidebar « Agenda / RDV » + permission éditeur.
+- `app/rendez-vous/page.tsx` (+ `rdv-client.tsx`) : page publique — réservation d'un créneau disponible + suivi par email. Lien « Rendez-vous » ajouté au header public.
+
+Vérification : `tsc` 0 erreur ; `build` OK. **Bilan 5.1** : agenda/RDV complet. **À tester runtime** : créer des créneaux (admin) → réserver (public) → email confirmation → approuver/refuser/reprogrammer (admin) → email de statut → suivi public par email.

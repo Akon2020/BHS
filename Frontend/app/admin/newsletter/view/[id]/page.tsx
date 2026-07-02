@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { NewsletterProgressBar } from "@/components/admin/newsletter-progress";
 
 import {
   getSingleNewsletter,
@@ -124,6 +125,9 @@ export default function ViewNewsletterPage() {
             : "Brouillon"}
         </Badge>
       </div>
+
+      {/* Progression d'envoi */}
+      <NewsletterProgressBar id={newsletterId} />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

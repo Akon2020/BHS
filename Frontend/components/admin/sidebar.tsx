@@ -25,6 +25,7 @@ import {
   Timer,
   Quote,
   HandHeart,
+  CalendarClock,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -155,6 +156,12 @@ export default function AdminSidebar({
       icon: Timer,
       href: "/admin/pointage",
       active: pathname.startsWith("/admin/pointage"),
+    },
+    {
+      label: "Agenda / RDV",
+      icon: CalendarClock,
+      href: "/admin/agenda",
+      active: pathname.startsWith("/admin/agenda"),
     },
     {
       label: "Profil",

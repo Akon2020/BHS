@@ -846,3 +846,61 @@ export interface RechercheResponse {
   evenements: RechercheEventItem[];
   fichiers: RechercheFichierItem[];
 }
+
+export interface NewsletterProgress {
+  total: number;
+  envoye: number;
+  echec: number;
+  attente: number;
+  traite: number;
+  pourcentage: number;
+  statut: "en_cours" | "termine" | "inconnu";
+}
+
+/* -------------------------------- Agenda -------------------------------- */
+
+export type RdvStatut = "en_attente" | "approuve" | "refuse" | "reprogramme";
+
+export interface CreneauRdv {
+  idCreneau: number;
+  date: string;
+  heureDebut: string;
+  heureFin: string;
+  capacite: number;
+  actif: boolean;
+  reste?: number;
+}
+
+export interface RendezVous {
+  idRendezVous: number;
+  idCreneau: number | null;
+  nom: string;
+  email: string;
+  telephone: string;
+  motif?: string | null;
+  date: string;
+  heureDebut: string;
+  heureFin?: string | null;
+  statut: RdvStatut;
+  note?: string | null;
+  createdAt: string;
+  creneau?: CreneauRdv | null;
+}
+
+export interface ParametreAgenda {
+  idParametre: number;
+  coordinateurNom: string;
+  coordinateurFonction?: string | null;
+  message?: string | null;
+  actif: boolean;
+}
+
+export interface GetCreneauxResponse {
+  nombre: number;
+  creneaux: CreneauRdv[];
+}
+
+export interface GetRendezVousResponse {
+  nombre: number;
+  rendezVous: RendezVous[];
+}

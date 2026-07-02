@@ -24,6 +24,7 @@ import {
   Trash2,
   UserPlus,
   Loader2,
+  Eye,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +50,7 @@ import {
   resendEventTicket,
   mettreAJourPaiementInscription,
   getEventFinances,
+  getEventFinancesExportUrl,
 } from "@/actions/event";
 import type {
   EvenementAdmin,
@@ -137,22 +139,17 @@ export default function ViewEventAdminPage() {
     if (event?.estPayant && !Number.isNaN(id)) fetchFinances();
   }, [event?.estPayant, id]);
 
-  const handlePaiement = async (
+  const [partialFor, setPartialFor] =
+    useState<InscriptionEvenement | null>(null);
+  const [partialAmount, setPartialAmount] = useState("");
+  const [detailsFor, setDetailsFor] =
+    useState<InscriptionEvenement | null>(null);
+
+  const doUpdatePaiement = async (
     ins: InscriptionEvenement,
     statutPaiement: StatutPaiement,
+    montantPaye?: number,
   ) => {
-    let montantPaye: number | undefined;
-    if (statutPaiement === "paye") {
-      montantPaye = Number(event?.montant) || 0;
-    } else if (statutPaiement === "partiel") {
-      const v = window.prompt(
-        "Montant reçu :",
-        String(ins.montantPaye ?? ""),
-      );
-      if (v === null) return;
-      montantPaye = Number(v) || 0;
-    }
-
     try {
       const updated = await mettreAJourPaiementInscription(
         id,
@@ -180,7 +177,7 @@ export default function ViewEventAdminPage() {
         title: "Paiement mis à jour",
         description:
           statutPaiement === "paye"
-            ? "Billet + reçu envoyés par email."
+            ? "Billet + reçu envoyés par email (en arrière-plan)."
             : undefined,
       });
     } catch (error: any) {
@@ -190,6 +187,21 @@ export default function ViewEventAdminPage() {
         description: error?.message || "Mise à jour impossible.",
       });
     }
+  };
+
+  const handlePaiement = (
+    ins: InscriptionEvenement,
+    statutPaiement: StatutPaiement,
+  ) => {
+    // Le montant partiel est saisi dans un modal dédié.
+    if (statutPaiement === "partiel") {
+      setPartialFor(ins);
+      setPartialAmount(String(ins.montantPaye ?? ""));
+      return;
+    }
+    const montantPaye =
+      statutPaiement === "paye" ? Number(event?.montant) || 0 : undefined;
+    doUpdatePaiement(ins, statutPaiement, montantPaye);
   };
 
   const totalPlaces = event?.nombrePlaces ?? null;
@@ -654,7 +666,20 @@ export default function ViewEventAdminPage() {
       {event?.estPayant && finances && (
         <Card>
           <CardHeader>
-            <CardTitle>Suivi financier</CardTitle>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle>Suivi financier</CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  window.open(getEventFinancesExportUrl(id), "_blank")
+                }
+                className="w-full sm:w-auto"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Exporter le rapport (PDF)
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -824,19 +849,32 @@ export default function ViewEventAdminPage() {
                       })}
                     </td>
                     <td className="p-3">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleResendTicket(ins.idInscription)}
-                        disabled={resendingForId === ins.idInscription}
-                      >
-                        {resendingForId === ins.idInscription ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Send className="mr-2 h-4 w-4" />
-                        )}
-                        Renvoyer ticket
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setDetailsFor(ins)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Détails
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleResendTicket(ins.idInscription)}
+                          disabled={resendingForId === ins.idInscription}
+                        >
+                          {resendingForId === ins.idInscription ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Send className="mr-2 h-4 w-4" />
+                          )}
+                          {event?.estPayant &&
+                          ins.statutPaiement === "paye"
+                            ? "Renvoyer billet + reçu"
+                            : "Renvoyer ticket"}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1030,6 +1068,123 @@ export default function ViewEventAdminPage() {
               Supprimer la sélection
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal : montant partiel */}
+      <Dialog
+        open={!!partialFor}
+        onOpenChange={(o) => !o && setPartialFor(null)}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Montant reçu (paiement partiel)</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              {partialFor?.nomComplet} — montant attendu : {event?.montant}{" "}
+              {event?.devise}.
+            </p>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={partialAmount}
+              onChange={(e) => setPartialAmount(e.target.value)}
+              placeholder="Montant reçu"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPartialFor(null)}>
+              Annuler
+            </Button>
+            <Button
+              onClick={() => {
+                const ins = partialFor;
+                if (!ins) return;
+                setPartialFor(null);
+                doUpdatePaiement(ins, "partiel", Number(partialAmount) || 0);
+              }}
+            >
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal : détails de l'inscription */}
+      <Dialog
+        open={!!detailsFor}
+        onOpenChange={(o) => !o && setDetailsFor(null)}
+      >
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Détails de l'inscription</DialogTitle>
+          </DialogHeader>
+          {detailsFor && (
+            <div className="space-y-2 text-sm">
+              {[
+                ["Nom", detailsFor.nomComplet],
+                ["Email", detailsFor.email],
+                ["Téléphone", detailsFor.telephone],
+                ["Sexe", detailsFor.sexe],
+                ["Type", detailsFor.utilisateur ? "Utilisateur" : "Visiteur"],
+                [
+                  "Inscrit le",
+                  new Date(detailsFor.dateInscription).toLocaleString("fr-FR"),
+                ],
+              ].map(([k, v]) => (
+                <div key={k as string} className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">{k}</span>
+                  <span className="text-right font-medium">{v}</span>
+                </div>
+              ))}
+
+              {event?.estPayant && (
+                <div className="flex justify-between gap-3">
+                  <span className="text-muted-foreground">Paiement</span>
+                  <span className="text-right font-medium">
+                    {detailsFor.statutPaiement} · {detailsFor.montantPaye}{" "}
+                    {event.devise}
+                  </span>
+                </div>
+              )}
+
+              {(event?.champsPersonnalises?.length ?? 0) > 0 && (
+                <div className="space-y-2 border-t pt-3">
+                  <p className="font-medium">Réponses au formulaire</p>
+                  {event!.champsPersonnalises!.map((c) => {
+                    const val = detailsFor.reponsesPersonnalisees?.[c.id];
+                    return (
+                      <div
+                        key={c.id}
+                        className="flex justify-between gap-3"
+                      >
+                        <span className="text-muted-foreground">
+                          {c.label}
+                        </span>
+                        {c.type === "fichier" && val ? (
+                          <a
+                            href={`${process.env.NEXT_PUBLIC_API_URL}/${val}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-right font-medium text-primary underline"
+                          >
+                            Voir le fichier
+                          </a>
+                        ) : (
+                          <span className="break-words text-right font-medium">
+                            {val || "—"}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
