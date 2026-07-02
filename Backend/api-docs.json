@@ -177,6 +177,149 @@
         }
       }
     },
+    "/api/agenda/parametre": {
+      "get": {
+        "summary": "Paramètres publics de l'agenda (coordinateur)",
+        "tags": [
+          "Agenda"
+        ],
+        "responses": {
+          "200": {
+            "description": "Paramètres"
+          }
+        }
+      }
+    },
+    "/api/agenda/creneaux/disponibles": {
+      "get": {
+        "summary": "Créneaux disponibles (public)",
+        "tags": [
+          "Agenda"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des créneaux disponibles"
+          }
+        }
+      }
+    },
+    "/api/agenda/rendez-vous": {
+      "post": {
+        "summary": "Réserver un créneau (public)",
+        "tags": [
+          "Agenda"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "idCreneau",
+                  "nom",
+                  "email",
+                  "telephone"
+                ],
+                "properties": {
+                  "idCreneau": {
+                    "type": "integer"
+                  },
+                  "nom": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "telephone": {
+                    "type": "string"
+                  },
+                  "motif": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Demande enregistrée"
+          }
+        }
+      },
+      "get": {
+        "summary": "Lister les rendez-vous (admin)",
+        "tags": [
+          "Agenda"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des RDV"
+          }
+        }
+      }
+    },
+    "/api/agenda/rendez-vous/{id}": {
+      "patch": {
+        "summary": "Mettre à jour le statut d'un RDV (approuver/refuser/reprogrammer)",
+        "tags": [
+          "Agenda"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RDV mis à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un RDV (admin)",
+        "tags": [
+          "Agenda"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "RDV supprimé"
+          }
+        }
+      }
+    },
     "/api/auth/status": {
       "get": {
         "summary": "Vérifie si l'utilisateur est connecté",
@@ -3332,6 +3475,10 @@
     {
       "name": "Abonnes",
       "description": "API pour gérer les abonnées à la newsletter"
+    },
+    {
+      "name": "Agenda",
+      "description": "Agenda et rendez-vous avec le Père Coordinateur"
     },
     {
       "name": "Blogs",

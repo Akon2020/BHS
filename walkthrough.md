@@ -517,3 +517,15 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 ### Note Swagger
 
 - `swagger.js` exporte `swaggerSpec` ; `generate-swagger.js` + `npm run swagger:gen` régénèrent `api-docs.json` (à relancer après chaque changement d'API).
+
+---
+
+## LOT 5.1 — Agenda / RDV
+
+### Backend ✅
+- Modèles : `creneauRdv` (date, heures, capacité, actif), `rendezVous` (coordonnées, motif, date/heure, statut en_attente/approuve/refuse/reprogramme, note), `parametreAgenda` (singleton coordinateur). Associations RDV↔créneau. Tables créées par `syncModels` (non destructif).
+- `utils/agenda-email.template.js` (séparé de `email.template.js`) : confirmation + changement de statut.
+- `controllers/agenda.controller.js` : paramètre (get/put), créneaux (admin CRUD + disponibles public avec calcul du reste), reserverRdv (public, contrôle capacité, email arrière-plan), getRendezVous (admin), suiviRdv (public par email), updateStatutRdv (approuver/refuser/reprogrammer, email arrière-plan), deleteRdv.
+- `routes/agenda.route.js` : `/api/agenda` (routes spécifiques avant `:id`). Swagger 93 chemins.
+
+Vérification : `node --check` OK ; `swagger:gen` OK. Reste : front admin (config créneaux + coordinateur + gestion RDV) + front public (créneaux, réservation, suivi).

@@ -235,10 +235,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 ### 5.1 📅 Agenda / RDV avec le Père Coordinateur  🟢
 > Coordinateur **unique configurable** ; réservation **publique**.
 
-- [ ] 🟢 Backend : paramètre **Coordinateur** (nom, éventuelle photo) ; modèle `Disponibilite`/`CreneauRdv` (jour/heure, durée, récurrence hebdo ou date, capacité, actif) ; modèle `RendezVous` (nom, email, tél, motif, créneau/date-heure, `statut` `en_attente`|`approuve`|`refuse`|`reprogramme`, nouvelleDate si report, note).
-- [ ] 🟢 Backend : endpoints — config des créneaux (admin), **créneaux disponibles** (public), **réserver** (public), lister (admin), **approuver / refuser / reporter** (admin), suivi de statut (public via lien/email). Emails aux étapes clés.
-- [ ] 🟢 Front public : voir les créneaux disponibles, réserver, **suivre le statut** (en attente/approuvé/refusé/reprogrammé), **historique**.
-- [ ] 🟢 Front admin : configuration des créneaux + gestion des RDV (approuver/refuser/reporter).
+- [x] 🟢 Backend : `ParametreAgenda` (singleton coordinateur : nom, fonction, message) ; `CreneauRdv` (date, heureDebut/Fin, capacité, actif) ; `RendezVous` (nom, email, tél, motif, date/heure dénormalisées, `statut` en_attente/approuve/refuse/reprogramme, note).
+- [x] 🟢 Backend : endpoints `/api/agenda` — paramètre (get public / put admin), créneaux (get admin, **disponibles** public, create/update/delete admin), **réserver** (public, contrôle capacité), lister (admin), **suivi** public (par email), **statut** (PATCH admin : approuver/refuser/**reprogrammer** avec nouvelle date), supprimer. Emails dédiés (`agenda-email.template.js`) en arrière-plan. Swagger 93 chemins.
+- [ ] 🟢 Front public : voir les créneaux disponibles, réserver, **suivre le statut**, **historique**.
+- [ ] 🟢 Front admin : configuration des créneaux + coordinateur + gestion des RDV (approuver/refuser/reporter).
 
 ### 5.2 🗓️ Vue calendrier agrégée + export natif  🟢
 - [ ] 🟢 Vue **mensuelle / liste** agrégeant : événements publics + **son propre RDV** + **anniversaires** configurés.
