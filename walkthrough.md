@@ -470,6 +470,16 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 
 ---
 
+## Correctifs de test
+
+### Inscription événement — plus de redirection vers le PDF ✅
+
+- **Symptôme** : après inscription, ouverture d'un onglet `…/uploads/tickets/ticket-….pdf` → **404**.
+- **Cause** : le contrôleur attache le billet à l'email puis **supprime** le fichier temporaire (`deleteFile`) → `pdfUrl` renvoyé pointe vers un fichier déjà supprimé. Le billet est en réalité **dans l'email** (pièce jointe).
+- **Correctif** : `components/modals/register-event-modal.tsx` n'ouvre plus `pdfUrl`. Message adapté : gratuit → « billet envoyé par email » ; payant → « email pour régler, billet après paiement ».
+
+---
+
 ## LOT 3.5 — Commentaires blog
 
 **Constat** : la partie **publique existait déjà** dans `app/blog/[slug]/blog-post-client.tsx` (formulaire nom/email/contenu → `createCommentaire`, liste des commentaires approuvés + réponses imbriquées, états chargement/vide). Il manquait la **modération admin** (sans elle, les commentaires en `attente` ne s'affichent jamais) et un **anti-spam**.

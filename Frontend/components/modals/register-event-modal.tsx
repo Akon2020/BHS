@@ -116,17 +116,17 @@ export function RegisterEventModal({
 
       const res = await registerToEvent(slug, fd);
 
-      if (res.pdfUrl) {
-        toast({
-          title: "Inscription réussie 🎉",
-          description: "Votre billet est prêt au téléchargement.",
-        });
-        window.open(res.pdfUrl, "_blank");
-      } else {
+      if (estPayant) {
         toast({
           title: "Inscription enregistrée",
           description:
-            "Cet événement est payant. Un email vous invite à régler le montant dû ; votre billet suivra après paiement.",
+            "Cet événement est payant. Un email vous invite à régler le montant dû ; votre billet vous sera envoyé après paiement.",
+        });
+      } else {
+        toast({
+          title: "Inscription réussie 🎉",
+          description:
+            "Votre billet vous a été envoyé par email. Pensez à vérifier votre boîte de réception (et les spams).",
         });
       }
 
