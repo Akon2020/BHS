@@ -478,6 +478,17 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 - **Cause** : le contrôleur attache le billet à l'email puis **supprime** le fichier temporaire (`deleteFile`) → `pdfUrl` renvoyé pointe vers un fichier déjà supprimé. Le billet est en réalité **dans l'email** (pièce jointe).
 - **Correctif** : `components/modals/register-event-modal.tsx` n'ouvre plus `pdfUrl`. Message adapté : gratuit → « billet envoyé par email » ; payant → « email pour régler, billet après paiement ».
 
+### Améliorations événement payant (retours de test) ✅
+
+1. **Détails d'inscription visibles (admin)** : bouton « Détails » par inscrit → modal affichant les champs de base + les **réponses aux champs personnalisés** (lien « Voir le fichier » pour les uploads).
+2. **Montant partiel → modal** : `window.prompt` remplacé par un modal dédié (saisie du montant reçu).
+3. **Reçu PDF stylisé + QR** : `utils/recu-pdf.js` réécrit — en-tête, bandeau statut (payé/partiel), carte détails, **QR code de vérification** (contenu auto-porteur `BHS-RECU|REC-…`), pied de page.
+4. **Paiement → email en arrière-plan** : `mettreAJourPaiement` répond **immédiatement** ; billet + reçu envoyés via `envoyerBilletEtRecu` (job non bloquant + nettoyage des fichiers).
+5. **Renvoi billet + reçu** : `renvoyerTicketInscription` répond immédiatement et envoie en arrière-plan **billet + reçu** si l'inscription payante est réglée (sinon billet seul pour un gratuit ; refus si payant non réglé). Le bouton admin s'intitule « Renvoyer billet + reçu » dans ce cas.
+
+**Vérification** : Back `node --check` OK ; Front `tsc` 0 erreur + `build` OK.
+**Note** : `Backend/utils/email.template.js` reste ta modification locale (templates paiement) — non commitée par moi ; pense à la committer.
+
 ---
 
 ## LOT 3.5 — Commentaires blog
