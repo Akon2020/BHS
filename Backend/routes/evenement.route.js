@@ -17,6 +17,7 @@ import {
   supprimerDoublonsSelectionnes,
   mettreAJourPaiement,
   getStatsFinancieresEvenement,
+  exporterFinancesEvenement,
 } from "../controllers/evenement.controller.js";
 import {
   authenticationJWT,
@@ -516,6 +517,28 @@ evenementRouter.get(
   authenticationJWT,
   authorizeRoles("admin", "editeur"),
   getStatsFinancieresEvenement,
+);
+
+/**
+ * @swagger
+ * /api/evenements/{id}/finances/export:
+ *   get:
+ *     summary: Export PDF du rapport financier d'un événement (admin)
+ *     tags: [Evenements]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200: { description: Fichier PDF }
+ */
+evenementRouter.get(
+  "/:id/finances/export",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur"),
+  exporterFinancesEvenement,
 );
 
 export default evenementRouter;

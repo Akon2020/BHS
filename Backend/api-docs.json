@@ -2071,6 +2071,34 @@
         }
       }
     },
+    "/api/evenements/{id}/finances/export": {
+      "get": {
+        "summary": "Export PDF du rapport financier d'un événement (admin)",
+        "tags": [
+          "Evenements"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fichier PDF"
+          }
+        }
+      }
+    },
     "/api/identites": {
       "get": {
         "summary": "Récupérer toutes les fiches d'identité",

@@ -489,6 +489,15 @@ Les pages publiques restées `"use client"` sont passées en wrappers serveur (c
 **Vérification** : Back `node --check` OK ; Front `tsc` 0 erreur + `build` OK.
 **Note** : `Backend/utils/email.template.js` reste ta modification locale (templates paiement) — non commitée par moi ; pense à la committer.
 
+### Export PDF du rapport financier (événement payant) ✅
+
+- `utils/event-finances-pdf.js` : `generateEventFinancesPdf(stream, data)` — en-tête (logo + titre + infos événement), **cartes résumé** (attendu/encaissé/reste/inscrits), répartition par statut, **tableau des inscrits** (nom, email, téléphone, statut, montant) avec en-tête coloré/zébrage + pagination, pied de page.
+- `controllers/evenement.controller.js` : `exporterFinancesEvenement` (calcule les finances + liste, streame le PDF en réponse).
+- `routes/evenement.route.js` : `GET /api/evenements/:id/finances/export` (admin/editeur). Swagger 89 chemins.
+- Front : `getEventFinancesExportUrl` + bouton **« Exporter le rapport (PDF) »** dans la carte « Suivi financier » (ouverture nouvel onglet, cookie httpOnly envoyé).
+
+**Vérification** : Back `node --check` OK ; Front `tsc` 0 erreur + `build` OK.
+
 ---
 
 ## LOT 3.5 — Commentaires blog

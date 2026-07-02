@@ -50,6 +50,7 @@ import {
   resendEventTicket,
   mettreAJourPaiementInscription,
   getEventFinances,
+  getEventFinancesExportUrl,
 } from "@/actions/event";
 import type {
   EvenementAdmin,
@@ -665,7 +666,20 @@ export default function ViewEventAdminPage() {
       {event?.estPayant && finances && (
         <Card>
           <CardHeader>
-            <CardTitle>Suivi financier</CardTitle>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle>Suivi financier</CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  window.open(getEventFinancesExportUrl(id), "_blank")
+                }
+                className="w-full sm:w-auto"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Exporter le rapport (PDF)
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

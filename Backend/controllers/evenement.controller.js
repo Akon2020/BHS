@@ -17,6 +17,7 @@ import {
 import { valideEmail } from "../middlewares/email.middleware.js";
 import { generateEventTicketPDF } from "../utils/event-pdf.js";
 import { generateRecuPDF } from "../utils/recu-pdf.js";
+import { generateEventFinancesPdf } from "../utils/event-finances-pdf.js";
 import { deleteFile } from "../utils/deletefile.js";
 
 const requiredFields = [
@@ -1245,6 +1246,64 @@ export const getStatsFinancieresEvenement = async (req, res, next) => {
       reste: Math.max(attendu - encaisse, 0),
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// Export PDF du rapport financier d'un événement (admin).
+export const exporterFinancesEvenement = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const event = await Evenement.findByPk(id);
+    if (!event)
+      return res.status(404).json({ message: "Événement non trouvé." });
+
+    const inscriptions = await InscriptionEvenement.findAll({
+      where: { idEvenement: id },
+      order: [["dateInscription", "ASC"]],
+    });
+
+    const montant = Number(event.montant) || 0;
+    const parStatut = {
+      non_paye: 0,
+      partiel: 0,
+      paye: 0,
+      accepte_non_paye: 0,
+    };
+    let encaisse = 0;
+    for (const i of inscriptions) {
+      parStatut[i.statutPaiement] = (parStatut[i.statutPaiement] || 0) + 1;
+      encaisse += Number(i.montantPaye) || 0;
+    }
+    const nbInscrits = inscriptions.length;
+    const attendu = event.estPayant ? montant * nbInscrits : 0;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="finances-${event.slug}.pdf"`,
+    );
+
+    return generateEventFinancesPdf(res, {
+      event: {
+        titre: event.titre,
+        dateEvenement: event.dateEvenement,
+        lieu: event.lieu,
+        montant,
+        devise: event.devise,
+      },
+      finances: {
+        attendu,
+        encaisse,
+        reste: Math.max(attendu - encaisse, 0),
+        nbInscrits,
+        parStatut,
+      },
+      inscriptions,
+      generatedAt: new Date().toLocaleString("fr-FR"),
+    });
+  } catch (error) {
+    if (!res.headersSent) res.status(500).json({ message: "Erreur serveur" });
     next(error);
   }
 };
