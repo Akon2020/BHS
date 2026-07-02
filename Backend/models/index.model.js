@@ -22,6 +22,7 @@ import Don from "./don.model.js";
 import CreneauRdv from "./creneauRdv.model.js";
 import RendezVous from "./rendezVous.model.js";
 import ParametreAgenda from "./parametreAgenda.model.js";
+import Anniversaire from "./anniversaire.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -304,5 +305,6 @@ export {
   CreneauRdv,
   RendezVous,
   ParametreAgenda,
+  Anniversaire,
   syncModels,
 };

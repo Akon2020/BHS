@@ -536,3 +536,20 @@ Vérification : `node --check` OK ; `swagger:gen` OK. Reste : front admin (confi
 - `app/rendez-vous/page.tsx` (+ `rdv-client.tsx`) : page publique — réservation d'un créneau disponible + suivi par email. Lien « Rendez-vous » ajouté au header public.
 
 Vérification : `tsc` 0 erreur ; `build` OK. **Bilan 5.1** : agenda/RDV complet. **À tester runtime** : créer des créneaux (admin) → réserver (public) → email confirmation → approuver/refuser/reprogrammer (admin) → email de statut → suivi public par email.
+
+---
+
+## LOT 5.3 — Anniversaires ✅
+
+### Backend
+- `models/anniversaire.model.js` : nom, jour, mois, année?, email?, note, `delaiRappelJours` (def. 3), actif. Table créée par `syncModels`.
+- `utils/anniversaire-email.template.js` : `birthdayAlertTemplate` (jour J), `birthdayReminderTemplate` (rappel).
+- `controllers/anniversaire.controller.js` : CRUD + `verifierAnniversaires()` (jour J → bcc abonnés actifs ; rappel J-N → bcc admins/éditeurs) + `declencherVerification` (manuel).
+- `routes/anniversaire.route.js` : `/api/anniversaires` (admin+editeur) + `POST /verifier`.
+- **Planificateur** : `node-cron` installé ; `utils/scheduler.js` (`startScheduler`) — job quotidien 07:00 Africa/Lubumbashi ; démarré dans `app.js` après `syncModels`. Swagger 96 chemins.
+
+### Frontend
+- `types` + `actions/anniversaire.ts`.
+- `app/admin/anniversaires/page.tsx` : ajout (nom, jour, mois, rappel, email/année), table (date, rappel, actif switch, édition dialog, suppression), bouton **« Lancer la vérification »**. Sidebar « Anniversaires » (Cake) + permission éditeur.
+
+Vérification : `node --check` OK ; `tsc` 0 erreur ; `build` OK. **À tester runtime** : ajouter un anniversaire du jour → « Lancer la vérification » → email aux abonnés ; anniversaire à J-N → rappel aux admins.

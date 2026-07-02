@@ -320,6 +320,112 @@
         }
       }
     },
+    "/api/anniversaires": {
+      "get": {
+        "summary": "Lister les anniversaires (admin)",
+        "tags": [
+          "Anniversaires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des anniversaires"
+          }
+        }
+      },
+      "post": {
+        "summary": "Ajouter un anniversaire (admin)",
+        "tags": [
+          "Anniversaires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Anniversaire créé"
+          }
+        }
+      }
+    },
+    "/api/anniversaires/verifier": {
+      "post": {
+        "summary": "Déclencher manuellement la vérification des anniversaires (admin)",
+        "tags": [
+          "Anniversaires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vérification exécutée"
+          }
+        }
+      }
+    },
+    "/api/anniversaires/{id}": {
+      "put": {
+        "summary": "Mettre à jour un anniversaire (admin)",
+        "tags": [
+          "Anniversaires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Anniversaire mis à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un anniversaire (admin)",
+        "tags": [
+          "Anniversaires"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Anniversaire supprimé"
+          }
+        }
+      }
+    },
     "/api/auth/status": {
       "get": {
         "summary": "Vérifie si l'utilisateur est connecté",
@@ -3479,6 +3585,10 @@
     {
       "name": "Agenda",
       "description": "Agenda et rendez-vous avec le Père Coordinateur"
+    },
+    {
+      "name": "Anniversaires",
+      "description": "Anniversaires (alertes jour J + rappels)"
     },
     {
       "name": "Blogs",
