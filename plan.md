@@ -245,12 +245,12 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [ ] 🟢 **Export vers calendrier natif** (fichier `.ics`, Google/Apple) **par item**.
 - [ ] 🟢 Accessible public (son RDV/événements) et admin (vue globale).
 
-### 5.3 🎂 Anniversaires  🟢
+### 5.3 🎂 Anniversaires  🟢 — *fait*
 > Rappel **en amont** → admins/équipe ; alerte **jour J** → tous (abonnés newsletter).
 
-- [ ] 🟢 Backend : modèle `Anniversaire` (nom, date [jour/mois, année optionnelle], email?, lien/catégorie) ; config du **délai de rappel** en amont.
-- [ ] 🟢 Backend : **planificateur quotidien** (`node-cron`) → alerte **jour J** par mail à **tous les abonnés newsletter** ; **rappel en amont** (X jours) aux **admins/équipe**.
-- [ ] 🟢 Front admin : liste + CRUD des anniversaires + réglage du rappel.
+- [x] 🟢 Backend : modèle `Anniversaire` (nom, jour, mois, année?, email?, note, `delaiRappelJours`, actif) ; CRUD `/api/anniversaires` + endpoint `POST /verifier` (déclenchement manuel). Emails dédiés (`anniversaire-email.template.js`).
+- [x] 🟢 Backend : **planificateur** (`node-cron` installé) — `utils/scheduler.js` : job quotidien **07:00 Africa/Lubumbashi** → alerte **jour J** (bcc à tous les abonnés actifs) + **rappel en amont** (J-`delaiRappelJours`, bcc aux admins/éditeurs). Démarré après `syncModels`.
+- [x] 🟢 Front admin : page `/admin/anniversaires` (ajout, table, actif, édition, suppression, bouton « Lancer la vérification ») ; sidebar + permission éditeur.
 
 ### 5.4 ✅ Todos / Kanban  🟢
 > Assignation aux **admins/staff** (personnels **ou** communautaires).

@@ -904,3 +904,24 @@ export interface GetRendezVousResponse {
   nombre: number;
   rendezVous: RendezVous[];
 }
+
+/* ----------------------------- Anniversaires ----------------------------- */
+
+export interface Anniversaire {
+  idAnniversaire: number;
+  nom: string;
+  jour: number;
+  mois: number;
+  annee?: number | null;
+  email?: string | null;
+  note?: string | null;
+  delaiRappelJours: number;
+  actif: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetAnniversairesResponse {
+  nombre: number;
+  anniversaires: Anniversaire[];
+}

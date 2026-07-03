@@ -28,6 +28,8 @@ import temoignageRouter from "./routes/temoignage.route.js";
 import donRouter from "./routes/don.route.js";
 import rechercheRouter from "./routes/recherche.route.js";
 import agendaRouter from "./routes/agenda.route.js";
+import anniversaireRouter from "./routes/anniversaire.route.js";
+import { startScheduler } from "./utils/scheduler.js";
 
 const app = express();
 
@@ -90,6 +92,7 @@ app.use("/api/temoignages", temoignageRouter);
 app.use("/api/dons", donRouter);
 app.use("/api/recherche", rechercheRouter);
 app.use("/api/agenda", agendaRouter);
+app.use("/api/anniversaires", anniversaireRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);
@@ -100,6 +103,7 @@ app.listen(PORT, async (err) => {
   } else {
     try {
       await syncModels();
+      startScheduler();
       console.log(`Le serveur est lancé au http://localhost:${PORT}/`);
       console.log(`Documentation Swagger sur ${HOST_URL}/api-docs/`);
     } catch (error) {
