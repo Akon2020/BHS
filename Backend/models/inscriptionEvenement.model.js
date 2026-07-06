@@ -73,6 +73,20 @@ const InscriptionEvenement = db.define(
       allowNull: true,
       defaultValue: {},
       comment: "Réponses aux champs personnalisés de l'événement",
+      // Certains drivers renvoient la colonne JSON comme chaîne : on garantit un objet.
+      get() {
+        const v = this.getDataValue("reponsesPersonnalisees");
+        if (v && typeof v === "object") return v;
+        if (typeof v === "string") {
+          try {
+            const parsed = JSON.parse(v);
+            return parsed && typeof parsed === "object" ? parsed : {};
+          } catch {
+            return {};
+          }
+        }
+        return v ?? {};
+      },
     },
     typeInscription: {
       type: DataTypes.ENUM("utilisateur", "visiteur"),

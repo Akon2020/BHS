@@ -33,12 +33,27 @@ export function RegisterEventModal({
   onOpenChange,
   slug,
   onSuccess,
-  champs = [],
+  champs: champsProp = [],
   estPayant = false,
   montant,
   devise = "USD",
 }: Props) {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+
+  // La colonne JSON peut revenir sous forme de chaîne selon l'environnement :
+  // on garantit toujours un tableau pour éviter un crash au rendu (.map).
+  const champs: ChampPersonnalise[] = Array.isArray(champsProp)
+    ? champsProp
+    : typeof champsProp === "string"
+      ? (() => {
+          try {
+            const parsed = JSON.parse(champsProp);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        })()
+      : [];
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<{
