@@ -23,6 +23,8 @@ import CreneauRdv from "./creneauRdv.model.js";
 import RendezVous from "./rendezVous.model.js";
 import ParametreAgenda from "./parametreAgenda.model.js";
 import Anniversaire from "./anniversaire.model.js";
+import Tache from "./tache.model.js";
+import TacheCommentaire from "./tacheCommentaire.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -189,6 +191,28 @@ CreneauRdv.hasMany(RendezVous, {
   as: "rendezVous",
 });
 
+// Tâches / Kanban associations
+Tache.belongsTo(Utilisateur, { foreignKey: "createdBy", as: "createur" });
+Utilisateur.hasMany(Tache, { foreignKey: "createdBy", as: "taches" });
+
+TacheCommentaire.belongsTo(Tache, {
+  foreignKey: "idTache",
+  as: "tache",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Tache.hasMany(TacheCommentaire, {
+  foreignKey: "idTache",
+  as: "commentaires",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+TacheCommentaire.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "auteur",
+});
+
 // Contact-Réponse associations
 ReponseContact.belongsTo(Contact, {
   foreignKey: "idContact",
@@ -306,5 +330,7 @@ export {
   RendezVous,
   ParametreAgenda,
   Anniversaire,
+  Tache,
+  TacheCommentaire,
   syncModels,
 };

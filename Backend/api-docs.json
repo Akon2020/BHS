@@ -3186,6 +3186,226 @@
         }
       }
     },
+    "/api/taches": {
+      "get": {
+        "summary": "Lister les tâches (staff)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "a_faire",
+                "en_cours",
+                "fait"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "assigne",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "me"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des tâches"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer une tâche (staff)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Tâche créée"
+          }
+        }
+      }
+    },
+    "/api/taches/rappels": {
+      "post": {
+        "summary": "Déclencher manuellement les rappels de tâches (admin)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rappels exécutés"
+          }
+        }
+      }
+    },
+    "/api/taches/{id}": {
+      "get": {
+        "summary": "Détail d'une tâche avec commentaires (staff)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Détail de la tâche"
+          }
+        }
+      },
+      "put": {
+        "summary": "Mettre à jour une tâche (staff)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tâche mise à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer une tâche (staff)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tâche supprimée"
+          }
+        }
+      }
+    },
+    "/api/taches/{id}/commentaires": {
+      "post": {
+        "summary": "Ajouter un commentaire à une tâche (staff)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Commentaire ajouté"
+          }
+        }
+      }
+    },
+    "/api/taches/{id}/commentaires/{commentaireId}": {
+      "delete": {
+        "summary": "Supprimer un commentaire de tâche (auteur ou admin)",
+        "tags": [
+          "Taches"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "commentaireId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Commentaire supprimé"
+          }
+        }
+      }
+    },
     "/api/temoignages/public": {
       "get": {
         "summary": "Lister les témoignages publiés (public)",
@@ -3641,6 +3861,10 @@
     {
       "name": "Recherche",
       "description": "Recherche globale publique (blogs, événements, fichiers)"
+    },
+    {
+      "name": "Taches",
+      "description": "Tâches / Kanban (staff interne)"
     },
     {
       "name": "Temoignages",

@@ -553,3 +553,21 @@ Vérification : `tsc` 0 erreur ; `build` OK. **Bilan 5.1** : agenda/RDV complet.
 - `app/admin/anniversaires/page.tsx` : ajout (nom, jour, mois, rappel, email/année), table (date, rappel, actif switch, édition dialog, suppression), bouton **« Lancer la vérification »**. Sidebar « Anniversaires » (Cake) + permission éditeur.
 
 Vérification : `node --check` OK ; `tsc` 0 erreur ; `build` OK. **À tester runtime** : ajouter un anniversaire du jour → « Lancer la vérification » → email aux abonnés ; anniversaire à J-N → rappel aux admins.
+
+## Lot 5.4 — Tâches / Kanban
+
+**Backend**
+- Modèles `Tache` (titre, description, priorité, statut a_faire|en_cours|fait, échéance, récurrence aucune|quotidien|hebdo|mensuel, assignes JSON multi-utilisateurs, rappelJoursAvant, dernierRappel, createdBy) et `TacheCommentaire` (idTache, idUtilisateur, contenu). Getter JSON défensif sur `assignes`.
+- Associations : Tache→createur, Tache↔TacheCommentaire (CASCADE), TacheCommentaire→auteur.
+- Contrôleur `tache.controller.js` : CRUD + filtres (?statut, ?assigne=me), commentaires (ajout/suppression auteur ou admin), `getTaches` renvoie aussi la liste des `assignables` (évite un appel à /api/users). Reprogrammation auto d'une tâche récurrente marquée « fait » (échéance suivante + retour à a_faire). Rappels e-mail (assignés + créateur) via `verifierRappelsTaches`.
+- Routes `/api/taches` (staff : admin/éditeur/membre) + `/api/taches/rappels` (admin/éditeur). Gabarit e-mail `tache-email.template.js`.
+- Planificateur : nouveau cron quotidien 07:30 Africa/Lubumbashi pour les rappels de tâches.
+- Swagger régénéré (101 chemins).
+
+**Frontend**
+- Types `Tache`, `TacheCommentaire`, `TacheAssigne`, statuts/priorités/récurrences + réponses.
+- Action `actions/tache.ts` (CRUD, commentaires, rappels).
+- Page `/admin/taches` : vue Kanban 3 colonnes avec drag & drop (mise à jour optimiste du statut), cartes (priorité, échéance en retard, récurrence, compteur de commentaires, avatars assignés), dialog création/édition (priorité, échéance, récurrence, rappel, assignés multi via cases), dialog détail + fil de commentaires, filtre « Mes tâches », bouton « Lancer les rappels » (admin/éditeur).
+- Sidebar + permission `/admin/taches` (éditeur + membre) synchronisées via `permissions.ts` (proxy.ts réutilise `hasAccessToPage`).
+
+**Vérifs** : `node --check` OK sur tous les fichiers backend ; `tsc --noEmit` propre ; `npm run build` réussi.

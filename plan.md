@@ -252,11 +252,11 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟢 Backend : **planificateur** (`node-cron` installé) — `utils/scheduler.js` : job quotidien **07:00 Africa/Lubumbashi** → alerte **jour J** (bcc à tous les abonnés actifs) + **rappel en amont** (J-`delaiRappelJours`, bcc aux admins/éditeurs). Démarré après `syncModels`.
 - [x] 🟢 Front admin : page `/admin/anniversaires` (ajout, table, actif, édition, suppression, bouton « Lancer la vérification ») ; sidebar + permission éditeur.
 
-### 5.4 ✅ Todos / Kanban  🟢
+### 5.4 ✅ Todos / Kanban  🟢 — *fait*
 > Assignation aux **admins/staff** (personnels **ou** communautaires).
 
-- [ ] 🟢 Backend : modèle `Tache` (titre, description, `statut` `a_faire`|`en_cours`|`fait`, échéance, **récurrence** `aucune`|`quotidien`|`hebdo`|`mensuel`, createdBy) + assignation **multi-admins** + modèle `TacheCommentaire` + rappels (à l'échéance / avant, via `node-cron`).
-- [ ] 🟢 Front admin : **vue Kanban** (À faire / En cours / Fait), création/édition (assignés, échéance, récurrence), commentaires, rappels configurables.
+- [x] 🟢 Backend : modèle `Tache` (titre, description, `priorite`, `statut` `a_faire`|`en_cours`|`fait`, échéance, **récurrence** `aucune`|`quotidien`|`hebdo`|`mensuel`, createdBy) + assignation **multi-admins** (JSON `assignes`) + modèle `TacheCommentaire` + rappels (à l'échéance / J-`rappelJoursAvant`, via `node-cron` 07:30). CRUD `/api/taches` (+ commentaires + `POST /rappels`). Reprogrammation auto des tâches récurrentes marquées « fait ».
+- [x] 🟢 Front admin : **vue Kanban** (À faire / En cours / Fait) avec **drag & drop**, création/édition (priorité, assignés, échéance, récurrence, rappel), détail + commentaires, filtre « mes tâches », bouton « Lancer les rappels ». Sidebar + permission staff (admin/éditeur/membre).
 
 ### 5.5 📊 Dashboard admin — mise à jour  🔵
 - [ ] 🔵 Intégrer au tableau de bord : **prochains RDV**, **anniversaires à venir**, **tâches** en cours / à échéance, stats **pointage**, **dons** récents, inscriptions/finances **événements**.

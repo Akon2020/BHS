@@ -29,6 +29,7 @@ import donRouter from "./routes/don.route.js";
 import rechercheRouter from "./routes/recherche.route.js";
 import agendaRouter from "./routes/agenda.route.js";
 import anniversaireRouter from "./routes/anniversaire.route.js";
+import tacheRouter from "./routes/tache.route.js";
 import { startScheduler } from "./utils/scheduler.js";
 
 const app = express();
@@ -93,6 +94,7 @@ app.use("/api/dons", donRouter);
 app.use("/api/recherche", rechercheRouter);
 app.use("/api/agenda", agendaRouter);
 app.use("/api/anniversaires", anniversaireRouter);
+app.use("/api/taches", tacheRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);

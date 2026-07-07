@@ -27,6 +27,7 @@ import {
   HandHeart,
   CalendarClock,
   Cake,
+  ListTodo,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -169,6 +170,12 @@ export default function AdminSidebar({
       icon: Cake,
       href: "/admin/anniversaires",
       active: pathname.startsWith("/admin/anniversaires"),
+    },
+    {
+      label: "Tâches",
+      icon: ListTodo,
+      href: "/admin/taches",
+      active: pathname.startsWith("/admin/taches"),
     },
     {
       label: "Profil",
