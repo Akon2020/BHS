@@ -571,3 +571,21 @@ Vérification : `node --check` OK ; `tsc` 0 erreur ; `build` OK. **À tester run
 - Sidebar + permission `/admin/taches` (éditeur + membre) synchronisées via `permissions.ts` (proxy.ts réutilise `hasAccessToPage`).
 
 **Vérifs** : `node --check` OK sur tous les fichiers backend ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Lot 5.5 — Tableau de bord (mise à jour)
+
+**Backend** — `dashboard.controller.js` étendu (clés ajoutées, rétro-compatible) :
+- `rendezVous` : 5 prochains RDV (à venir, en attente/approuvés) + nombre en attente.
+- `anniversaires` : 5 anniversaires les plus proches (calcul de la prochaine occurrence + `dansJours`).
+- `taches` : compteurs `aFaire`/`enCours` + 5 prochaines échéances.
+- `pointage` : sessions et heures pointées du mois en cours.
+- `dons` : 5 dons récents + total confirmé par devise.
+- `finances` : nombre d'inscriptions événements + encaissé par devise.
+- Swagger : propriétés de réponse documentées, régénéré (101 chemins).
+
+**Frontend**
+- Types `dashboard.ts` étendus (DashboardRdv, DashboardAnniversaire, DashboardTache, DashboardDon + sous-objets).
+- Composant `components/admin/dashboard-overview.tsx` : 4 cartes de stats secondaires cliquables (RDV en attente, tâches actives, heures pointées, inscrits) + 5 panneaux (Prochains RDV, Anniversaires à venir, Tâches à échéance, Dons récents, Finances événements) avec liens « Voir tout », badges statut/priorité, états vides.
+- Intégré dans `app/admin/page.tsx` entre les cartes de stats et le graphique.
+
+**Vérifs** : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.

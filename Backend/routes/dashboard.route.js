@@ -58,6 +58,24 @@ const dashboardRouter = Router();
  *                       type: number
  *                     data:
  *                       type: array
+ *                 rendezVous:
+ *                   type: object
+ *                   description: Prochains rendez-vous + nombre en attente
+ *                 anniversaires:
+ *                   type: object
+ *                   description: Anniversaires à venir (prochaine occurrence)
+ *                 taches:
+ *                   type: object
+ *                   description: Compteurs (à faire / en cours) + prochaines échéances
+ *                 pointage:
+ *                   type: object
+ *                   description: Sessions et heures pointées du mois en cours
+ *                 dons:
+ *                   type: object
+ *                   description: Dons récents + total confirmé par devise
+ *                 finances:
+ *                   type: object
+ *                   description: Inscriptions événements + encaissé par devise
  *       500:
  *         description: Erreur serveur
  */

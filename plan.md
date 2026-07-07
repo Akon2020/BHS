@@ -258,8 +258,8 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟢 Backend : modèle `Tache` (titre, description, `priorite`, `statut` `a_faire`|`en_cours`|`fait`, échéance, **récurrence** `aucune`|`quotidien`|`hebdo`|`mensuel`, createdBy) + assignation **multi-admins** (JSON `assignes`) + modèle `TacheCommentaire` + rappels (à l'échéance / J-`rappelJoursAvant`, via `node-cron` 07:30). CRUD `/api/taches` (+ commentaires + `POST /rappels`). Reprogrammation auto des tâches récurrentes marquées « fait ».
 - [x] 🟢 Front admin : **vue Kanban** (À faire / En cours / Fait) avec **drag & drop**, création/édition (priorité, assignés, échéance, récurrence, rappel), détail + commentaires, filtre « mes tâches », bouton « Lancer les rappels ». Sidebar + permission staff (admin/éditeur/membre).
 
-### 5.5 📊 Dashboard admin — mise à jour  🔵
-- [ ] 🔵 Intégrer au tableau de bord : **prochains RDV**, **anniversaires à venir**, **tâches** en cours / à échéance, stats **pointage**, **dons** récents, inscriptions/finances **événements**.
+### 5.5 📊 Dashboard admin — mise à jour  🔵 — *fait*
+- [x] 🔵 Intégrer au tableau de bord : **prochains RDV** (+ nb en attente), **anniversaires à venir** (prochaine occurrence / J-x), **tâches** à faire·en cours + prochaines échéances, stats **pointage** (sessions & heures du mois), **dons** récents + total confirmé par devise, inscriptions/finances **événements** (encaissé par devise). Contrôleur `dashboard` étendu + composant `dashboard-overview.tsx` (4 stats secondaires + 5 panneaux liés aux pages).
 
 ---
 

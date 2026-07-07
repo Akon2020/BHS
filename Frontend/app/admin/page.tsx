@@ -22,6 +22,7 @@ import Link from "next/link";
 import AdminRecentUsers from "@/components/admin/recent-users";
 import AdminRecentPosts from "@/components/admin/recent-posts";
 import AdminChart from "@/components/admin/chart";
+import DashboardOverview from "@/components/admin/dashboard-overview";
 import { getDashboard } from "@/actions/dashboard";
 import type { DashboardResponse } from "@/types/dashboard";
 
@@ -160,6 +161,9 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Aperçu agrégé : RDV, anniversaires, tâches, pointage, dons, finances */}
+      <DashboardOverview data={data} />
 
       {/* Analytics Chart */}
       <Card>
