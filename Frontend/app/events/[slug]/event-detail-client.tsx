@@ -21,6 +21,7 @@ import { toast } from "@/components/ui/use-toast";
 import { getEventBySlug } from "@/actions/event";
 import type { Evenement } from "@/types/user";
 import { RegisterEventModal } from "@/components/modals/register-event-modal";
+import { AddToCalendar } from "@/components/add-to-calendar";
 
 export default function EventDetailsPage({ slug }: { slug: string }) {
   const [event, setEvent] = useState<Evenement | null>(null);
@@ -210,7 +211,7 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
                 Inscrivez-vous pour réserver votre place.
               </p>
 
-              <div className="mt-6">
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Button
                   size="lg"
                   className="gap-2"
@@ -219,6 +220,20 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
                   <CheckCircle className="h-5 w-5" />
                   S’inscrire à l’événement
                 </Button>
+                {event && (
+                  <AddToCalendar
+                    size="default"
+                    item={{
+                      uid: `evt-${event.idEvenement}@burningheart`,
+                      title: event.titre,
+                      description: event.description,
+                      location: event.lieu,
+                      date: event.dateEvenement,
+                      heureDebut: event.heureDebut,
+                      heureFin: event.heureFin,
+                    }}
+                  />
+                )}
               </div>
             </div>
           )}

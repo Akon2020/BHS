@@ -26,6 +26,7 @@ import {
   Quote,
   HandHeart,
   CalendarClock,
+  CalendarDays,
   Cake,
   ListTodo,
   X,
@@ -176,6 +177,12 @@ export default function AdminSidebar({
       icon: ListTodo,
       href: "/admin/taches",
       active: pathname.startsWith("/admin/taches"),
+    },
+    {
+      label: "Calendrier",
+      icon: CalendarDays,
+      href: "/admin/calendrier",
+      active: pathname.startsWith("/admin/calendrier"),
     },
     {
       label: "Profil",

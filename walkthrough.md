@@ -589,3 +589,22 @@ Vérification : `node --check` OK ; `tsc` 0 erreur ; `build` OK. **À tester run
 - Intégré dans `app/admin/page.tsx` entre les cartes de stats et le graphique.
 
 **Vérifs** : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Lot 5.2 — Calendrier agrégé + export .ics
+
+**Utilitaire & composant partagés**
+- `lib/ics.ts` : génération de fichiers .ics (iCalendar) et de liens Google Agenda. Gère les événements horaires (début/fin, fin par défaut +1 h), la journée entière et la récurrence annuelle (anniversaires), avec échappement des caractères spéciaux.
+- `components/add-to-calendar.tsx` : bouton réutilisable (menu déroulant) — « Télécharger (.ics) » ou « Google Agenda ».
+
+**Admin** — page `/admin/calendrier` :
+- Agrège événements (getAllEventsAdmin), rendez-vous (getRendezVous) et anniversaires (getAnniversaires).
+- Vue **mois** (grille 6 semaines lundi→dimanche, jour courant surligné, 3 items max/jour + « +N de plus ») et vue **liste** chronologique.
+- Navigation par mois + bouton « Aujourd'hui », filtres par type (couleurs : événement=primary, RDV=bleu, anniversaire=ambre).
+- Clic sur une entrée → modal détail (date longue, lieu, statut, description) avec export .ics/Google.
+- Sidebar + permission éditeur (`/admin/calendrier`).
+
+**Public**
+- Détail événement (`event-detail-client.tsx`) : bouton « Ajouter au calendrier » à côté de l'inscription.
+- Suivi des RDV (`rdv-client.tsx`) : export .ics par rendez-vous non refusé.
+
+**Vérifs** : `tsc --noEmit` propre ; `npm run build` réussi (route `/admin/calendrier`). Lot 100 % frontend, aucune donnée touchée.

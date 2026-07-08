@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
+import { AddToCalendar } from "@/components/add-to-calendar";
 import {
   getParametreAgenda,
   getCreneauxDisponibles,
@@ -301,7 +302,7 @@ export default function RdvClient() {
                   {suivi.map((r) => (
                     <li
                       key={r.idRendezVous}
-                      className="flex items-center justify-between gap-3 rounded-lg border p-3"
+                      className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
                         <p className="font-medium">
@@ -314,9 +315,25 @@ export default function RdvClient() {
                           </p>
                         )}
                       </div>
-                      <Badge variant={STATUT[r.statut].variant}>
-                        {STATUT[r.statut].label}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={STATUT[r.statut].variant}>
+                          {STATUT[r.statut].label}
+                        </Badge>
+                        {r.statut !== "refuse" && (
+                          <AddToCalendar
+                            size="icon"
+                            variant="ghost"
+                            item={{
+                              uid: `rdv-${r.idRendezVous}@burningheart`,
+                              title: "Rendez-vous — Burning Heart",
+                              description: r.motif || undefined,
+                              date: r.date,
+                              heureDebut: r.heureDebut,
+                              heureFin: r.heureFin || undefined,
+                            }}
+                          />
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ul>

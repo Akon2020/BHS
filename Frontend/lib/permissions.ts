@@ -28,6 +28,7 @@ export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
     "/admin/agenda",
     "/admin/anniversaires",
     "/admin/taches",
+    "/admin/calendrier",
     "/admin/profile",
   ],
   membre: ["/admin", "/admin/team", "/admin/taches", "/admin/profile"],

@@ -240,10 +240,10 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 - [x] 🟢 Front public : page `/rendez-vous` — voir les créneaux disponibles, **réserver**, **suivre le statut** par email. Lien « Rendez-vous » dans le header.
 - [x] 🟢 Front admin : page `/admin/agenda` — config coordinateur, CRUD créneaux (+ actif/reste), gestion des RDV (approuver/refuser/**reprogrammer** via modal/supprimer) ; entrée sidebar + permission éditeur.
 
-### 5.2 🗓️ Vue calendrier agrégée + export natif  🟢
-- [ ] 🟢 Vue **mensuelle / liste** agrégeant : événements publics + **son propre RDV** + **anniversaires** configurés.
-- [ ] 🟢 **Export vers calendrier natif** (fichier `.ics`, Google/Apple) **par item**.
-- [ ] 🟢 Accessible public (son RDV/événements) et admin (vue globale).
+### 5.2 🗓️ Vue calendrier agrégée + export natif  🟢 — *fait*
+- [x] 🟢 Vue **mensuelle / liste** agrégeant : événements + RDV + **anniversaires** — page admin `/admin/calendrier` (grille 6 semaines + vue liste, navigation par mois, filtres par type, détail en modal). Sidebar + permission éditeur.
+- [x] 🟢 **Export vers calendrier natif** (fichier `.ics` + lien **Google Agenda**) **par item** — utilitaire `lib/ics.ts` + composant réutilisable `add-to-calendar.tsx` (anniversaires en journée entière + récurrence annuelle).
+- [x] 🟢 Accessible **public** (bouton « Ajouter au calendrier » sur le détail événement et dans le suivi des RDV) et **admin** (vue globale agrégée).
 
 ### 5.3 🎂 Anniversaires  🟢 — *fait*
 > Rappel **en amont** → admins/équipe ; alerte **jour J** → tous (abonnés newsletter).
