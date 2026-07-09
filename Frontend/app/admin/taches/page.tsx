@@ -272,22 +272,26 @@ export default function TachesPage() {
     setTaches((prev) =>
       prev.map((t) => (t.idTache === id ? { ...t, statut } : t)),
     );
+
+    // Une tâche récurrente clôturée engendre une nouvelle occurrence : on
+    // recharge la liste pour la faire apparaître.
+    const genereOccurrence =
+      statut === "fait" && tache.recurrence !== "aucune" && !!tache.echeance;
+
     try {
       const updated = await updateTache(id, { statut });
-      // Réconcilie (gère la reprogrammation des tâches récurrentes) en
-      // conservant les détails déjà résolus (assignés, créateur).
       setTaches((prev) =>
         prev.map((t) =>
-          t.idTache === id
-            ? {
-                ...t,
-                statut: updated.statut,
-                echeance: updated.echeance,
-                dernierRappel: updated.dernierRappel,
-              }
-            : t,
+          t.idTache === id ? { ...t, statut: updated.statut } : t,
         ),
       );
+      if (genereOccurrence) {
+        await fetchTaches();
+        toast({
+          title: "Tâche clôturée",
+          description: "Une nouvelle occurrence a été planifiée.",
+        });
+      }
     } catch (error: any) {
       setTaches(previous);
       toast({

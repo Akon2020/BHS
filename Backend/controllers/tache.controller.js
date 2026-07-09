@@ -189,22 +189,34 @@ export const updateTache = async (req, res, next) => {
       tache.rappelJoursAvant = Math.max(0, Number(rappelJoursAvant) || 0);
     }
 
-    // Gestion du statut avec récurrence : une tâche récurrente marquée « fait »
-    // est reprogrammée à la prochaine occurrence plutôt que clôturée.
+    // Une tâche récurrente marquée « fait » : elle reste clôturée, mais une
+    // nouvelle occurrence est créée pour la prochaine échéance.
+    let occurrenceCreee = false;
     if (statut !== undefined && STATUTS.includes(statut)) {
-      const suivante =
-        statut === "fait" ? prochaineEcheance(tache.echeance, tache.recurrence) : null;
-      if (suivante) {
-        tache.echeance = suivante;
-        tache.statut = "a_faire";
-        tache.dernierRappel = null;
-      } else {
-        tache.statut = statut;
+      tache.statut = statut;
+      if (statut === "fait") {
+        const suivante = prochaineEcheance(tache.echeance, tache.recurrence);
+        if (suivante) {
+          await Tache.create({
+            titre: tache.titre,
+            description: tache.description,
+            statut: "a_faire",
+            priorite: tache.priorite,
+            echeance: suivante,
+            recurrence: tache.recurrence,
+            assignes: tache.assignes,
+            rappelJoursAvant: tache.rappelJoursAvant,
+            createdBy: tache.createdBy,
+          });
+          occurrenceCreee = true;
+        }
       }
     }
 
     await tache.save();
-    return res.status(200).json({ message: "Tâche mise à jour", data: tache });
+    return res
+      .status(200)
+      .json({ message: "Tâche mise à jour", data: tache, occurrenceCreee });
   } catch (error) {
     console.error("Erreur maj tâche :", error);
     res.status(500).json({ message: "Erreur serveur" });
