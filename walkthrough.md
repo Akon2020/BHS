@@ -608,3 +608,14 @@ Vérification : `node --check` OK ; `tsc` 0 erreur ; `build` OK. **À tester run
 - Suivi des RDV (`rdv-client.tsx`) : export .ics par rendez-vous non refusé.
 
 **Vérifs** : `tsc --noEmit` propre ; `npm run build` réussi (route `/admin/calendrier`). Lot 100 % frontend, aucune donnée touchée.
+
+## Refonte visuelle du tableau de bord (UI/UX)
+
+Application du design system « Bento Grid + Data-Dense Dashboard » (skill ui-ux-pro-max), thème crimson via tokens.
+- Hiérarchie repensée : **KPIs héro** (4 cartes cliquables : utilisateurs, articles, événements, abonnés + badge de tendance mensuelle) → **bento** (graphique des visites sur 2/3 + carte « Aperçu rapide » sur 1/3) → **panneaux temps-réel** (RDV, anniversaires, tâches) → **finances** (dons, événements) → **activité récente** (onglets).
+- Micro-interactions cohérentes : hover (bordure primaire, ombre douce), transitions 150–300ms, focus visibles, `cursor-pointer` sur les cartes cliquables, chiffres en `tabular-nums`.
+- États de chargement : **skeletons** pour les KPIs, l'aperçu rapide et les panneaux (au lieu d'un écran vide).
+- En-tête enrichi (titre serif + date du jour en toutes lettres).
+- Composant `dashboard-overview.tsx` scindé : `DashboardQuickStats` (rail du bento) + panneaux agrégés.
+
+Vérifs : `tsc --noEmit` propre ; `npm run build` réussi.
