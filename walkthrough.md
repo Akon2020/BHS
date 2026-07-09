@@ -619,3 +619,20 @@ Application du design system « Bento Grid + Data-Dense Dashboard » (skill ui-u
 - Composant `dashboard-overview.tsx` scindé : `DashboardQuickStats` (rail du bento) + panneaux agrégés.
 
 Vérifs : `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Dashboard façon « Maxton » (données réelles + graphiques)
+
+Refonte inspirée d'un dashboard premium (carte d'accueil, KPIs à sparkline, donut, barres, jauges radiales) — branchée uniquement sur de vraies agrégations.
+
+**Backend** (`dashboard.controller.js`)
+- `serie` : séries des 6 derniers mois (nouveaux utilisateurs, abonnés, événements, articles) pour les sparklines et la croissance.
+- `taches.fait` ajouté (répartition complète à faire / en cours / fait).
+- `dons` : périmètres mois courant et année (`moisParDevise`, `anneeParDevise`, `moisCount`, `anneeCount`) pour les jauges.
+
+**Frontend**
+- Infra graphiques `components/admin/charts/chart-core.ts` : enregistrement chart.js + palette dérivée des tokens `--chart-*` lue au runtime et ré-évaluée au changement de thème (clair/sombre), helper `withAlpha` (oklch).
+- Composants : `KpiSparkline` (mini-courbe), `TasksDonut` (répartition tâches, centre = total), `GrowthBar` (barres groupées utilisateurs vs abonnés), `DonsRadial` (jauge dons mois/année).
+- Page `/admin` recomposée : en-tête + **carte d'accueil** (salutation, dons confirmés de l'année, CTA) + aperçu rapide ; **4 KPIs** avec tendance + sparkline réelle ; **répartition des tâches** + **croissance 6 mois** ; **dons ce mois / cette année** (jauges) ; panneaux agrégés ; activité récente. Skeletons de chargement partout.
+- Le graphique « visites » à données aléatoires est retiré au profit de données réelles.
+
+Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.

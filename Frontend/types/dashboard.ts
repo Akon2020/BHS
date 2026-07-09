@@ -55,6 +55,7 @@ export interface DashboardResponse {
   taches: {
     aFaire: number;
     enCours: number;
+    fait: number;
     data: DashboardTache[];
   };
   pointage: {
@@ -64,10 +65,21 @@ export interface DashboardResponse {
   };
   dons: {
     totalParDevise: Record<string, number>;
+    moisParDevise: Record<string, number>;
+    anneeParDevise: Record<string, number>;
+    moisCount: number;
+    anneeCount: number;
     data: DashboardDon[];
   };
   finances: {
     nbInscrits: number;
     encaisseParDevise: Record<string, number>;
+  };
+  serie: {
+    mois: string[];
+    utilisateurs: number[];
+    abonnes: number[];
+    evenements: number[];
+    articles: number[];
   };
 }

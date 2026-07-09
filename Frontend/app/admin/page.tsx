@@ -17,21 +17,36 @@ import {
   Mail,
   ArrowUpRight,
   ArrowDownRight,
+  HandHeart,
+  ListTodo,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 import AdminRecentUsers from "@/components/admin/recent-users";
 import AdminRecentPosts from "@/components/admin/recent-posts";
-import AdminChart from "@/components/admin/chart";
 import DashboardOverview, {
   DashboardQuickStats,
 } from "@/components/admin/dashboard-overview";
+import { KpiSparkline } from "@/components/admin/charts/kpi-sparkline";
+import { TasksDonut } from "@/components/admin/charts/tasks-donut";
+import { GrowthBar } from "@/components/admin/charts/growth-bar";
+import { DonsRadial } from "@/components/admin/charts/dons-radial";
+import { useChartPalette } from "@/components/admin/charts/chart-core";
 import { getDashboard } from "@/actions/dashboard";
 import type { DashboardResponse } from "@/types/dashboard";
 
-/** Badge d'évolution mensuelle (hausse/baisse). */
+const formatMontants = (parDevise: Record<string, number>) => {
+  const entries = Object.entries(parDevise || {});
+  if (entries.length === 0) return "0";
+  return entries
+    .map(([dev, montant]) => `${montant.toLocaleString("fr-FR")} ${dev}`)
+    .join(" · ");
+};
+
 function TrendBadge({ stat }: { stat?: string }) {
   const value = stat ?? "0%";
   const down = value.startsWith("-");
@@ -54,23 +69,26 @@ function TrendBadge({ stat }: { stat?: string }) {
   );
 }
 
-/** Carte KPI cliquable (métrique principale + tendance). */
 function KpiCard({
   label,
   value,
   stat,
   icon: Icon,
   href,
+  series,
+  color,
 }: {
   label: string;
   value: number;
   stat: string;
   icon: LucideIcon;
   href: string;
+  series: number[];
+  color: string;
 }) {
   return (
     <Link href={href} className="group focus-visible:outline-none">
-      <Card className="h-full transition-all group-hover:border-primary/40 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
+      <Card className="h-full overflow-hidden transition-all group-hover:border-primary/40 group-hover:shadow-md group-focus-visible:ring-2 group-focus-visible:ring-ring">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -80,9 +98,9 @@ function KpiCard({
           </div>
           <p className="mt-4 text-3xl font-bold tabular-nums">{value}</p>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="mt-1 text-[11px] text-muted-foreground/70">
-            depuis le mois dernier
-          </p>
+          <div className="mt-3">
+            <KpiSparkline data={series} color={color} />
+          </div>
         </CardContent>
       </Card>
     </Link>
@@ -90,6 +108,8 @@ function KpiCard({
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
+  const palette = useChartPalette();
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -110,12 +130,7 @@ export default function AdminDashboard() {
     };
   }, []);
 
-  const dateLabel = new Date().toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const prenom = user?.nomComplet?.split(" ")[0] || "";
 
   const kpis = data
     ? [
@@ -125,20 +140,8 @@ export default function AdminDashboard() {
           stat: data.users.stat,
           icon: Users,
           href: "/admin/users",
-        },
-        {
-          label: "Articles",
-          value: data.blogs.nombre,
-          stat: data.blogs.stat,
-          icon: FileText,
-          href: "/admin/blog",
-        },
-        {
-          label: "Événements",
-          value: data.evenements.nombre,
-          stat: data.evenements.stat,
-          icon: Calendar,
-          href: "/admin/events",
+          series: data.serie.utilisateurs,
+          color: palette.chart1,
         },
         {
           label: "Abonnés Newsletter",
@@ -146,9 +149,35 @@ export default function AdminDashboard() {
           stat: data.abonnes.stat,
           icon: Mail,
           href: "/admin/abonnes",
+          series: data.serie.abonnes,
+          color: palette.chart2,
+        },
+        {
+          label: "Événements",
+          value: data.evenements.nombre,
+          stat: data.evenements.stat,
+          icon: Calendar,
+          href: "/admin/events",
+          series: data.serie.evenements,
+          color: palette.chart4,
+        },
+        {
+          label: "Articles",
+          value: data.blogs.nombre,
+          stat: data.blogs.stat,
+          icon: FileText,
+          href: "/admin/blog",
+          series: data.serie.articles,
+          color: palette.chart3,
         },
       ]
     : [];
+
+  const donsAnnee = data ? formatMontants(data.dons.anneeParDevise) : "0";
+  const ratioMois =
+    data && data.dons.anneeCount > 0
+      ? data.dons.moisCount / data.dons.anneeCount
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -159,7 +188,12 @@ export default function AdminDashboard() {
             Tableau de bord
           </h1>
           <p className="mt-1 text-sm capitalize text-muted-foreground">
-            {dateLabel}
+            {new Date().toLocaleDateString("fr-FR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -172,33 +206,37 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* KPIs principaux */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-10 w-10 rounded-lg" />
-                    <Skeleton className="h-5 w-12 rounded-full" />
-                  </div>
-                  <Skeleton className="mt-4 h-8 w-16" />
-                  <Skeleton className="mt-2 h-4 w-24" />
-                </CardContent>
-              </Card>
-            ))
-          : kpis.map((k) => <KpiCard key={k.label} {...k} />)}
-      </div>
-
-      {/* Bento : graphique (principal) + aperçu rapide (rail) */}
+      {/* Accueil + aperçu rapide */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Analyse des visites</CardTitle>
-            <CardDescription>30 derniers jours</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AdminChart />
+        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent lg:col-span-2">
+          <CardContent className="flex h-full flex-col justify-between gap-6 p-6">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Bienvenue{prenom ? `, ${prenom}` : ""} 👋
+              </p>
+              <h2 className="mt-1 font-serif text-xl font-bold sm:text-2xl">
+                Voici l&apos;activité de Burning Heart
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Dons confirmés cette année
+              </p>
+              <p className="font-serif text-3xl font-bold text-primary sm:text-4xl">
+                {loading ? "—" : donsAnnee}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {loading
+                  ? ""
+                  : `${data?.dons.anneeCount ?? 0} don${(data?.dons.anneeCount ?? 0) > 1 ? "s" : ""} confirmé${(data?.dons.anneeCount ?? 0) > 1 ? "s" : ""}`}
+              </p>
+            </div>
+            <div>
+              <Button asChild variant="default" className="gap-2">
+                <Link href="/admin/dons">
+                  <HandHeart className="h-4 w-4" />
+                  Voir les dons
+                </Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -218,7 +256,107 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Panneaux agrégés : RDV, anniversaires, tâches, dons, finances */}
+      {/* KPIs avec tendance + sparkline */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <Skeleton className="h-5 w-12 rounded-full" />
+                  </div>
+                  <Skeleton className="mt-4 h-8 w-16" />
+                  <Skeleton className="mt-2 h-4 w-24" />
+                  <Skeleton className="mt-3 h-12 w-full" />
+                </CardContent>
+              </Card>
+            ))
+          : kpis.map((k) => <KpiCard key={k.label} {...k} />)}
+      </div>
+
+      {/* Répartition des tâches + croissance */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ListTodo className="h-4 w-4 text-primary" />
+              Répartition des tâches
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="mx-auto h-44 w-44 rounded-full" />
+            ) : (
+              <TasksDonut
+                aFaire={data!.taches.aFaire}
+                enCours={data!.taches.enCours}
+                fait={data!.taches.fait}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BarChart3 className="h-4 w-4 text-primary" />
+              Croissance sur 6 mois
+            </CardTitle>
+            <CardDescription>
+              Nouveaux utilisateurs et abonnés par mois
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <GrowthBar
+                labels={data!.serie.mois}
+                utilisateurs={data!.serie.utilisateurs}
+                abonnes={data!.serie.abonnes}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dons : ce mois / cette année */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <HandHeart className="h-4 w-4 text-primary" />
+            Dons confirmés
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="grid gap-6 sm:grid-cols-2">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2">
+              <DonsRadial
+                label="Ce mois"
+                count={data!.dons.moisCount}
+                montantLabel={formatMontants(data!.dons.moisParDevise)}
+                ratio={ratioMois}
+                colorKey="primary"
+              />
+              <DonsRadial
+                label="Cette année"
+                count={data!.dons.anneeCount}
+                montantLabel={formatMontants(data!.dons.anneeParDevise)}
+                ratio={1}
+                colorKey="chart2"
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Panneaux agrégés : RDV, anniversaires, tâches, finances */}
       {loading ? (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -240,7 +378,7 @@ export default function AdminDashboard() {
 
       {/* Activité récente */}
       <Tabs defaultValue="users">
-        <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:inline-grid">
+        <TabsList className="grid w-full grid-cols-2 sm:inline-grid sm:w-auto">
           <TabsTrigger value="users">Utilisateurs récents</TabsTrigger>
           <TabsTrigger value="posts">Articles récents</TabsTrigger>
         </TabsList>

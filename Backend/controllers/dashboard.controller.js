@@ -233,6 +233,62 @@ export const dashboard = async (_, res, next) => {
       encaisseParDevise[dev] = (encaisseParDevise[dev] || 0) + m;
     }
 
+    // Répartition complète des tâches (pour le donut).
+    const tachesFait = await Tache.count({ where: { statut: "fait" } });
+
+    // Séries des 6 derniers mois (croissance + sparklines KPI).
+    const MOIS_COURTS = [
+      "janv.", "févr.", "mars", "avr.", "mai", "juin",
+      "juil.", "août", "sept.", "oct.", "nov.", "déc.",
+    ];
+    const buckets = [];
+    const serieMois = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      buckets.push({ y: d.getFullYear(), m: d.getMonth() });
+      serieMois.push(MOIS_COURTS[d.getMonth()]);
+    }
+    const countByMonth = (rows, field) =>
+      buckets.map(
+        (b) =>
+          rows.filter((r) => {
+            const v = r[field];
+            if (!v) return false;
+            const dt = new Date(v);
+            return dt.getFullYear() === b.y && dt.getMonth() === b.m;
+          }).length,
+      );
+    const serie = {
+      mois: serieMois,
+      utilisateurs: countByMonth(users, "createdAt"),
+      abonnes: countByMonth(abonnes, "dateAbonnement"),
+      evenements: countByMonth(evenements, "createdAt"),
+      articles: countByMonth(blogs, "createdAt"),
+    };
+
+    // Dons confirmés : périmètre mois courant et année courante.
+    const donsConfirmesDates = await Don.findAll({
+      where: { statut: "confirme" },
+      attributes: ["montant", "devise", "createdAt"],
+    });
+    const donsMoisParDevise = {};
+    const donsAnneeParDevise = {};
+    let donsMoisCount = 0;
+    let donsAnneeCount = 0;
+    for (const d of donsConfirmesDates) {
+      const dt = new Date(d.createdAt);
+      const m = Number(d.montant) || 0;
+      const dev = d.devise || "USD";
+      if (dt.getFullYear() === now.getFullYear()) {
+        donsAnneeCount += 1;
+        if (m) donsAnneeParDevise[dev] = (donsAnneeParDevise[dev] || 0) + m;
+        if (dt.getMonth() === now.getMonth()) {
+          donsMoisCount += 1;
+          if (m) donsMoisParDevise[dev] = (donsMoisParDevise[dev] || 0) + m;
+        }
+      }
+    }
+
     return res.status(200).json({
       users: {
         nombre: users.length,
@@ -264,6 +320,7 @@ export const dashboard = async (_, res, next) => {
       taches: {
         aFaire: tachesAFaire,
         enCours: tachesEnCours,
+        fait: tachesFait,
         data: prochainesTaches,
       },
       pointage: {
@@ -273,12 +330,17 @@ export const dashboard = async (_, res, next) => {
       },
       dons: {
         totalParDevise: donsTotalParDevise,
+        moisParDevise: donsMoisParDevise,
+        anneeParDevise: donsAnneeParDevise,
+        moisCount: donsMoisCount,
+        anneeCount: donsAnneeCount,
         data: donsRecents,
       },
       finances: {
         nbInscrits: inscriptions.length,
         encaisseParDevise,
       },
+      serie,
     });
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
