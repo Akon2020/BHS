@@ -68,8 +68,8 @@ function Panel({
 }) {
   return (
     <Card className="flex flex-col transition-shadow hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
           <Icon className="h-4 w-4 text-primary" />
           {title}
         </CardTitle>
@@ -81,9 +81,9 @@ function Panel({
           <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent className="flex-1 p-4 pt-0">
         {isEmpty ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
+          <p className="py-4 text-center text-sm text-muted-foreground">
             {emptyLabel}
           </p>
         ) : (
@@ -111,21 +111,23 @@ export default function DashboardOverview({
         isEmpty={(data.rendezVous?.data?.length ?? 0) === 0}
         emptyLabel="Aucun rendez-vous à venir."
       >
-        <ul className="space-y-3">
-          {data.rendezVous.data.map((r) => (
+        <ul className="space-y-2">
+          {data.rendezVous.data.slice(0, 4).map((r) => (
             <li
               key={r.idRendezVous}
-              className="flex items-start justify-between gap-2"
+              className="flex items-center justify-between gap-2"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{r.nom}</p>
+                <p className="truncate text-sm font-medium leading-tight">
+                  {r.nom}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {formatDate(r.date)} · {r.heureDebut?.slice(0, 5)}
                 </p>
               </div>
               <span
                 className={cn(
-                  "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",
+                  "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium",
                   rdvBadge(r.statut),
                 )}
               >
@@ -143,19 +145,21 @@ export default function DashboardOverview({
         isEmpty={(data.anniversaires?.data?.length ?? 0) === 0}
         emptyLabel="Aucun anniversaire configuré."
       >
-        <ul className="space-y-3">
-          {data.anniversaires.data.map((a) => (
+        <ul className="space-y-2">
+          {data.anniversaires.data.slice(0, 4).map((a) => (
             <li
               key={a.idAnniversaire}
               className="flex items-center justify-between gap-2"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{a.nom}</p>
+                <p className="truncate text-sm font-medium leading-tight">
+                  {a.nom}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {String(a.jour).padStart(2, "0")} {MOIS_COURTS[a.mois - 1]}
                 </p>
               </div>
-              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                 {a.dansJours === 0
                   ? "Aujourd'hui"
                   : a.dansJours === 1
@@ -174,21 +178,23 @@ export default function DashboardOverview({
         isEmpty={(data.taches?.data?.length ?? 0) === 0}
         emptyLabel="Aucune tâche planifiée."
       >
-        <ul className="space-y-3">
-          {data.taches.data.map((t) => (
+        <ul className="space-y-2">
+          {data.taches.data.slice(0, 4).map((t) => (
             <li
               key={t.idTache}
-              className="flex items-start justify-between gap-2"
+              className="flex items-center justify-between gap-2"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{t.titre}</p>
+                <p className="truncate text-sm font-medium leading-tight">
+                  {t.titre}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {formatDate(t.echeance)}
                 </p>
               </div>
               <span
                 className={cn(
-                  "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",
+                  "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium",
                   prioriteBadge(t.priorite),
                 )}
               >

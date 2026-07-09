@@ -24,6 +24,7 @@ import {
   Tags,
   UserCheck,
   Trophy,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -135,6 +136,14 @@ export default function AdminDashboard() {
   const palette = useChartPalette();
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  // Horloge live (null tant que non monté → évite tout écart d'hydratation).
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -154,6 +163,21 @@ export default function AdminDashboard() {
   }, []);
 
   const prenom = user?.nomComplet?.split(" ")[0] || "";
+  const heure = now?.getHours() ?? 0;
+  const salutation = !now
+    ? "Bonjour"
+    : heure < 12
+      ? "Bonjour"
+      : heure < 18
+        ? "Bon après-midi"
+        : "Bonsoir";
+  const dateLabel = (now ?? new Date()).toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const heureLabel = now ? now.toLocaleTimeString("fr-FR") : "--:--:--";
 
   const kpis = data
     ? [
@@ -218,16 +242,20 @@ export default function AdminDashboard() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold tracking-tight sm:text-3xl">
-            Bonjour{prenom ? `, ${prenom}` : ""}
+            {salutation}
+            {prenom ? `, ${prenom}` : ""}
           </h1>
-          <p className="mt-1 text-sm capitalize text-muted-foreground">
-            {new Date().toLocaleDateString("fr-FR", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <span className="capitalize">{dateLabel}</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span
+              className="inline-flex items-center gap-1 tabular-nums"
+              aria-live="off"
+            >
+              <Clock className="h-3.5 w-3.5" />
+              {heureLabel}
+            </span>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild>
@@ -257,6 +285,26 @@ export default function AdminDashboard() {
             ))
           : kpis.map((k) => <KpiCard key={k.label} {...k} />)}
       </div>
+
+      {/* Panneaux opérationnels : RDV, anniversaires, tâches (compacts) */}
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="p-4 pb-2">
+                <Skeleton className="h-5 w-40" />
+              </CardHeader>
+              <CardContent className="space-y-2 p-4 pt-0">
+                {Array.from({ length: 3 }).map((_, j) => (
+                  <Skeleton key={j} className="h-9 w-full" />
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <DashboardOverview data={data} />
+      )}
 
       {/* Analyse : croissance + événements */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -455,26 +503,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Panneaux opérationnels : RDV, anniversaires, tâches */}
-      {loading ? (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-5 w-40" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {Array.from({ length: 3 }).map((_, j) => (
-                  <Skeleton key={j} className="h-10 w-full" />
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <DashboardOverview data={data} />
-      )}
 
       {/* Activité récente */}
       <Tabs defaultValue="users">
