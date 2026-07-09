@@ -653,3 +653,11 @@ Sur retour utilisateur : dons rétrogradés à un simple KPI, focus sur l'analys
 - `dashboard-overview` allégé aux 3 panneaux opérationnels (dons/finances/quickstats retirés).
 
 Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Calendrier — entrées manuelles
+
+Ajout d'un module d'entrées de calendrier saisies à la main (rappels, réunions internes, notes).
+- Backend : modèle `EntreeCalendrier` (titre, description, date, heureDebut/Fin, lieu, journeeEntiere, createdBy) + CRUD `/api/calendrier` (admin/éditeur). Nouvelle table auto-créée par `db.sync` (aucune donnée touchée). Swagger régénéré (103 chemins).
+- Frontend : types + `actions/calendrier.ts` ; page `/admin/calendrier` enrichie — bouton « Ajouter », formulaire (titre, date, journée entière ou heures début/fin, lieu, description), nouveau type « Perso » (couleur émeraude) agrégé dans les vues mois/liste et le filtre, édition/suppression depuis la modale de détail, export .ics automatique.
+
+Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.

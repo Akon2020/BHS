@@ -926,6 +926,37 @@ export interface GetAnniversairesResponse {
   anniversaires: Anniversaire[];
 }
 
+/* --------------------------- Entrées calendrier --------------------------- */
+
+export interface EntreeCalendrier {
+  idEntree: number;
+  titre: string;
+  description?: string | null;
+  date: string;
+  heureDebut?: string | null;
+  heureFin?: string | null;
+  lieu?: string | null;
+  journeeEntiere: boolean;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetEntreesCalendrierResponse {
+  nombre: number;
+  entrees: EntreeCalendrier[];
+}
+
+export interface EntreeCalendrierBody {
+  titre: string;
+  description?: string;
+  date: string;
+  heureDebut?: string | null;
+  heureFin?: string | null;
+  lieu?: string;
+  journeeEntiere?: boolean;
+}
+
 /* -------------------------------- Tâches -------------------------------- */
 
 export type StatutTache = "a_faire" | "en_cours" | "fait";

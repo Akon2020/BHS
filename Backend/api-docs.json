@@ -945,6 +945,94 @@
         }
       }
     },
+    "/api/calendrier": {
+      "get": {
+        "summary": "Lister les entrées de calendrier (admin/éditeur)",
+        "tags": [
+          "Calendrier"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des entrées"
+          }
+        }
+      },
+      "post": {
+        "summary": "Ajouter une entrée de calendrier (admin/éditeur)",
+        "tags": [
+          "Calendrier"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Entrée créée"
+          }
+        }
+      }
+    },
+    "/api/calendrier/{id}": {
+      "put": {
+        "summary": "Mettre à jour une entrée de calendrier (admin/éditeur)",
+        "tags": [
+          "Calendrier"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrée mise à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer une entrée de calendrier (admin/éditeur)",
+        "tags": [
+          "Calendrier"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrée supprimée"
+          }
+        }
+      }
+    },
     "/api/categories": {
       "get": {
         "summary": "Récupérer toutes les catégories",
@@ -3837,6 +3925,10 @@
     {
       "name": "Blogs",
       "description": "API pour gérer les blogs"
+    },
+    {
+      "name": "Calendrier",
+      "description": "Entrées de calendrier saisies manuellement"
     },
     {
       "name": "Catégories",

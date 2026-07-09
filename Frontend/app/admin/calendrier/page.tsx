@@ -9,15 +9,24 @@ import {
   List,
   MapPin,
   Clock,
+  Plus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import DeleteConfirmationModal from "@/components/modals/delete-confirmation-modal";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { AddToCalendar } from "@/components/add-to-calendar";
@@ -25,8 +34,14 @@ import type { IcsItem } from "@/lib/ics";
 import { getAllEventsAdmin } from "@/actions/event";
 import { getRendezVous } from "@/actions/agenda";
 import { getAnniversaires } from "@/actions/anniversaire";
+import {
+  getEntreesCalendrier,
+  createEntreeCalendrier,
+  updateEntreeCalendrier,
+  deleteEntreeCalendrier,
+} from "@/actions/calendrier";
 
-type CalType = "evenement" | "rdv" | "anniversaire";
+type CalType = "evenement" | "rdv" | "anniversaire" | "perso";
 
 interface CalItem {
   key: string;
@@ -38,6 +53,7 @@ interface CalItem {
   location?: string;
   description?: string;
   badge?: string;
+  entreeId?: number; // présent pour les entrées manuelles (type "perso")
   ics: IcsItem;
 }
 
@@ -60,7 +76,22 @@ const TYPE_CONFIG: Record<
     dot: "bg-amber-500",
     chip: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
+  perso: {
+    label: "Perso",
+    dot: "bg-emerald-500",
+    chip: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  },
 };
+
+interface EntreeForm {
+  titre: string;
+  description: string;
+  date: string;
+  heureDebut: string;
+  heureFin: string;
+  lieu: string;
+  journeeEntiere: boolean;
+}
 
 const MOIS = [
   "Janvier",
@@ -82,10 +113,21 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const toDateStr = (y: number, m: number, d: number) =>
   `${y}-${pad(m + 1)}-${pad(d)}`;
 
+const emptyEntreeForm = (): EntreeForm => ({
+  titre: "",
+  description: "",
+  date: new Date().toISOString().slice(0, 10),
+  heureDebut: "",
+  heureFin: "",
+  lieu: "",
+  journeeEntiere: false,
+});
+
 export default function CalendrierPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [rdvs, setRdvs] = useState<any[]>([]);
   const [anniversaires, setAnniversaires] = useState<any[]>([]);
+  const [entrees, setEntrees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [cursor, setCursor] = useState(() => {
@@ -97,21 +139,36 @@ export default function CalendrierPage() {
     evenement: true,
     rdv: true,
     anniversaire: true,
+    perso: true,
   });
   const [selected, setSelected] = useState<CalItem | null>(null);
+
+  // Formulaire d'entrée manuelle.
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState<EntreeForm>(emptyEntreeForm());
+  const [saving, setSaving] = useState(false);
+  const [toDelete, setToDelete] = useState<CalItem | null>(null);
+
+  const refreshEntrees = async () => {
+    const res = await getEntreesCalendrier();
+    setEntrees(res.entrees || []);
+  };
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-        const [ev, rv, an] = await Promise.all([
+        const [ev, rv, an, en] = await Promise.all([
           getAllEventsAdmin({ limit: 500 }),
           getRendezVous(),
           getAnniversaires(),
+          getEntreesCalendrier(),
         ]);
         setEvents(ev.events || []);
         setRdvs(rv.rendezVous || []);
         setAnniversaires(an.anniversaires || []);
+        setEntrees(en.entrees || []);
       } catch (error: any) {
         toast({
           variant: "destructive",
@@ -200,8 +257,35 @@ export default function CalendrierPage() {
       });
     }
 
+    for (const en of entrees) {
+      if (!en.date) continue;
+      const [y, m] = en.date.split("-").map(Number);
+      if (y !== year || m - 1 !== month) continue;
+      list.push({
+        key: `perso-${en.idEntree}`,
+        type: "perso",
+        date: en.date,
+        title: en.titre,
+        heureDebut: en.journeeEntiere ? undefined : en.heureDebut || undefined,
+        heureFin: en.journeeEntiere ? undefined : en.heureFin || undefined,
+        location: en.lieu || undefined,
+        description: en.description || undefined,
+        entreeId: en.idEntree,
+        ics: {
+          uid: `perso-${en.idEntree}@burningheart`,
+          title: en.titre,
+          description: en.description || undefined,
+          location: en.lieu || undefined,
+          date: en.date,
+          heureDebut: en.journeeEntiere ? undefined : en.heureDebut || undefined,
+          heureFin: en.journeeEntiere ? undefined : en.heureFin || undefined,
+          allDay: !!en.journeeEntiere,
+        },
+      });
+    }
+
     return list.filter((i) => filters[i.type]);
-  }, [events, rdvs, anniversaires, cursor, filters]);
+  }, [events, rdvs, anniversaires, entrees, cursor, filters]);
 
   const itemsByDay = useMemo(() => {
     const map = new Map<string, CalItem[]>();
@@ -266,6 +350,82 @@ export default function CalendrierPage() {
   const toggleFilter = (t: CalType) =>
     setFilters((f) => ({ ...f, [t]: !f[t] }));
 
+  const openCreate = () => {
+    setEditingId(null);
+    const defaultDate = toDateStr(cursor.year, cursor.month, 1);
+    setForm({ ...emptyEntreeForm(), date: defaultDate });
+    setFormOpen(true);
+  };
+
+  const openEdit = (item: CalItem) => {
+    const en = entrees.find((e) => e.idEntree === item.entreeId);
+    if (!en) return;
+    setEditingId(en.idEntree);
+    setForm({
+      titre: en.titre || "",
+      description: en.description || "",
+      date: en.date,
+      heureDebut: en.heureDebut ? en.heureDebut.slice(0, 5) : "",
+      heureFin: en.heureFin ? en.heureFin.slice(0, 5) : "",
+      lieu: en.lieu || "",
+      journeeEntiere: !!en.journeeEntiere,
+    });
+    setSelected(null);
+    setFormOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.titre.trim() || !form.date) {
+      toast({ variant: "destructive", title: "Titre et date requis" });
+      return;
+    }
+    const payload = {
+      titre: form.titre.trim(),
+      description: form.description.trim() || undefined,
+      date: form.date,
+      lieu: form.lieu.trim() || undefined,
+      journeeEntiere: form.journeeEntiere,
+      heureDebut: form.journeeEntiere ? null : form.heureDebut || null,
+      heureFin: form.journeeEntiere ? null : form.heureFin || null,
+    };
+    try {
+      setSaving(true);
+      if (editingId) {
+        await updateEntreeCalendrier(editingId, payload);
+        toast({ title: "Entrée mise à jour" });
+      } else {
+        await createEntreeCalendrier(payload);
+        toast({ title: "Entrée ajoutée" });
+      }
+      setFormOpen(false);
+      await refreshEntrees();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error?.message,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!toDelete?.entreeId) return;
+    try {
+      await deleteEntreeCalendrier(toDelete.entreeId);
+      toast({ title: "Entrée supprimée" });
+      setSelected(null);
+      await refreshEntrees();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error?.message,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -276,22 +436,28 @@ export default function CalendrierPage() {
             entrée vers votre agenda.
           </p>
         </div>
-        <div className="flex items-center gap-1 rounded-md border p-1">
-          <Button
-            variant={view === "mois" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setView("mois")}
-          >
-            <CalendarDays className="mr-2 h-4 w-4" />
-            Mois
-          </Button>
-          <Button
-            variant={view === "liste" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setView("liste")}
-          >
-            <List className="mr-2 h-4 w-4" />
-            Liste
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-md border p-1">
+            <Button
+              variant={view === "mois" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setView("mois")}
+            >
+              <CalendarDays className="mr-2 h-4 w-4" />
+              Mois
+            </Button>
+            <Button
+              variant={view === "liste" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setView("liste")}
+            >
+              <List className="mr-2 h-4 w-4" />
+              Liste
+            </Button>
+          </div>
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter
           </Button>
         </div>
       </div>
@@ -508,13 +674,139 @@ export default function CalendrierPage() {
                   {selected.description}
                 </p>
               )}
-              <div className="flex justify-end">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex gap-2">
+                  {selected.type === "perso" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEdit(selected)}
+                      >
+                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                        Modifier
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setToDelete(selected)}
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                        Supprimer
+                      </Button>
+                    </>
+                  )}
+                </div>
                 <AddToCalendar item={selected.ics} variant="default" />
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Formulaire d'entrée manuelle */}
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingId ? "Modifier l'entrée" : "Ajouter au calendrier"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Titre</Label>
+              <Input
+                value={form.titre}
+                onChange={(e) => setForm({ ...form, titre: e.target.value })}
+                placeholder="Ex : Réunion de préparation"
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lieu (optionnel)</Label>
+                <Input
+                  value={form.lieu}
+                  onChange={(e) => setForm({ ...form, lieu: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between rounded-md border px-3 py-2">
+              <Label htmlFor="journee" className="cursor-pointer text-sm">
+                Journée entière
+              </Label>
+              <Switch
+                id="journee"
+                checked={form.journeeEntiere}
+                onCheckedChange={(v) =>
+                  setForm({ ...form, journeeEntiere: v })
+                }
+              />
+            </div>
+
+            {!form.journeeEntiere && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Heure de début</Label>
+                  <Input
+                    type="time"
+                    value={form.heureDebut}
+                    onChange={(e) =>
+                      setForm({ ...form, heureDebut: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Heure de fin (optionnel)</Label>
+                  <Input
+                    type="time"
+                    value={form.heureFin}
+                    onChange={(e) =>
+                      setForm({ ...form, heureFin: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Description (optionnel)</Label>
+              <Textarea
+                rows={3}
+                value={form.description}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFormOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "..." : editingId ? "Enregistrer" : "Ajouter"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <DeleteConfirmationModal
+        isOpen={!!toDelete}
+        onClose={() => setToDelete(null)}
+        onConfirm={handleDelete}
+        title="Supprimer cette entrée ?"
+        description="Cette action est irréversible."
+      />
     </div>
   );
 }

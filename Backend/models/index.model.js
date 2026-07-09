@@ -25,6 +25,7 @@ import ParametreAgenda from "./parametreAgenda.model.js";
 import Anniversaire from "./anniversaire.model.js";
 import Tache from "./tache.model.js";
 import TacheCommentaire from "./tacheCommentaire.model.js";
+import EntreeCalendrier from "./entreeCalendrier.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -213,6 +214,12 @@ TacheCommentaire.belongsTo(Utilisateur, {
   as: "auteur",
 });
 
+// Entrée de calendrier associations
+EntreeCalendrier.belongsTo(Utilisateur, {
+  foreignKey: "createdBy",
+  as: "createur",
+});
+
 // Contact-Réponse associations
 ReponseContact.belongsTo(Contact, {
   foreignKey: "idContact",
@@ -332,5 +339,6 @@ export {
   Anniversaire,
   Tache,
   TacheCommentaire,
+  EntreeCalendrier,
   syncModels,
 };
