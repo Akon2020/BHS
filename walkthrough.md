@@ -636,3 +636,20 @@ Refonte inspirée d'un dashboard premium (carte d'accueil, KPIs à sparkline, do
 - Le graphique « visites » à données aléatoires est retiré au profit de données réelles.
 
 Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Dashboard — recentrage analytique (événements, articles, users, abonnés, pointage)
+
+Sur retour utilisateur : dons rétrogradés à un simple KPI, focus sur l'analyse.
+
+**Backend** (`dashboard.controller.js`)
+- Pointage : série des heures sur 6 mois (`serie.heures`), tendance mensuelle (`pointage.stat`), `pointage.topContributeurs` (top 5 du mois par profil).
+- Événements : `aVenir`, `passes`, `tauxRemplissage` (places inscrites / totales).
+- Articles : `blogs.parCategorie` (répartition par catégorie).
+- Abonnés : `abonnes.parStatut` (actif / inactif / désabonné).
+
+**Frontend**
+- Nouveaux composants graphiques : `DonutChart` (générique), `HoursLine` (courbe heures), `CategoryBar` (barres horizontales). Suppression de `tasks-donut` et `dons-radial`.
+- Page `/admin` recentrée : en-tête (salutation) ; **6 KPIs** (utilisateurs, abonnés, événements, articles, heures pointées avec tendance+sparkline, dons en KPI compact) ; **Croissance 6 mois** + carte **Événements** (donut à venir/passés, taux de remplissage, inscriptions, encaissé) ; **Heures pointées 6 mois** + **Top contributeurs** ; **Articles par catégorie** + **Abonnés par statut** ; panneaux opérationnels (RDV, anniversaires, tâches) ; activité récente.
+- `dashboard-overview` allégé aux 3 panneaux opérationnels (dons/finances/quickstats retirés).
+
+Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.

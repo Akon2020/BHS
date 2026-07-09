@@ -2,24 +2,24 @@
 
 import { Doughnut } from "react-chartjs-2";
 import type { ChartOptions } from "chart.js";
-import { useChartPalette } from "./chart-core";
+import "./chart-core";
 
-interface Props {
-  aFaire: number;
-  enCours: number;
-  fait: number;
+export interface DonutSegment {
+  label: string;
+  value: number;
+  color: string;
 }
 
-/** Donut de répartition des tâches par statut. */
-export function TasksDonut({ aFaire, enCours, fait }: Props) {
-  const p = useChartPalette();
-  const total = aFaire + enCours + fait;
+interface Props {
+  segments: DonutSegment[];
+  centerValue?: string | number;
+  centerLabel?: string;
+}
 
-  const segments = [
-    { label: "À faire", value: aFaire, color: p.chart3 },
-    { label: "En cours", value: enCours, color: p.chart4 },
-    { label: "Fait", value: fait, color: p.chart2 },
-  ];
+/** Donut générique : segments colorés, total au centre, légende chiffrée. */
+export function DonutChart({ segments, centerValue, centerLabel }: Props) {
+  const total = segments.reduce((a, s) => a + s.value, 0);
+  const center = centerValue ?? total;
 
   const data = {
     labels: segments.map((s) => s.label),
@@ -39,32 +39,32 @@ export function TasksDonut({ aFaire, enCours, fait }: Props) {
     cutout: "72%",
     plugins: {
       legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx) => ` ${ctx.label} : ${ctx.parsed}`,
-        },
-      },
+      tooltip: { callbacks: { label: (ctx) => ` ${ctx.label} : ${ctx.parsed}` } },
     },
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative mx-auto h-44 w-44">
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
+      <div className="relative h-40 w-40 shrink-0">
         {total === 0 ? (
           <div className="flex h-full w-full items-center justify-center rounded-full border-8 border-muted text-sm text-muted-foreground">
-            Aucune
+            Aucune donnée
           </div>
         ) : (
           <>
             <Doughnut data={data} options={options} />
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold tabular-nums">{total}</span>
-              <span className="text-xs text-muted-foreground">tâches</span>
+              <span className="text-2xl font-bold tabular-nums">{center}</span>
+              {centerLabel && (
+                <span className="text-xs text-muted-foreground">
+                  {centerLabel}
+                </span>
+              )}
             </div>
           </>
         )}
       </div>
-      <ul className="space-y-2">
+      <ul className="w-full space-y-2">
         {segments.map((s) => (
           <li
             key={s.label}

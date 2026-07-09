@@ -40,11 +40,25 @@ export interface DashboardDon {
   createdAt: string;
 }
 
+export interface DashboardAbonnesSection extends DashboardSection<Abonne> {
+  parStatut: { actif: number; inactif: number; desabonne: number };
+}
+
+export interface DashboardEvenementsSection extends DashboardSection<Evenement> {
+  aVenir: number;
+  passes: number;
+  tauxRemplissage: number;
+}
+
+export interface DashboardBlogsSection extends DashboardSection<Blog> {
+  parCategorie: { categorie: string; count: number }[];
+}
+
 export interface DashboardResponse {
   users: DashboardSection<User>;
-  abonnes: DashboardSection<Abonne>;
-  evenements: DashboardSection<Evenement>;
-  blogs: DashboardSection<Blog>;
+  abonnes: DashboardAbonnesSection;
+  evenements: DashboardEvenementsSection;
+  blogs: DashboardBlogsSection;
   rendezVous: {
     enAttente: number;
     data: DashboardRdv[];
@@ -62,6 +76,8 @@ export interface DashboardResponse {
     sessionsMois: number;
     minutesMois: number;
     heuresMois: number;
+    stat: string;
+    topContributeurs: { nom: string; heures: number }[];
   };
   dons: {
     totalParDevise: Record<string, number>;
@@ -81,5 +97,6 @@ export interface DashboardResponse {
     abonnes: number[];
     evenements: number[];
     articles: number[];
+    heures: number[];
   };
 }

@@ -15,11 +15,15 @@ import {
   FileText,
   Calendar,
   Mail,
+  Timer,
+  HandHeart,
   ArrowUpRight,
   ArrowDownRight,
-  HandHeart,
-  ListTodo,
   BarChart3,
+  CalendarRange,
+  Tags,
+  UserCheck,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,13 +32,12 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import AdminRecentUsers from "@/components/admin/recent-users";
 import AdminRecentPosts from "@/components/admin/recent-posts";
-import DashboardOverview, {
-  DashboardQuickStats,
-} from "@/components/admin/dashboard-overview";
+import DashboardOverview from "@/components/admin/dashboard-overview";
 import { KpiSparkline } from "@/components/admin/charts/kpi-sparkline";
-import { TasksDonut } from "@/components/admin/charts/tasks-donut";
 import { GrowthBar } from "@/components/admin/charts/growth-bar";
-import { DonsRadial } from "@/components/admin/charts/dons-radial";
+import { HoursLine } from "@/components/admin/charts/hours-line";
+import { CategoryBar } from "@/components/admin/charts/category-bar";
+import { DonutChart } from "@/components/admin/charts/donut-chart";
 import { useChartPalette } from "@/components/admin/charts/chart-core";
 import { getDashboard } from "@/actions/dashboard";
 import type { DashboardResponse } from "@/types/dashboard";
@@ -77,14 +80,16 @@ function KpiCard({
   href,
   series,
   color,
+  hint,
 }: {
   label: string;
-  value: number;
-  stat: string;
+  value: string | number;
+  stat?: string;
   icon: LucideIcon;
   href: string;
-  series: number[];
-  color: string;
+  series?: number[];
+  color?: string;
+  hint?: string;
 }) {
   return (
     <Link href={href} className="group focus-visible:outline-none">
@@ -94,16 +99,34 @@ function KpiCard({
             <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Icon className="h-5 w-5" />
             </span>
-            <TrendBadge stat={stat} />
+            {stat && <TrendBadge stat={stat} />}
           </div>
-          <p className="mt-4 text-3xl font-bold tabular-nums">{value}</p>
+          <p className="mt-4 truncate text-2xl font-bold tabular-nums xl:text-3xl">
+            {value}
+          </p>
           <p className="text-sm text-muted-foreground">{label}</p>
-          <div className="mt-3">
-            <KpiSparkline data={series} color={color} />
-          </div>
+          {series && color ? (
+            <div className="mt-3">
+              <KpiSparkline data={series} color={color} />
+            </div>
+          ) : (
+            hint && (
+              <p className="mt-3 text-xs text-muted-foreground/70">{hint}</p>
+            )
+          )}
         </CardContent>
       </Card>
     </Link>
+  );
+}
+
+/** Ligne statistique compacte (label + valeur). */
+function StatLine({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex items-center justify-between rounded-md bg-muted/50 px-3 py-2 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold tabular-nums">{value}</span>
+    </div>
   );
 }
 
@@ -170,14 +193,24 @@ export default function AdminDashboard() {
           series: data.serie.articles,
           color: palette.chart3,
         },
+        {
+          label: "Heures pointées (mois)",
+          value: `${data.pointage.heuresMois} h`,
+          stat: data.pointage.stat,
+          icon: Timer,
+          href: "/admin/pointage",
+          series: data.serie.heures,
+          color: palette.chart5,
+        },
+        {
+          label: "Dons confirmés",
+          value: formatMontants(data.dons.totalParDevise),
+          icon: HandHeart,
+          href: "/admin/dons",
+          hint: `${data.dons.anneeCount} cette année`,
+        },
       ]
     : [];
-
-  const donsAnnee = data ? formatMontants(data.dons.anneeParDevise) : "0";
-  const ratioMois =
-    data && data.dons.anneeCount > 0
-      ? data.dons.moisCount / data.dons.anneeCount
-      : 0;
 
   return (
     <div className="space-y-6">
@@ -185,7 +218,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold tracking-tight sm:text-3xl">
-            Tableau de bord
+            Bonjour{prenom ? `, ${prenom}` : ""}
           </h1>
           <p className="mt-1 text-sm capitalize text-muted-foreground">
             {new Date().toLocaleDateString("fr-FR", {
@@ -206,60 +239,10 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Accueil + aperçu rapide */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent lg:col-span-2">
-          <CardContent className="flex h-full flex-col justify-between gap-6 p-6">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Bienvenue{prenom ? `, ${prenom}` : ""} 👋
-              </p>
-              <h2 className="mt-1 font-serif text-xl font-bold sm:text-2xl">
-                Voici l&apos;activité de Burning Heart
-              </h2>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Dons confirmés cette année
-              </p>
-              <p className="font-serif text-3xl font-bold text-primary sm:text-4xl">
-                {loading ? "—" : donsAnnee}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {loading
-                  ? ""
-                  : `${data?.dons.anneeCount ?? 0} don${(data?.dons.anneeCount ?? 0) > 1 ? "s" : ""} confirmé${(data?.dons.anneeCount ?? 0) > 1 ? "s" : ""}`}
-              </p>
-            </div>
-            <div>
-              <Button asChild variant="default" className="gap-2">
-                <Link href="/admin/dons">
-                  <HandHeart className="h-4 w-4" />
-                  Voir les dons
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {loading ? (
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-5 w-32" />
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
-            </CardContent>
-          </Card>
-        ) : (
-          <DashboardQuickStats data={data} />
-        )}
-      </div>
-
-      {/* KPIs avec tendance + sparkline */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: 6 }).map((_, i) => (
               <Card key={i}>
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
@@ -275,28 +258,8 @@ export default function AdminDashboard() {
           : kpis.map((k) => <KpiCard key={k.label} {...k} />)}
       </div>
 
-      {/* Répartition des tâches + croissance */}
+      {/* Analyse : croissance + événements */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ListTodo className="h-4 w-4 text-primary" />
-              Répartition des tâches
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="mx-auto h-44 w-44 rounded-full" />
-            ) : (
-              <TasksDonut
-                aFaire={data!.taches.aFaire}
-                enCours={data!.taches.enCours}
-                fait={data!.taches.fait}
-              />
-            )}
-          </CardContent>
-        </Card>
-
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -319,44 +282,181 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CalendarRange className="h-4 w-4 text-primary" />
+              Événements
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {loading ? (
+              <Skeleton className="h-40 w-full" />
+            ) : (
+              <>
+                <DonutChart
+                  segments={[
+                    {
+                      label: "À venir",
+                      value: data!.evenements.aVenir,
+                      color: palette.chart1,
+                    },
+                    {
+                      label: "Passés",
+                      value: data!.evenements.passes,
+                      color: palette.chart3,
+                    },
+                  ]}
+                  centerValue={data!.evenements.nombre}
+                  centerLabel="au total"
+                />
+                <div className="space-y-2">
+                  <StatLine
+                    label="Taux de remplissage"
+                    value={`${data!.evenements.tauxRemplissage} %`}
+                  />
+                  <StatLine
+                    label="Inscriptions"
+                    value={data!.finances.nbInscrits}
+                  />
+                  <StatLine
+                    label="Encaissé"
+                    value={formatMontants(data!.finances.encaisseParDevise)}
+                  />
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Dons : ce mois / cette année */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <HandHeart className="h-4 w-4 text-primary" />
-            Dons confirmés
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="grid gap-6 sm:grid-cols-2">
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
-              <DonsRadial
-                label="Ce mois"
-                count={data!.dons.moisCount}
-                montantLabel={formatMontants(data!.dons.moisParDevise)}
-                ratio={ratioMois}
-                colorKey="primary"
-              />
-              <DonsRadial
-                label="Cette année"
-                count={data!.dons.anneeCount}
-                montantLabel={formatMontants(data!.dons.anneeParDevise)}
-                ratio={1}
-                colorKey="chart2"
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Pointage : tendance + top contributeurs */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Timer className="h-4 w-4 text-primary" />
+              Heures pointées — 6 mois
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-56 w-full" />
+            ) : (
+              <HoursLine labels={data!.serie.mois} data={data!.serie.heures} />
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Panneaux agrégés : RDV, anniversaires, tâches, finances */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Trophy className="h-4 w-4 text-primary" />
+              Top contributeurs
+            </CardTitle>
+            <CardDescription>Heures pointées ce mois</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-full" />
+                ))}
+              </div>
+            ) : data!.pointage.topContributeurs.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                Aucun pointage ce mois.
+              </p>
+            ) : (
+              <ol className="space-y-3">
+                {data!.pointage.topContributeurs.map((c, i) => (
+                  <li
+                    key={c.nom}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={cn(
+                          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+                          i === 0
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {i + 1}
+                      </span>
+                      <span className="truncate text-sm font-medium">
+                        {c.nom}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-sm font-semibold tabular-nums">
+                      {c.heures} h
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Répartitions : articles par catégorie + abonnés */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Tags className="h-4 w-4 text-primary" />
+              Articles par catégorie
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-56 w-full" />
+            ) : (
+              <CategoryBar items={data!.blogs.parCategorie} />
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UserCheck className="h-4 w-4 text-primary" />
+              Abonnés newsletter
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-40 w-full" />
+            ) : (
+              <DonutChart
+                segments={[
+                  {
+                    label: "Actifs",
+                    value: data!.abonnes.parStatut.actif,
+                    color: palette.chart2,
+                  },
+                  {
+                    label: "Inactifs",
+                    value: data!.abonnes.parStatut.inactif,
+                    color: palette.chart4,
+                  },
+                  {
+                    label: "Désabonnés",
+                    value: data!.abonnes.parStatut.desabonne,
+                    color: palette.mutedFg,
+                  },
+                ]}
+                centerValue={data!.abonnes.nombre}
+                centerLabel="abonnés"
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Panneaux opérationnels : RDV, anniversaires, tâches */}
       {loading ? (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (

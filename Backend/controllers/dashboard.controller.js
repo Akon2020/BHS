@@ -8,6 +8,7 @@ import {
   Anniversaire,
   Tache,
   Pointage,
+  ProfilPointage,
   Don,
   InscriptionEvenement,
 } from "../models/index.model.js";
@@ -266,6 +267,79 @@ export const dashboard = async (_, res, next) => {
       articles: countByMonth(blogs, "createdAt"),
     };
 
+    // Pointage : heures par mois (6 mois) + tendance + top contributeurs.
+    const debutSerie = `${buckets[0].y}-${String(buckets[0].m + 1).padStart(2, "0")}-01`;
+    const pointages6 = await Pointage.findAll({
+      where: { date: { [Op.gte]: debutSerie } },
+      attributes: ["date", "dureeMinutes"],
+    });
+    const heuresParMois = buckets.map((b) => {
+      const min = pointages6
+        .filter((p) => {
+          const dt = new Date(p.date);
+          return dt.getFullYear() === b.y && dt.getMonth() === b.m;
+        })
+        .reduce((a, p) => a + (p.dureeMinutes || 0), 0);
+      return Math.round((min / 60) * 10) / 10;
+    });
+    serie.heures = heuresParMois;
+    const pointageStat = calculateMonthlyStat(
+      heuresParMois[5] || 0,
+      heuresParMois[4] || 0,
+    );
+
+    const pointagesMoisDetail = await Pointage.findAll({
+      where: {
+        date: { [Op.between]: [startOfCurrentMonth, endOfCurrentMonth] },
+      },
+      attributes: ["dureeMinutes"],
+      include: [
+        { model: ProfilPointage, as: "profil", attributes: ["nomComplet"] },
+      ],
+    });
+    const parProfil = {};
+    for (const p of pointagesMoisDetail) {
+      const nom = p.profil?.nomComplet || "—";
+      parProfil[nom] = (parProfil[nom] || 0) + (p.dureeMinutes || 0);
+    }
+    const topContributeurs = Object.entries(parProfil)
+      .map(([nom, min]) => ({ nom, heures: Math.round((min / 60) * 10) / 10 }))
+      .filter((c) => c.heures > 0)
+      .sort((a, b) => b.heures - a.heures)
+      .slice(0, 5);
+
+    // Événements : à venir / passés + taux de remplissage global.
+    let evAVenir = 0;
+    let placesTotales = 0;
+    let placesInscrites = 0;
+    for (const e of evenements) {
+      if (e.dateEvenement && String(e.dateEvenement) >= todayStr) evAVenir += 1;
+      placesTotales += e.nombrePlaces || 0;
+      placesInscrites += e.nombreInscrits || 0;
+    }
+    const evPasses = evenements.length - evAVenir;
+    const tauxRemplissage =
+      placesTotales > 0
+        ? Math.round((placesInscrites / placesTotales) * 100)
+        : 0;
+
+    // Articles par catégorie.
+    const catCount = {};
+    for (const b of blogs) {
+      const nom = b.categorie?.nomCategorie || "Sans catégorie";
+      catCount[nom] = (catCount[nom] || 0) + 1;
+    }
+    const articlesParCategorie = Object.entries(catCount)
+      .map(([categorie, count]) => ({ categorie, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
+
+    // Abonnés par statut.
+    const abonnesParStatut = { actif: 0, inactif: 0, desabonne: 0 };
+    for (const a of abonnes) {
+      if (abonnesParStatut[a.statut] !== undefined) abonnesParStatut[a.statut] += 1;
+    }
+
     // Dons confirmés : périmètre mois courant et année courante.
     const donsConfirmesDates = await Don.findAll({
       where: { statut: "confirme" },
@@ -298,16 +372,21 @@ export const dashboard = async (_, res, next) => {
       abonnes: {
         nombre: abonnes.length,
         stat: abonnesStat,
+        parStatut: abonnesParStatut,
         data: abonnes.slice(0, 5),
       },
       evenements: {
         nombre: evenements.length,
         stat: evenementsStat,
+        aVenir: evAVenir,
+        passes: evPasses,
+        tauxRemplissage,
         data: evenements.slice(0, 5),
       },
       blogs: {
         nombre: blogs.length,
         stat: blogsStat,
+        parCategorie: articlesParCategorie,
         data: blogs.slice(0, 5),
       },
       rendezVous: {
@@ -327,6 +406,8 @@ export const dashboard = async (_, res, next) => {
         sessionsMois: pointagesMois.length,
         minutesMois,
         heuresMois: Math.round((minutesMois / 60) * 10) / 10,
+        stat: pointageStat,
+        topContributeurs,
       },
       dons: {
         totalParDevise: donsTotalParDevise,
