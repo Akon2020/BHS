@@ -47,6 +47,15 @@ export default function PublicLayout() {
         }}
       />
       <Tabs.Screen
+        name="recherche"
+        options={{
+          title: "Recherche",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="compte"
         options={{
           title: "Compte",

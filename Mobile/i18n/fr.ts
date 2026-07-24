@@ -138,6 +138,15 @@ export const fr = {
     commentPending:
       "Merci ! Votre commentaire sera visible après validation.",
   },
+  recherche: {
+    title: "Recherche",
+    placeholder: "Rechercher un article, un événement…",
+    prompt: "Saisissez au moins 2 caractères.",
+    empty: "Aucun résultat.",
+    articles: "Articles",
+    events: "Événements",
+    resources: "Ressources",
+  },
   compte: {
     title: "Compte",
     guestTitle: "Votre espace personnel",
