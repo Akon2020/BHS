@@ -29,6 +29,7 @@ import {
 import { queryClient, asyncStoragePersister } from "@/lib/query-client";
 import { useSession } from "@/stores/session";
 import { getColors } from "@/theme/colors";
+import { ToastHost } from "@/components/ui/toast";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -85,6 +86,7 @@ export default function RootLayout() {
           <ThemeProvider value={buildNavTheme(scheme)}>
             <StatusBar style={scheme === "dark" ? "light" : "dark"} />
             <Stack screenOptions={{ headerShown: false }} />
+            <ToastHost />
           </ThemeProvider>
         </PersistQueryClientProvider>
       </SafeAreaProvider>
