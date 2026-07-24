@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const withAlpha = (token) => `rgb(var(${token}) / <alpha-value>)`;
+
 module.exports = {
   content: [
     "./app/**/*.{js,jsx,ts,tsx}",
@@ -9,45 +11,45 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: withAlpha("--background"),
+        foreground: withAlpha("--foreground"),
         card: {
-          DEFAULT: "var(--card)",
-          foreground: "var(--card-foreground)",
+          DEFAULT: withAlpha("--card"),
+          foreground: withAlpha("--card-foreground"),
         },
         popover: {
-          DEFAULT: "var(--popover)",
-          foreground: "var(--popover-foreground)",
+          DEFAULT: withAlpha("--popover"),
+          foreground: withAlpha("--popover-foreground"),
         },
         primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-foreground)",
+          DEFAULT: withAlpha("--primary"),
+          foreground: withAlpha("--primary-foreground"),
         },
         secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-foreground)",
+          DEFAULT: withAlpha("--secondary"),
+          foreground: withAlpha("--secondary-foreground"),
         },
         muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-foreground)",
+          DEFAULT: withAlpha("--muted"),
+          foreground: withAlpha("--muted-foreground"),
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-foreground)",
+          DEFAULT: withAlpha("--accent"),
+          foreground: withAlpha("--accent-foreground"),
         },
         destructive: {
-          DEFAULT: "var(--destructive)",
-          foreground: "var(--destructive-foreground)",
+          DEFAULT: withAlpha("--destructive"),
+          foreground: withAlpha("--destructive-foreground"),
         },
-        border: "var(--border)",
-        input: "var(--input)",
-        ring: "var(--ring)",
+        border: withAlpha("--border"),
+        input: withAlpha("--input"),
+        ring: withAlpha("--ring"),
         chart: {
-          1: "var(--chart-1)",
-          2: "var(--chart-2)",
-          3: "var(--chart-3)",
-          4: "var(--chart-4)",
-          5: "var(--chart-5)",
+          1: withAlpha("--chart-1"),
+          2: withAlpha("--chart-2"),
+          3: withAlpha("--chart-3"),
+          4: withAlpha("--chart-4"),
+          5: withAlpha("--chart-5"),
         },
       },
       borderRadius: {

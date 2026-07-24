@@ -4,60 +4,62 @@
 
 /*
  * Tokens de couleur portés depuis Frontend/app/globals.css (thème crimson).
- * Les valeurs OKLCH du web sont converties en hex sRGB (React Native ne rend pas oklch).
+ * Les valeurs OKLCH du web sont converties en sRGB (React Native ne rend pas oklch),
+ * exprimées en canaux "R G B" pour permettre les opacités NativeWind
+ * (ex. bg-primary/10) via rgb(var(--token) / <alpha-value>).
  */
 @layer base {
   :root {
-    --background: #fcfcfc;
-    --foreground: #0e0e13;
-    --card: #ffffff;
-    --card-foreground: #0e0e13;
-    --popover: #ffffff;
-    --popover-foreground: #0e0e13;
-    --primary: #900d30;
-    --primary-foreground: #fcfcfc;
-    --secondary: #f1f1f4;
-    --secondary-foreground: #17161d;
-    --muted: #f1f1f4;
-    --muted-foreground: #686871;
-    --accent: #f1f1f4;
-    --accent-foreground: #17161d;
-    --destructive: #e7000b;
-    --destructive-foreground: #fcfcfc;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
-    --ring: #900d30;
-    --chart-1: #900d30;
-    --chart-2: #009689;
-    --chart-3: #104e64;
-    --chart-4: #ffb900;
-    --chart-5: #fe9a00;
+    --background: 252 252 252;
+    --foreground: 14 14 19;
+    --card: 255 255 255;
+    --card-foreground: 14 14 19;
+    --popover: 255 255 255;
+    --popover-foreground: 14 14 19;
+    --primary: 144 13 48;
+    --primary-foreground: 252 252 252;
+    --secondary: 241 241 244;
+    --secondary-foreground: 23 22 29;
+    --muted: 241 241 244;
+    --muted-foreground: 104 104 113;
+    --accent: 241 241 244;
+    --accent-foreground: 23 22 29;
+    --destructive: 231 0 11;
+    --destructive-foreground: 252 252 252;
+    --border: 228 228 231;
+    --input: 228 228 231;
+    --ring: 144 13 48;
+    --chart-1: 144 13 48;
+    --chart-2: 0 150 137;
+    --chart-3: 16 78 100;
+    --chart-4: 255 185 0;
+    --chart-5: 254 154 0;
   }
 
   .dark:root {
-    --background: #050509;
-    --foreground: #f8f8fa;
-    --card: #0b0b0f;
-    --card-foreground: #f8f8fa;
-    --popover: #0b0b0f;
-    --popover-foreground: #f8f8fa;
-    --primary: #ce3e57;
-    --primary-foreground: #f8f8fa;
-    --secondary: #15151b;
-    --secondary-foreground: #f8f8fa;
-    --muted: #15151b;
-    --muted-foreground: #9797a0;
-    --accent: #15151b;
-    --accent-foreground: #f8f8fa;
-    --destructive: #d40c1a;
-    --destructive-foreground: #f8f8fa;
-    --border: #1f1f25;
-    --input: #1f1f25;
-    --ring: #ce3e57;
-    --chart-1: #ce3e57;
-    --chart-2: #00bc7d;
-    --chart-3: #fe9a00;
-    --chart-4: #ad46ff;
-    --chart-5: #ff2056;
+    --background: 5 5 9;
+    --foreground: 248 248 250;
+    --card: 11 11 15;
+    --card-foreground: 248 248 250;
+    --popover: 11 11 15;
+    --popover-foreground: 248 248 250;
+    --primary: 206 62 87;
+    --primary-foreground: 248 248 250;
+    --secondary: 21 21 27;
+    --secondary-foreground: 248 248 250;
+    --muted: 21 21 27;
+    --muted-foreground: 151 151 160;
+    --accent: 21 21 27;
+    --accent-foreground: 248 248 250;
+    --destructive: 212 12 26;
+    --destructive-foreground: 248 248 250;
+    --border: 31 31 37;
+    --input: 31 31 37;
+    --ring: 206 62 87;
+    --chart-1: 206 62 87;
+    --chart-2: 0 188 125;
+    --chart-3: 254 154 0;
+    --chart-4: 173 70 255;
+    --chart-5: 255 32 86;
   }
 }
