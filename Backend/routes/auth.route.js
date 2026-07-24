@@ -3,6 +3,7 @@ import {
   login,
   logout,
   register,
+  inscription,
   resetPassword,
   updatePassword,
 } from "../controllers/auth.controller.js";
@@ -116,6 +117,40 @@ authRouter.post(
  *         description: Email ou mot de passe incorrect
  */
 authRouter.post("/login", login);
+
+/**
+ * @swagger
+ * /api/auth/inscription:
+ *   post:
+ *     summary: Inscription publique (crée un compte membre)
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nomComplet
+ *               - email
+ *               - password
+ *             properties:
+ *               nomComplet:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Compte créé (renvoie token + user)
+ *       400:
+ *         description: Données invalides
+ *       409:
+ *         description: Email déjà utilisé
+ */
+authRouter.post("/inscription", inscription);
 
 /**
  * @swagger

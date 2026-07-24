@@ -84,6 +84,71 @@ export const register = async (req, res, next) => {
   }
 };
 
+// Inscription PUBLIQUE (visiteurs mobiles/web) : crée un compte `membre`.
+// Distinct de `register` (réservé admin) pour ne pas altérer son usage.
+export const inscription = async (req, res, next) => {
+  try {
+    const { nomComplet, email, password } = req.body;
+
+    if (!nomComplet || !email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Nom complet, email et mot de passe sont requis." });
+    }
+    if (!valideEmail(email)) {
+      return res.status(400).json({ message: "Entrez une adresse mail valide" });
+    }
+    if (!strongPasswd(password)) {
+      return res.status(400).json({
+        message:
+          "Le mot de passe doit contenir au moins 6 caractères, avec une lettre, un chiffre et un symbole.",
+      });
+    }
+
+    const userExists = await Utilisateur.findOne({ where: { email } });
+    if (userExists) {
+      return res
+        .status(409)
+        .json({ message: "Un compte existe déjà avec cet email." });
+    }
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Rôle forcé à `membre` côté serveur — jamais transmis par le client.
+    const newUser = await Utilisateur.create({
+      nomComplet,
+      email,
+      password: hashedPassword,
+      role: "membre",
+    });
+
+    // Email de bienvenue en arrière-plan (non bloquant).
+    transporter
+      .sendMail({
+        from: `"BurningHeart IHS" <${EMAIL}>`,
+        to: email,
+        subject: "Bienvenue dans BurningHeart IHS",
+        html: welcomeEmailTemplate(nomComplet, email, FRONT_URL),
+      })
+      .catch((e) => console.error("Erreur email inscription :", e.message));
+
+    const token = generateToken(newUser);
+    res.cookie("token", token, getAuthCookieOptions({ withMaxAge: true }));
+
+    const userWithoutPassword = getUserWithoutPassword(newUser);
+    return res.status(201).json({
+      message: "Compte créé avec succès",
+      token,
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'inscription publique :", error);
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -115,8 +180,13 @@ export const login = async (req, res, next) => {
 
     const userWithoutPassword = getUserWithoutPassword(user);
 
+    // Le cookie httpOnly reste posé pour le web. On ajoute `token` + `user` au
+    // corps pour les clients sans cookie (mobile, flux Bearer) — ajout additif,
+    // le web continue de lire `data.userInfo`.
     res.status(200).json({
       message: `Bienvenu ${userWithoutPassword.nomComplet} 👋`,
+      token: loginToken,
+      user: userWithoutPassword,
       data: { userInfo: userWithoutPassword },
     });
   } catch (error) {
