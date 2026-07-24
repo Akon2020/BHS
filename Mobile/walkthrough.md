@@ -24,7 +24,18 @@
 
 **Vérifs** : `tsc --noEmit` propre ; `expo lint` propre. ⚠️ Rendu runtime non vérifié ici (pas d'émulateur) — à valider via `npx expo start`.
 
-**Reste Phase 0** : `EXPO_PUBLIC_API_URL` (créer `.env` depuis `.env.example`), config **EAS** (dev/preview/prod), groupes `(auth)/(member)/(admin)`, primitives manquantes (Input, Avatar, BottomSheet, Toast), **Sentry**, bannière hors-ligne + écran d'erreur global, Prettier/lint-staged.
+### Complétion ✅
+
+- **Primitives UI** : `Input` (libellé/erreur/aide, compatible RHF), `Avatar` (photo ou initiales), `Toast` (store Zustand + hôte animé, auto-dismiss) et `Sheet` (feuille modale native). `ToastHost` monté à la racine.
+- **Connectivité** : `hooks/use-online.ts` (NetInfo) + `OfflineBanner` (bandeau discret hors-ligne) ; `onlineManager` de TanStack Query branché sur NetInfo (requêtes en pause hors-ligne).
+- **Borne d'erreur globale** : `ErrorBoundary` exporté depuis `app/_layout.tsx` (expo-router) → `ErrorScreen` réutilisable.
+- **Sentry** : `lib/sentry.ts` (`initSentry` conditionnel au DSN, no-op sinon ; `Sentry.wrap` sur le layout racine) ; plugin `@sentry/react-native` ajouté à `app.json`.
+- **EAS** : `eas.json` (profils development/preview/production + channels).
+- **Outillage** : Prettier (`.prettierrc.json`, `.prettierignore`), `eslint-config-prettier`, scripts `format`/`format:check`/`typecheck`, config `lint-staged` (hook husky à brancher plus tard).
+
+**Runtime validé** : l'app démarre, thème crimson + dark mode système, polices serif, et l'appel API réel (`/api/temoignages/public`) affiche l'état vide correctement (capture confirmée). Correctif appliqué : tokens en canaux RGB pour les opacités NativeWind ; `babel-preset-expo` ajouté en dépendance directe.
+
+**Reste (mineur, non bloquant)** : créer `.env` depuis `.env.example` ; brancher un hook husky pour `lint-staged` ; groupes de routes `(auth)/(member)/(admin)` livrés avec leurs écrans (Phases 1/4/5).
 
 ---
 

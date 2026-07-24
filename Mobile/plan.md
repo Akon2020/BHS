@@ -7,17 +7,17 @@
 ## Phase 0 — Fondations
 
 - [x] Init `Mobile/` (Expo, TypeScript strict) dans le monorepo, sans toucher à `Frontend/`/`Backend/`
-- [ ] EAS configuré (profils dev/preview/production)
-- [x] NativeWind + tokens extraits de `Frontend/app/globals.css` (crimson, OKLCH→hex clair/sombre, `--chart-*`, `--radius`) → `global.css` + `theme/colors.ts`
+- [x] EAS configuré (`eas.json` : profils development/preview/production + channels)
+- [x] NativeWind + tokens extraits de `Frontend/app/globals.css` (crimson, OKLCH→sRGB clair/sombre en canaux RGB pour les opacités, `--chart-*`, `--radius`) → `global.css` + `theme/colors.ts`
 - [x] Polices `Crimson Pro` + `Inter` via `@expo-google-fonts`
-- [~] `expo-router` : groupes de routes ((public) fait ; (auth), (member), (admin) à venir avec leurs phases)
+- [~] `expo-router` : groupe (public) fait ; (auth), (member), (admin) créés **avec leurs écrans** dans leurs phases respectives (Phase 1/4/5)
 - [x] Client HTTP : instance unique (`services/api/client.ts`), `baseURL` = `EXPO_PUBLIC_API_URL`, intercepteur `Authorization: Bearer` depuis `expo-secure-store`
-- [x] TanStack Query + persistance cache (lecture hors-ligne)
+- [x] TanStack Query + persistance cache (lecture hors-ligne) + `onlineManager` (NetInfo)
 - [x] Zustand : store d'auth (session, profil, rôle — revalidé via `/api/auth/profile`)
-- [~] Design system de base : Button, Card, Badge, EmptyState, Skeleton, Text, Screen faits ; Input, Avatar, BottomSheet, Toast à venir
-- [ ] Sentry configuré
-- [ ] Gestion offline (bannière hors-ligne) + écran d'erreur global
-- [ ] ESLint/Prettier, lint-staged (ESLint `expo lint` OK ; Prettier/lint-staged à ajouter)
+- [x] Design system de base : Button, Card, Badge, EmptyState, Skeleton, Text, Screen, **Input, Avatar, Toast, Sheet**
+- [x] Sentry configuré (init conditionnelle sur `EXPO_PUBLIC_SENTRY_DSN`, no-op sans DSN)
+- [x] Gestion offline (bannière hors-ligne + pause des requêtes) + **borne d'erreur globale** (expo-router)
+- [x] ESLint/Prettier (`eslint-config-prettier`, `.prettierrc`, scripts `format`/`typecheck`) ; config `lint-staged` prête (hook husky à brancher plus tard)
 
 **DoD** : app démarre, navigation stylée cohérente avec la marque BHS, un appel réel à `GET /api/dashboard` (ou tout endpoint public simple) fonctionne de bout en bout.
 
