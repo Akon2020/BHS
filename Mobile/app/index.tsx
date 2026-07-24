@@ -1,7 +1,9 @@
 import { Redirect } from "expo-router";
+import { usePreferences } from "@/stores/preferences";
 
-// Point d'entrée : la navigation par rôle (public / auth / member / admin)
-// sera introduite en Phase 1. Pour l'instant, on ouvre l'espace public.
+// Point d'entrée : onboarding au premier lancement, puis espace public.
+// (La navigation par rôle member/admin se fait depuis l'espace public/profil.)
 export default function Index() {
-  return <Redirect href="/(public)" />;
+  const onboardingDone = usePreferences((s) => s.onboardingDone);
+  return <Redirect href={onboardingDone ? "/(public)" : "/onboarding"} />;
 }

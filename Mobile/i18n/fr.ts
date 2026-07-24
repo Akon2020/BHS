@@ -40,4 +40,23 @@ export const fr = {
     passwordTooShort: "Au moins 6 caractères",
     required: "Ce champ est requis",
   },
+  onboarding: {
+    subtitle: "Pèlerins avec le Christ",
+    points: [
+      {
+        title: "Vivez la communauté",
+        body: "Événements, rendez-vous et ressources de l'apostolat, où que vous soyez.",
+      },
+      {
+        title: "Nourrissez votre foi",
+        body: "Échos de prière, pensée du jour et méditations, chaque jour à portée de main.",
+      },
+      {
+        title: "Restez proche",
+        body: "Rappels, actualités et suivi de vos demandes, en toute simplicité.",
+      },
+    ],
+    start: "Commencer",
+    haveAccount: "J'ai déjà un compte",
+  },
 } as const;
