@@ -6,6 +6,7 @@ import {
   inscription,
   resetPassword,
   updatePassword,
+  supprimerCompte,
 } from "../controllers/auth.controller.js";
 import {
   authenticationJWT,
@@ -222,5 +223,21 @@ authRouter.post("/resetpassword", updatePassword);
  *         description: Déconnexion réussie
  */
 authRouter.post("/logout", logout);
+
+/**
+ * @swagger
+ * /api/auth/compte:
+ *   delete:
+ *     summary: Supprime définitivement son propre compte
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Compte supprimé
+ *       401:
+ *         description: Non authentifié
+ */
+authRouter.delete("/compte", authenticationJWT, supprimerCompte);
 
 export default authRouter;

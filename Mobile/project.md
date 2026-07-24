@@ -138,6 +138,16 @@ Ne pas réutiliser `/register` (garder son usage admin actuel intact — routes 
 
 Le modèle `Fichier` a un `statut` et un `modeAcces`, mais `/info.md` ne précise pas explicitement le champ qui distingue "visible publiquement" de "réservé admin" au-delà de la séparation par route (`/public` vs CRUD admin). **À vérifier dans le Swagger à jour avant Phase 2** — pas de changement de schéma anticipé, juste une clarification de lecture.
 
+### 5.5 Auth — suppression de son propre compte ✅ (fait)
+
+Conformité stores (RGPD / Apple / Google) : l'utilisateur doit pouvoir supprimer son compte depuis l'app. L'endpoint admin `DELETE /api/users/delete/:id` ne convient pas (réservé admin). Ajout d'un endpoint **self-service** :
+
+```
+DELETE /api/auth/compte   (authentifié)
+  → 200 { message }   // supprime l'utilisateur courant + efface le cookie
+```
+Additif et non destructif pour l'existant. Utilisé par l'écran Profil (Phase 1).
+
 ---
 
 ## 6. Échos de Prière / Pensée du Jour / Méditation

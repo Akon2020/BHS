@@ -16,7 +16,6 @@ import { fr } from "@/i18n/fr";
 export default function PublicHome() {
   const status = useSession((s) => s.status);
   const user = useSession((s) => s.user);
-  const doLogout = useSession((s) => s.logout);
   const {
     data: temoignages,
     isLoading,
@@ -40,10 +39,10 @@ export default function PublicHome() {
             </View>
             {status === "authenticated" ? (
               <Button
-                label="Déconnexion"
+                label={fr.profil.title}
                 variant="outline"
                 size="md"
-                onPress={() => doLogout()}
+                onPress={() => router.push("/(member)/profil")}
               />
             ) : (
               <Button

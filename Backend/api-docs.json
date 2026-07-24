@@ -692,6 +692,27 @@
         }
       }
     },
+    "/api/auth/compte": {
+      "delete": {
+        "summary": "Supprime définitivement son propre compte",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compte supprimé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        }
+      }
+    },
     "/api/blogs": {
       "get": {
         "summary": "Récupérer tous les blogs (avec pagination)",

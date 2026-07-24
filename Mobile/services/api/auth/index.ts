@@ -47,3 +47,8 @@ export const logout = async (): Promise<void> => {
     /* ignore : la déconnexion locale prime */
   }
 };
+
+/** Suppression définitive de son propre compte. */
+export const supprimerCompte = async (): Promise<void> => {
+  await api.delete("/api/auth/compte");
+};

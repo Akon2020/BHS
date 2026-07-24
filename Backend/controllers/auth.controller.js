@@ -303,3 +303,20 @@ export const logout = (req, res) => {
     });
   }
 };
+
+// Suppression de son propre compte (RGPD / conformité stores).
+export const supprimerCompte = async (req, res, next) => {
+  try {
+    const utilisateur = await Utilisateur.findByPk(req.user.idUtilisateur);
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur introuvable." });
+    }
+    await utilisateur.destroy();
+    res.clearCookie("token", getAuthCookieOptions());
+    return res.status(200).json({ message: "Compte supprimé" });
+  } catch (error) {
+    console.error("Erreur suppression compte:", error);
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
