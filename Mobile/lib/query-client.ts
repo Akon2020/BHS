@@ -1,6 +1,13 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, onlineManager } from "@tanstack/react-query";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
+
+// Branche l'état réseau natif : les requêtes se mettent en pause hors-ligne
+// et reprennent au retour de la connexion.
+onlineManager.setEventListener((setOnline) =>
+  NetInfo.addEventListener((state) => setOnline(!!state.isConnected)),
+);
 
 export const queryClient = new QueryClient({
   defaultOptions: {

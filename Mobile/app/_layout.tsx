@@ -26,10 +26,22 @@ import {
   CrimsonPro_700Bold,
 } from "@expo-google-fonts/crimson-pro";
 
+import type { ErrorBoundaryProps } from "expo-router";
 import { queryClient, asyncStoragePersister } from "@/lib/query-client";
 import { useSession } from "@/stores/session";
 import { getColors } from "@/theme/colors";
 import { ToastHost } from "@/components/ui/toast";
+import { OfflineBanner } from "@/components/ui/offline-banner";
+import { ErrorScreen } from "@/components/ui/error-screen";
+
+// Borne d'erreur globale (expo-router) : tout crash de rendu affiche cet écran.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  return (
+    <SafeAreaProvider>
+      <ErrorScreen message={error.message} onRetry={retry} />
+    </SafeAreaProvider>
+  );
+}
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -86,6 +98,7 @@ export default function RootLayout() {
           <ThemeProvider value={buildNavTheme(scheme)}>
             <StatusBar style={scheme === "dark" ? "light" : "dark"} />
             <Stack screenOptions={{ headerShown: false }} />
+            <OfflineBanner />
             <ToastHost />
           </ThemeProvider>
         </PersistQueryClientProvider>
