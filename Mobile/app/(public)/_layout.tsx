@@ -64,6 +64,9 @@ export default function PublicLayout() {
           ),
         }}
       />
+      {/* Écrans accessibles par navigation, masqués de la barre d'onglets. */}
+      <Tabs.Screen name="contact" options={{ href: null }} />
+      <Tabs.Screen name="newsletter" options={{ href: null }} />
     </Tabs>
   );
 }

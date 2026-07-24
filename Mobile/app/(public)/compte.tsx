@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SettingsGroup, SettingsRow } from "@/components/ui/settings-row";
 import { useSession } from "@/stores/session";
 import { fr } from "@/i18n/fr";
 
@@ -69,6 +70,18 @@ export default function Compte() {
             }
           />
         )}
+
+        {/* Services accessibles à tous */}
+        <SettingsGroup title={fr.compte.services}>
+          <SettingsRow
+            label={fr.compte.contact}
+            onPress={() => router.push("/(public)/contact")}
+          />
+          <SettingsRow
+            label={fr.compte.newsletter}
+            onPress={() => router.push("/(public)/newsletter")}
+          />
+        </SettingsGroup>
       </ScrollView>
     </Screen>
   );

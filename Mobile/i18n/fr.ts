@@ -156,5 +156,27 @@ export const fr = {
     login: "Se connecter",
     register: "Créer un compte",
     logout: "Se déconnecter",
+    services: "Services",
+    contact: "Nous contacter",
+    newsletter: "Newsletter",
+  },
+  contact: {
+    title: "Nous contacter",
+    subtitle: "Une question, une demande ? Écrivez-nous.",
+    nomComplet: "Nom complet",
+    email: "Email",
+    sujet: "Sujet",
+    message: "Message",
+    send: "Envoyer",
+    success: "Message envoyé. Nous vous répondrons bientôt 🙏",
+  },
+  newsletter: {
+    title: "Newsletter",
+    subtitle:
+      "Recevez les actualités de l'apostolat et les temps forts de la communauté.",
+    nomComplet: "Nom complet",
+    email: "Email",
+    subscribe: "S'abonner",
+    success: "Abonnement confirmé. Merci 🙏",
   },
 } as const;
