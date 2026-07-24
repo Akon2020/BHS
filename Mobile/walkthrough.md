@@ -41,7 +41,20 @@
 
 ## Phase 1 — Authentification & compte
 
-_(à compléter)_
+### Backend (ajouts additifs, scoping project.md §5.2-5.3) ✅
+- `POST /api/auth/login` renvoie désormais `token` + `user` dans le corps (le cookie httpOnly et `data.userInfo` restent inchangés pour le web).
+- Nouvel endpoint public `POST /api/auth/inscription` : crée un compte `membre` (rôle forcé côté serveur), email de bienvenue en arrière-plan, renvoie `token` + `user`. Distinct de `/register` (admin, inchangé). Swagger régénéré (104 chemins).
+
+### Mobile — flux d'authentification ✅ (cœur)
+- Service `services/api/auth` : `login`, `inscription`, `requestPasswordReset`, `getProfile`, `logout`.
+- Groupe `app/(auth)` avec **garde** (`_layout` redirige vers `(public)` si déjà connecté) : écrans **Connexion**, **Inscription**, **Mot de passe oublié** — formulaires **React Hook Form + Zod**, états de chargement, toasts de succès/erreur, `KeyboardAvoidingView`.
+- `ControlledInput` (RHF + Input) réutilisable.
+- Accueil public : bouton **Se connecter** (invité) ou **Déconnexion** + salutation nominative (connecté).
+- Session : `setSession` (token → secure-store), `bootstrap` revalide le profil au lancement.
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres (mobile) ; `node --check` (backend). Runtime à valider sur device.
+
+**Reste Phase 1** : Onboarding léger, écran de profil (infos/mot de passe/biométrie/thème/suppression de compte), préférences notifications (mock), écran Reset (deep-link).
 
 ---
 

@@ -25,11 +25,11 @@
 
 ## Phase 1 — Authentification & compte
 
-- [ ] **Backend (à demander/valider avant ou en parallèle)** : `/api/auth/login` renvoie `{ user, token }` ; nouvel endpoint public `POST /api/auth/inscription` (§5.2-5.3 de `project.md`)
-- [ ] Écrans : Splash, Onboarding léger, Login, Inscription, Mot de passe oublié, Reset password (branchés sur `/api/auth/*` réel)
-- [ ] Mode invité explicite sur les écrans qui l'autorisent (inscription événement, RDV)
-- [ ] Profil : infos, modif, mot de passe, préférences de notifications (mock tant que §5.1 backend n'existe pas), biométrie, thème, suppression de compte
-- [ ] Revalidation du rôle à chaque lancement via `/api/auth/profile`, matrice de permissions répliquée depuis `Frontend/lib/permissions.ts`
+- [x] **Backend** : `/api/auth/login` renvoie `{ user, token }` (additif) ; nouvel endpoint public `POST /api/auth/inscription` (compte `membre`, rôle forcé serveur) — Swagger 104 chemins.
+- [~] Écrans : **Login, Inscription, Mot de passe oublié** faits (RHF + Zod, API réelle) ; Splash géré (expo-splash-screen) ; Onboarding léger + écran Reset (deep-link) à faire.
+- [x] Mode invité explicite (bouton « Continuer sans compte » + accueil public accessible à tous).
+- [ ] Profil : infos, modif, mot de passe, préférences de notifications (mock §5.1), biométrie, thème, suppression de compte — à faire.
+- [x] Revalidation du rôle à chaque lancement via `/api/auth/profile` (`bootstrap`), matrice de permissions répliquée depuis `Frontend/lib/permissions.ts`.
 
 **DoD** : inscription → connexion → déconnexion → mot de passe oublié fonctionnels contre l'API réelle ; rôle correctement résolu et testé pour les 3 rôles (admin/editeur/membre) + invité.
 
