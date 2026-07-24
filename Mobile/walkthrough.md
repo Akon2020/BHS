@@ -80,9 +80,29 @@
 - **Détail** `app/(public)/evenements/[slug].tsx` : image, badges + montant, infos (date/heure/lieu/places restantes), description ; bouton **S'inscrire** (masqué si complet ou non publié).
 - **Inscription dynamique** `components/features/evenements/register-sheet.tsx` : champs de base (nom/email/téléphone/sexe, préremplis si connecté) + `champsPersonnalises` rendus **par type** (textarea, select→chips, checkbox→switch oui/non, **fichier**→expo-document-picker, date/nombre/tel/email→input typé). Validation des requis, messages FR, `useMutation` + invalidation du détail, toast adapté gratuit/payant.
 
-**Reste Phase 2** : Échos/Pensées/Méditations (+ commentaires), Fichiers publics, Newsletter (abonnement), Contact (+ Mes messages), Fiche d'identité, Recherche globale. « Mes inscriptions » nécessite un endpoint backend (cf. `project.md §9`).
+### Spiritualité (Échos / Pensée / Méditation) ✅
+- Services `services/api/categories` (résolution des 3 slugs fixes), `services/api/blog` (liste par catégorie + détail avec commentaires approuvés), `services/api/commentaires` (publication publique + honeypot).
+- Onglet **Spiritualité** (`app/(public)/spiritualite/`) : sélecteur segmenté 3 sections, liste (FlashList + `ArticleCard`), détail `[slug]` — **image plein écran** si Méditation sans texte, sinon texte (HTML→texte via `utils/html.ts`, rendu riche = amélioration future).
+- **Commentaires** (`components/features/spiritualite/comments.tsx`) : liste des approuvés + formulaire RHF/Zod → statut `attente` (toast de modération).
 
-**Vérifs** : `tsc --noEmit` + `expo lint` propres.
+### Recherche globale ✅
+- Service `services/api/recherche` ; onglet `app/(public)/recherche.tsx` : champ avec **anti-rebond** (`hooks/use-debounce`), résultats groupés (Articles → détail article, Événements → détail événement, Ressources), états prompt/chargement/vide.
+
+### Contact & Newsletter ✅
+- Services `services/api/contact` (`sendContact`), `services/api/abonnes` (`subscribeNewsletter`).
+- Écrans `contact.tsx` / `newsletter.tsx` (RHF/Zod, préremplis si connecté), masqués de la barre d'onglets (`href: null`), accessibles depuis l'onglet **Compte** (section Services).
+
+### Ressources / Fichiers ✅
+- Service `services/api/fichiers` (public, détail, URL de téléchargement par index). Écrans `fichiers/` (liste + détail) avec ouverture/téléchargement via `expo-web-browser` selon `modeAcces`.
+
+### Fiche d'identité ✅
+- Service `services/api/identite` (mapping formulaire plat → payload **imbriqué** identite/urgence/medical). Écran `identite.tsx` : sections (pièce, état civil, coordonnées, contact d'urgence, santé conditionnelle), `ChipSelect` pour les énumérations, validation FR. Accessible depuis Compte → Services.
+
+**Navigation finale** : 5 onglets (Accueil · Événements · Spiritualité · Recherche · Compte). Contact/Newsletter/Fichiers/Identité en écrans masqués accessibles via Compte → Services.
+
+**Phase 2 : ✅ complète.** Points ouverts backend notés dans `project.md §9` : « Mes inscriptions » (événements) et « Mes messages » (contact) — suivi par email/utilisateur à ajouter.
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres. Commits séparés par fonctionnalité.
 
 ---
 

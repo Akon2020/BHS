@@ -40,12 +40,12 @@
 > Pré-requis : Swagger `Backend/api-docs.json` à jour demandé (point ouvert `project.md` §9) pour figer les noms exacts de routes Agenda/Fichiers.
 
 - [~] **Événements** : **liste** (FlashList) + **détail** (image, infos, places, `estPayant`/`montant`/`devise`) + **inscription dynamique** faits — champs de base + `champsPersonnalises` rendus **par type** (texte/email/tel/nombre/select/checkbox/date/textarea/**fichier** via expo-document-picker), envoi multipart `reponsesPersonnalisees` + fichiers. **Navigation par onglets** (Accueil/Événements/Compte) ajoutée. *Reste : « Mes inscriptions » (nécessite un endpoint backend, cf. `project.md` §9) et l'affichage du statut de paiement d'une inscription.*
-- [ ] **Échos de Prière / Pensée du Jour / Méditation** : résolution des `idCategorie` via slugs fixes au démarrage, 3 écrans dédiés liste + détail, rendu image plein écran pour Méditation sans texte, **commentaires** (lecture + publication via `/api/commentaires`, statut `attente` affiché à l'auteur)
-- [ ] **Fichiers publics** : `/api/fichiers/public`, détail par slug, téléchargement (`modeAcces`)
-- [ ] **Newsletter** : abonnement/désabonnement (`/api/abonnes/subscribe`)
-- [ ] **Contact** : formulaire (`/api/contacts` POST public), "Mes messages" avec statut + réponse reçue
-- [ ] **Fiche d'identité** : formulaire complet (état civil, contact d'urgence, santé), `/api/identites/add`
-- [ ] **Recherche globale** : `/api/recherche?q=`
+- [x] **Échos de Prière / Pensée du Jour / Méditation** : onglet **Spiritualité** avec sélecteur segmenté (3 sections), résolution des `idCategorie` via slugs fixes (`echos-de-priere`/`pensee-du-jour`/`meditation`), liste + détail, rendu **image plein écran** pour Méditation sans texte, **commentaires** (lecture des approuvés + publication → statut `attente`, message de modération). *Dépendance : les 3 catégories doivent exister avec ces slugs côté web.*
+- [x] **Fichiers publics** : `/api/fichiers/public`, liste + détail par slug, ouverture/**téléchargement** par index (`WebBrowser`).
+- [x] **Newsletter** : abonnement (`/api/abonnes/subscribe`). *(Désabonnement : via le lien email, non exposé en app.)*
+- [x] **Contact** : formulaire (`/api/contacts/add` public). *(« Mes messages » : nécessiterait un endpoint de suivi par email, cf. `project.md §9`.)*
+- [x] **Fiche d'identité** : formulaire complet (pièce, état civil, coordonnées, contact d'urgence, santé conditionnelle), payload imbriqué → `/api/identites/add`.
+- [x] **Recherche globale** : onglet dédié, `/api/recherche?q=` (anti-rebond), résultats groupés (articles/événements/ressources).
 
 **DoD** : tous les écrans consomment l'API réelle, aucun mock restant sur ce périmètre.
 
