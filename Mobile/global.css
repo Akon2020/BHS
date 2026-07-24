@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tokens de couleur portés depuis Frontend/app/globals.css (thème crimson).
+ * Les valeurs OKLCH du web sont converties en hex sRGB (React Native ne rend pas oklch).
+ */
+@layer base {
+  :root {
+    --background: #fcfcfc;
+    --foreground: #0e0e13;
+    --card: #ffffff;
+    --card-foreground: #0e0e13;
+    --popover: #ffffff;
+    --popover-foreground: #0e0e13;
+    --primary: #900d30;
+    --primary-foreground: #fcfcfc;
+    --secondary: #f1f1f4;
+    --secondary-foreground: #17161d;
+    --muted: #f1f1f4;
+    --muted-foreground: #686871;
+    --accent: #f1f1f4;
+    --accent-foreground: #17161d;
+    --destructive: #e7000b;
+    --destructive-foreground: #fcfcfc;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #900d30;
+    --chart-1: #900d30;
+    --chart-2: #009689;
+    --chart-3: #104e64;
+    --chart-4: #ffb900;
+    --chart-5: #fe9a00;
+  }
+
+  .dark:root {
+    --background: #050509;
+    --foreground: #f8f8fa;
+    --card: #0b0b0f;
+    --card-foreground: #f8f8fa;
+    --popover: #0b0b0f;
+    --popover-foreground: #f8f8fa;
+    --primary: #ce3e57;
+    --primary-foreground: #f8f8fa;
+    --secondary: #15151b;
+    --secondary-foreground: #f8f8fa;
+    --muted: #15151b;
+    --muted-foreground: #9797a0;
+    --accent: #15151b;
+    --accent-foreground: #f8f8fa;
+    --destructive: #d40c1a;
+    --destructive-foreground: #f8f8fa;
+    --border: #1f1f25;
+    --input: #1f1f25;
+    --ring: #ce3e57;
+    --chart-1: #ce3e57;
+    --chart-2: #00bc7d;
+    --chart-3: #fe9a00;
+    --chart-4: #ad46ff;
+    --chart-5: #ff2056;
+  }
+}

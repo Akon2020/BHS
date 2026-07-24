@@ -6,18 +6,18 @@
 
 ## Phase 0 — Fondations
 
-- [ ] Init `Mobile/` (Expo, TypeScript strict) dans le monorepo, sans toucher à `Frontend/`/`Backend/`
+- [x] Init `Mobile/` (Expo, TypeScript strict) dans le monorepo, sans toucher à `Frontend/`/`Backend/`
 - [ ] EAS configuré (profils dev/preview/production)
-- [ ] NativeWind + tokens extraits de `Frontend/app/globals.css` (crimson, OKLCH clair/sombre, `--chart-*`, `--radius`) → `theme/colors.ts`
-- [ ] Polices `Crimson Pro` + `Inter` via `@expo-google-fonts`
-- [ ] `expo-router` : groupes de routes ((public), (auth), (member), (admin))
-- [ ] Client HTTP : instance unique (`services/api/client.ts`), `baseURL` = `EXPO_PUBLIC_API_URL`, intercepteur `Authorization: Bearer` depuis `expo-secure-store`
-- [ ] TanStack Query + persistance cache (lecture hors-ligne)
-- [ ] Zustand : store d'auth (session, profil, rôle — revalidé via `/api/auth/profile`)
-- [ ] Design system de base : Button, Input, Card, Badge, Avatar, EmptyState, Skeleton, BottomSheet, Toast — cohérents avec les tokens crimson
+- [x] NativeWind + tokens extraits de `Frontend/app/globals.css` (crimson, OKLCH→hex clair/sombre, `--chart-*`, `--radius`) → `global.css` + `theme/colors.ts`
+- [x] Polices `Crimson Pro` + `Inter` via `@expo-google-fonts`
+- [~] `expo-router` : groupes de routes ((public) fait ; (auth), (member), (admin) à venir avec leurs phases)
+- [x] Client HTTP : instance unique (`services/api/client.ts`), `baseURL` = `EXPO_PUBLIC_API_URL`, intercepteur `Authorization: Bearer` depuis `expo-secure-store`
+- [x] TanStack Query + persistance cache (lecture hors-ligne)
+- [x] Zustand : store d'auth (session, profil, rôle — revalidé via `/api/auth/profile`)
+- [~] Design system de base : Button, Card, Badge, EmptyState, Skeleton, Text, Screen faits ; Input, Avatar, BottomSheet, Toast à venir
 - [ ] Sentry configuré
 - [ ] Gestion offline (bannière hors-ligne) + écran d'erreur global
-- [ ] ESLint/Prettier, lint-staged
+- [ ] ESLint/Prettier, lint-staged (ESLint `expo lint` OK ; Prettier/lint-staged à ajouter)
 
 **DoD** : app démarre, navigation stylée cohérente avec la marque BHS, un appel réel à `GET /api/dashboard` (ou tout endpoint public simple) fonctionne de bout en bout.
 
@@ -82,7 +82,7 @@
 - [ ] **Fichiers (admin)** : CRUD, upload multi-fichiers, `modeAcces`
 - [ ] **Todos/Kanban** : vue Kanban (à_faire/en_cours/fait), création perso/communautaire (`assignes` JSON), récurrence (déjà auto-gérée backend), commentaires (`TacheCommentaire`)
 - [ ] **Anniversaires (admin)** : CRUD
-- [ ] **Pointage** : saisie manuelle de session (aligné sur le flux web actuel — voir point ouvert `project.md` §9 pour un éventuel "pointer maintenant"), consultation stats, export PDF (lien)
+- [ ] **Pointage** : saisie manuelle de session (flux web actuel) **+ « pointer maintenant »** (nouveau flux natif horodaté — nécessite l'ajout backend `POST /api/pointages/pointer` + `POST /api/pointages/:id/cloturer`, cf. `project.md` §9, décidé), consultation stats, export PDF (lien)
 - [ ] **Calendrier (admin)** : CRUD entrées manuelles
 - [ ] **Utilisateurs** : gestion des comptes internes selon permissions
 

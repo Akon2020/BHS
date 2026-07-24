@@ -6,7 +6,25 @@
 
 ## Phase 0 — Fondations
 
-_(à compléter au fur et à mesure)_
+### Socle (1re passe) ✅ (partiel)
+
+**Thème & style**
+- **NativeWind v4** configuré : `babel.config.js` (preset `nativewind/babel` + `jsxImportSource`), `metro.config.js` (`withNativeWind`, entrée `global.css`), `tailwind.config.js` (preset NativeWind, `darkMode: class`, couleurs mappées sur variables CSS, rayons, familles de polices), `nativewind-env.d.ts`.
+- **Tokens portés depuis `Frontend/app/globals.css`** : les valeurs **OKLCH** du web (React Native ne rend pas oklch) sont converties en **hex sRGB** et déclarées dans `global.css` (`:root` clair + `.dark:root` sombre) et dupliquées en typé dans `theme/colors.ts` (usages hors NativeWind : navigation, StatusBar, icônes). Primaire crimson `#900d30` (clair) / `#ce3e57` (sombre).
+- **Polices** : `Inter` (corps) + `Crimson Pro` (titres) via `@expo-google-fonts`, chargées dans `app/_layout.tsx`, familles exposées en classes (`font-sans/medium/semibold/bold`, `font-serif/serif-bold`).
+
+**Données & session**
+- **Client HTTP unique** `services/api/client.ts` : `baseURL = EXPO_PUBLIC_API_URL` (fallback prod), **intercepteur `Authorization: Bearer`** depuis `expo-secure-store` (`services/api/session.ts`), gestion 401 (purge + handler), `getApiErrorMessage` FR.
+- **TanStack Query** `lib/query-client.ts` : client + **persistance AsyncStorage** (lecture hors-ligne), fourni via `PersistQueryClientProvider`.
+- **Zustand** `stores/session.ts` : `bootstrap()` (lecture token → `GET /api/auth/profile`), `setSession/refreshProfile/logout`, `can(path)` aligné sur `lib/permissions.ts` (**réplique exacte** de `Frontend/lib/permissions.ts`).
+
+**Design system (base)** `components/ui/` : `Text`/`Heading`, `Button` (variantes + loading, cible ≥ 44 px), `Card`, `Badge` (couleur + texte), `EmptyState`, `Skeleton` (pulsant), `Screen` (safe-area). Chaînes FR centralisées dans `i18n/fr.ts`.
+
+**Navigation** : template de démo Expo retiré (`(tabs)`, `modal`, composants `themed-*`/hooks/constants) ; `app/_layout.tsx` refait (providers + polices + bootstrap) ; `app/index.tsx` → redirection ; groupe **`(public)`** avec un écran d'accueil branché sur **l'API réelle** (`GET /api/temoignages/public`) démontrant états chargement/erreur/vide.
+
+**Vérifs** : `tsc --noEmit` propre ; `expo lint` propre. ⚠️ Rendu runtime non vérifié ici (pas d'émulateur) — à valider via `npx expo start`.
+
+**Reste Phase 0** : `EXPO_PUBLIC_API_URL` (créer `.env` depuis `.env.example`), config **EAS** (dev/preview/prod), groupes `(auth)/(member)/(admin)`, primitives manquantes (Input, Avatar, BottomSheet, Toast), **Sentry**, bannière hors-ligne + écran d'erreur global, Prettier/lint-staged.
 
 ---
 

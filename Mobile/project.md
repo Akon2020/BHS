@@ -180,7 +180,10 @@ Confirmé : 3 catégories fixes du module `Blog` existant, chacune avec son prop
 
 ## 9. Points ouverts
 
-- **Pointage mobile** : le web ne fait que de la **saisie manuelle a posteriori** (pas de "pointer en direct/live"). L'utilisateur a demandé un pointage/consultation mobile — à confirmer : reproduit-on exactement le même flux de saisie manuelle (date + heures) sur mobile, ou souhaite-t-on **en plus** un vrai "pointer maintenant" (bouton unique horodaté), ce qui serait une **nouvelle fonctionnalité backend** à ajouter (non présente sur le web) ?
+- **Pointage mobile** — **DÉCIDÉ** : en plus de la saisie manuelle a posteriori (flux web actuel), le mobile propose un vrai **« pointer maintenant »** (bouton unique horodaté). C'est une **évolution backend à ajouter** (non présente sur le web), planifiée en Phase 5 :
+  - `POST /api/pointages/pointer` (admin/editeur) → ouvre une session pour le profil courant à l'heure serveur (UTC+2), sans `heureFin`.
+  - `POST /api/pointages/:id/cloturer` → renseigne `heureFin` = maintenant (réutilise la logique de clôture a posteriori existante).
+  - Additif et non destructif : la saisie manuelle reste inchangée.
 - **Swagger à jour** : le fichier `api-docs.json` fourni initialement est partiel — en demander une régénération (`npm run swagger:gen` côté `Backend/`) avant la Phase 2 de `Mobile/plan.md`, pour figer les noms de routes exacts (Agenda, Todos, Calendrier, Fichiers) avant de coder les adaptateurs.
 - **Fichiers publics vs privés** : confirmer le champ/la logique exacte de filtrage (§5.4).
 - **`COOKIE_DOMAIN`** : sans impact direct sur le mobile (qui n'utilise pas les cookies), mais à garder en tête si un jour un WebView est utilisé (ex. pour le don, redirigé vers le site).
