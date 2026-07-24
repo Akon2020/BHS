@@ -378,7 +378,7 @@ export const createEvent = async (req, res, next) => {
               newEvent.titre,
               newEvent.dateEvenement,
               newEvent.lieu,
-              `${FRONT_URL}/evenements/${newEvent.idEvenement}`,
+              `${FRONT_URL}/events/${newEvent.slug}`,
             ),
           };
 

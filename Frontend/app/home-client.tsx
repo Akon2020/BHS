@@ -286,7 +286,7 @@ export default function HomePage() {
                     <div>
                       <h4 className="font-medium mb-1">Téléphone</h4>
                       <a
-                        href="tel:+243849005240"
+                        href="tel:+243898961612"
                         className="text-sm text-primary hover:underline"
                       >
                         +243 849 005 240
