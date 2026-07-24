@@ -74,6 +74,10 @@ export default function Compte() {
         {/* Services accessibles à tous */}
         <SettingsGroup title={fr.compte.services}>
           <SettingsRow
+            label={fr.compte.resources}
+            onPress={() => router.push("/(public)/fichiers")}
+          />
+          <SettingsRow
             label={fr.compte.contact}
             onPress={() => router.push("/(public)/contact")}
           />

@@ -159,6 +159,15 @@ export const fr = {
     services: "Services",
     contact: "Nous contacter",
     newsletter: "Newsletter",
+    resources: "Ressources",
+  },
+  fichiers: {
+    title: "Ressources",
+    empty: "Aucune ressource disponible.",
+    error: "Impossible de charger les ressources.",
+    files: "fichier(s)",
+    open: "Ouvrir",
+    download: "Télécharger",
   },
   contact: {
     title: "Nous contacter",

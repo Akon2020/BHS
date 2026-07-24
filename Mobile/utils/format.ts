@@ -37,6 +37,15 @@ export const formatMontant = (
   return `${n.toLocaleString("fr-FR")} ${devise}`;
 };
 
+/** Taille de fichier lisible (octets → Ko/Mo). */
+export const formatTaille = (bytes?: number | string | null): string => {
+  const n = Number(bytes);
+  if (!n) return "";
+  if (n < 1024) return `${n} o`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} Ko`;
+  return `${(n / (1024 * 1024)).toFixed(1)} Mo`;
+};
+
 /** Résout une URL média (chemin relatif servi depuis /uploads → URL absolue). */
 export const mediaUrl = (path?: string | null): string | undefined => {
   if (!path) return undefined;
