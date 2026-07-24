@@ -39,7 +39,7 @@
 
 > Pré-requis : Swagger `Backend/api-docs.json` à jour demandé (point ouvert `project.md` §9) pour figer les noms exacts de routes Agenda/Fichiers.
 
-- [ ] **Événements** : liste (à venir/en cours/passés), détail, **formulaire dynamique** rendu depuis `champsPersonnalises` (Zod généré dynamiquement selon les types texte/email/tel/nombre/select/checkbox/date/textarea/fichier), gestion `estPayant`/`montant`/`devise`, inscription (`reponsesPersonnalisees`), "Mes inscriptions", statut de paiement affiché (lecture seule, suivi manuel admin)
+- [~] **Événements** : **liste** (FlashList) + **détail** (image, infos, places, `estPayant`/`montant`/`devise`) + **inscription dynamique** faits — champs de base + `champsPersonnalises` rendus **par type** (texte/email/tel/nombre/select/checkbox/date/textarea/**fichier** via expo-document-picker), envoi multipart `reponsesPersonnalisees` + fichiers. **Navigation par onglets** (Accueil/Événements/Compte) ajoutée. *Reste : « Mes inscriptions » (nécessite un endpoint backend, cf. `project.md` §9) et l'affichage du statut de paiement d'une inscription.*
 - [ ] **Échos de Prière / Pensée du Jour / Méditation** : résolution des `idCategorie` via slugs fixes au démarrage, 3 écrans dédiés liste + détail, rendu image plein écran pour Méditation sans texte, **commentaires** (lecture + publication via `/api/commentaires`, statut `attente` affiché à l'auteur)
 - [ ] **Fichiers publics** : `/api/fichiers/public`, détail par slug, téléchargement (`modeAcces`)
 - [ ] **Newsletter** : abonnement/désabonnement (`/api/abonnes/subscribe`)

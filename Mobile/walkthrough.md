@@ -69,7 +69,20 @@
 
 ## Phase 2 — Contenus publics
 
-_(à compléter)_
+### Navigation par onglets ✅
+- `app/(public)/_layout.tsx` converti en **Tabs** (expo-router) : **Accueil**, **Événements**, **Compte** (icônes Ionicons, couleurs du thème).
+- Onglet **Compte** (`app/(public)/compte.tsx`) : invité → CTA connexion/inscription ; connecté → carte profil + accès `Mon profil` + déconnexion.
+- Helpers `utils/format.ts` : `formatDate`, `formatHeure`, `formatMontant`, `mediaUrl` (chemin `/uploads` → URL absolue via `API_BASE_URL`).
+
+### Événements ✅ (liste, détail, inscription dynamique)
+- Service `services/api/evenements` (types alignés sur `evenements`/`inscriptionsevenements`) : `getEvenements` (public, paginé), `getEvenementBySlug`, `registerToEvent` (multipart : base + `reponsesPersonnalisees` JSON + fichiers RN `{uri,name,type}`).
+- **Liste** `app/(public)/evenements/index.tsx` : **FlashList**, `EventCard` (image `expo-image`, badges gratuit/payant/complet, date/heure/lieu), pull-to-refresh, états chargement/erreur/vide.
+- **Détail** `app/(public)/evenements/[slug].tsx` : image, badges + montant, infos (date/heure/lieu/places restantes), description ; bouton **S'inscrire** (masqué si complet ou non publié).
+- **Inscription dynamique** `components/features/evenements/register-sheet.tsx` : champs de base (nom/email/téléphone/sexe, préremplis si connecté) + `champsPersonnalises` rendus **par type** (textarea, select→chips, checkbox→switch oui/non, **fichier**→expo-document-picker, date/nombre/tel/email→input typé). Validation des requis, messages FR, `useMutation` + invalidation du détail, toast adapté gratuit/payant.
+
+**Reste Phase 2** : Échos/Pensées/Méditations (+ commentaires), Fichiers publics, Newsletter (abonnement), Contact (+ Mes messages), Fiche d'identité, Recherche globale. « Mes inscriptions » nécessite un endpoint backend (cf. `project.md §9`).
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres.
 
 ---
 
