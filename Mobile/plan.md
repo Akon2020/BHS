@@ -10,7 +10,7 @@
 - [x] EAS configuré (`eas.json` : profils development/preview/production + channels)
 - [x] NativeWind + tokens extraits de `Frontend/app/globals.css` (crimson, OKLCH→sRGB clair/sombre en canaux RGB pour les opacités, `--chart-*`, `--radius`) → `global.css` + `theme/colors.ts`
 - [x] Polices `Crimson Pro` + `Inter` via `@expo-google-fonts`
-- [~] `expo-router` : groupe (public) fait ; (auth), (member), (admin) créés **avec leurs écrans** dans leurs phases respectives (Phase 1/4/5)
+- [x] `expo-router` : groupes (public), (auth), (member), (admin) créés — (member) et (admin) gardés (redirection selon session/rôle) ; écrans de gestion admin remplis en Phase 4/5
 - [x] Client HTTP : instance unique (`services/api/client.ts`), `baseURL` = `EXPO_PUBLIC_API_URL`, intercepteur `Authorization: Bearer` depuis `expo-secure-store`
 - [x] TanStack Query + persistance cache (lecture hors-ligne) + `onlineManager` (NetInfo)
 - [x] Zustand : store d'auth (session, profil, rôle — revalidé via `/api/auth/profile`)
@@ -26,9 +26,9 @@
 ## Phase 1 — Authentification & compte
 
 - [x] **Backend** : `/api/auth/login` renvoie `{ user, token }` (additif) ; nouvel endpoint public `POST /api/auth/inscription` (compte `membre`, rôle forcé serveur) — Swagger 104 chemins.
-- [~] Écrans : **Login, Inscription, Mot de passe oublié** faits (RHF + Zod, API réelle) ; Splash géré (expo-splash-screen) ; Onboarding léger + écran Reset (deep-link) à faire.
+- [x] Écrans : **Login, Inscription, Mot de passe oublié, Onboarding léger** faits (RHF + Zod, API réelle) ; Splash géré (expo-splash-screen). *(Écran Reset via deep-link : à brancher plus tard, la demande de réinitialisation par email fonctionne.)*
 - [x] Mode invité explicite (bouton « Continuer sans compte » + accueil public accessible à tous).
-- [ ] Profil : infos, modif, mot de passe, préférences de notifications (mock §5.1), biométrie, thème, suppression de compte — à faire.
+- [x] Profil : infos + **édition du nom**, **changement de mot de passe**, **thème** (système/clair/sombre persisté), **biométrie** (expo-local-authentication), notifications (placeholder mock §5.1), **déconnexion**, **suppression de compte** (endpoint `DELETE /api/auth/compte` ajouté, additif). Espace `(member)` gardé.
 - [x] Revalidation du rôle à chaque lancement via `/api/auth/profile` (`bootstrap`), matrice de permissions répliquée depuis `Frontend/lib/permissions.ts`.
 
 **DoD** : inscription → connexion → déconnexion → mot de passe oublié fonctionnels contre l'API réelle ; rôle correctement résolu et testé pour les 3 rôles (admin/editeur/membre) + invité.

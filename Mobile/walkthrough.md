@@ -52,9 +52,18 @@
 - Accueil public : bouton **Se connecter** (invité) ou **Déconnexion** + salutation nominative (connecté).
 - Session : `setSession` (token → secure-store), `bootstrap` revalide le profil au lancement.
 
-**Vérifs** : `tsc --noEmit` + `expo lint` propres (mobile) ; `node --check` (backend). Runtime à valider sur device.
+**Vérifs** : `tsc --noEmit` + `expo lint` propres (mobile) ; `node --check` (backend). Runtime validé sur device (inscription/connexion/déconnexion OK).
 
-**Reste Phase 1** : Onboarding léger, écran de profil (infos/mot de passe/biométrie/thème/suppression de compte), préférences notifications (mock), écran Reset (deep-link).
+### Mobile — préférences, thème, onboarding, profil ✅
+- **Préférences persistées** `stores/preferences.ts` (Zustand + `persist` AsyncStorage) : `themeMode` (système/clair/sombre), `onboardingDone`, `biometricEnabled`, drapeau `hydrated`.
+- **Thème sélectionnable** : `app/_layout.tsx` applique le mode via `nativewind` `colorScheme.set(...)` ; thème de navigation + StatusBar suivent le mode effectif ; le rendu attend l'hydratation des préférences (pas de flash).
+- **Onboarding léger** `app/onboarding.tsx` (3 points de valeur + CTA) affiché au **premier lancement** (gating dans `app/index.tsx` sur `onboardingDone`).
+- **Espace membre gardé** `app/(member)/_layout.tsx` (redirige les invités vers la connexion) + **écran Profil** `app/(member)/profil.tsx` : en-tête (avatar/nom/email/rôle), **édition du nom** et **changement de mot de passe** (feuilles `Sheet` + RHF/Zod), **sélecteur de thème**, **bascule biométrie** (`expo-local-authentication`, vérif de disponibilité), notifications (placeholder « bientôt »), **déconnexion**, **suppression de compte** (confirmation + `DELETE /api/auth/compte`).
+- **Backend** : endpoint self-service `DELETE /api/auth/compte` (supprime l'utilisateur courant + efface le cookie) — additif, documenté `project.md §5.5`. Swagger 105 chemins.
+- **Services** : `services/api/users` (`updateProfil` multipart, `changePassword`) ; `services/api/auth` (`supprimerCompte`). Session : `setUser`, `deleteAccount`, **purge du cache TanStack Query** à la déconnexion/suppression (CLAUDE.md §6). Primitives `SettingsRow`/`SettingsGroup` ajoutées.
+- **Groupe `(admin)` gardé** `app/(admin)/_layout.tsx` (accès editeur/admin via la matrice) + placeholder — écrans remplis en Phase 4/5.
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres ; `node --check` (backend). Commits séparés par fonctionnalité.
 
 ---
 
