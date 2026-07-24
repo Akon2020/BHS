@@ -38,6 +38,15 @@ export default function PublicLayout() {
         }}
       />
       <Tabs.Screen
+        name="spiritualite"
+        options={{
+          title: "Spiritualité",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="book-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="compte"
         options={{
           title: "Compte",
