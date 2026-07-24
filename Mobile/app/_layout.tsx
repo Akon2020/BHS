@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useColorScheme } from "react-native";
+import { colorScheme as nwColorScheme } from "nativewind";
 import {
   ThemeProvider,
   DefaultTheme,
@@ -29,6 +30,7 @@ import {
 import type { ErrorBoundaryProps } from "expo-router";
 import { queryClient, asyncStoragePersister } from "@/lib/query-client";
 import { useSession } from "@/stores/session";
+import { usePreferences } from "@/stores/preferences";
 import { getColors } from "@/theme/colors";
 import { initSentry, withSentry } from "@/lib/sentry";
 import { ToastHost } from "@/components/ui/toast";
@@ -66,9 +68,14 @@ function buildNavTheme(scheme: "light" | "dark" | null | undefined): Theme {
 }
 
 function RootLayout() {
-  const scheme = useColorScheme();
+  const systemScheme = useColorScheme();
   const bootstrap = useSession((s) => s.bootstrap);
   const status = useSession((s) => s.status);
+  const themeMode = usePreferences((s) => s.themeMode);
+  const prefsHydrated = usePreferences((s) => s.hydrated);
+
+  // Thème effectif : préférence utilisateur, sinon système.
+  const scheme = themeMode === "system" ? systemScheme : themeMode;
 
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -83,7 +90,12 @@ function RootLayout() {
     void bootstrap();
   }, [bootstrap]);
 
-  const ready = fontsLoaded && status !== "loading";
+  // Applique le mode de thème choisi aux classes NativeWind.
+  useEffect(() => {
+    nwColorScheme.set(themeMode);
+  }, [themeMode]);
+
+  const ready = fontsLoaded && status !== "loading" && prefsHydrated;
 
   useEffect(() => {
     if (ready) void SplashScreen.hideAsync();
