@@ -68,6 +68,7 @@ export default function PublicLayout() {
       <Tabs.Screen name="contact" options={{ href: null }} />
       <Tabs.Screen name="newsletter" options={{ href: null }} />
       <Tabs.Screen name="fichiers" options={{ href: null }} />
+      <Tabs.Screen name="identite" options={{ href: null }} />
     </Tabs>
   );
 }

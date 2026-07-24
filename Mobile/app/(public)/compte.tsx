@@ -78,6 +78,10 @@ export default function Compte() {
             onPress={() => router.push("/(public)/fichiers")}
           />
           <SettingsRow
+            label={fr.identite.title}
+            onPress={() => router.push("/(public)/identite")}
+          />
+          <SettingsRow
             label={fr.compte.contact}
             onPress={() => router.push("/(public)/contact")}
           />
