@@ -30,9 +30,12 @@ import type { ErrorBoundaryProps } from "expo-router";
 import { queryClient, asyncStoragePersister } from "@/lib/query-client";
 import { useSession } from "@/stores/session";
 import { getColors } from "@/theme/colors";
+import { initSentry, withSentry } from "@/lib/sentry";
 import { ToastHost } from "@/components/ui/toast";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 import { ErrorScreen } from "@/components/ui/error-screen";
+
+initSentry();
 
 // Borne d'erreur globale (expo-router) : tout crash de rendu affiche cet écran.
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
@@ -62,7 +65,7 @@ function buildNavTheme(scheme: "light" | "dark" | null | undefined): Theme {
   };
 }
 
-export default function RootLayout() {
+function RootLayout() {
   const scheme = useColorScheme();
   const bootstrap = useSession((s) => s.bootstrap);
   const status = useSession((s) => s.status);
@@ -106,3 +109,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default withSentry(RootLayout);
