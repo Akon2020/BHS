@@ -74,6 +74,10 @@ export default function AdminHome() {
 
         <SettingsGroup title={fr.admin.sections}>
           <SettingsRow
+            label={fr.admin.contacts}
+            onPress={() => router.push("/(admin)/contacts")}
+          />
+          <SettingsRow
             label={fr.admin.dons}
             onPress={() => router.push("/(admin)/dons")}
           />
