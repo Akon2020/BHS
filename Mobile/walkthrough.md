@@ -159,7 +159,12 @@
 - `services/api/evenements` étendu (`getEvenementsAdmin`, `getEvenementAdmin`, `updatePaiement`, `getFinances`, `resendTicket`) + types (`EvenementAdmin`, `InscriptionEvenement`, `FinancesResponse`).
 - `app/(admin)/evenements/` : liste (tous statuts), détail avec **carte finances** (attendu/encaissé/reste/inscrits), **liste des inscrits** + **suivi de paiement** (feuille `PaymentSheet` : non payé/partiel[+montant]/payé/accepté-non-payé) + **renvoi de billet**.
 
-**Reste Phase 4** : **Newsletters** (rédaction/envoi + `/progress`/stats/abonnés) ; authoring Blog + création/édition d'événements (constructeur de champs perso) — laissés au web pour l'instant (UX de rédaction lourde sur mobile), à cadrer.
+### Newsletters + Abonnés ✅
+- `services/api/newsletters` (`getNewsletters`, `getNewsletter`, `createNewsletter`, `sendNewsletter`, `getNewsletterProgress`, `deleteNewsletter`) ; `services/api/abonnes` étendu (`getAbonnes`).
+- `app/(admin)/newsletters/` : liste (statut brouillon/envoyée/programmée), **rédaction** (`nouveau.tsx` : titre interne/objet/contenu, auteur = utilisateur courant côté serveur), **détail** avec **envoi** (confirmation `Alert`, flux tâche de fond `/:id/send`) et **barre de progression** (polling `/:id/progress` toutes les 2 s tant que `statut === en_cours` : envoyés/échecs/en attente + %), suppression.
+- `app/(admin)/abonnes.tsx` : liste des abonnés (statut actif/inactif/désabonné + date), total. Entrées **Newsletters** et **Abonnés** ajoutées au menu du hub admin.
+
+**Reste hors périmètre Phase 4** : authoring Blog + création/édition d'événements (constructeur de champs perso) — laissés au web (UX de rédaction lourde sur mobile), décidé.
 
 **Vérifs** : `tsc --noEmit` + `expo lint` propres ; `npm test` (11/11). Commits séparés par module.
 

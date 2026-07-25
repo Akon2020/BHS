@@ -69,7 +69,7 @@
 - [x] **Événements (gestion)** : liste admin (`/api/evenements/admin`), détail avec **inscrits**, **suivi de paiement** (non payé/partiel[+montant]/payé/accepté-non-payé via feuille), **finances** (`/:id/finances`), **renvoi de billet**. *(Création/édition d'événement + constructeur de champs perso = authoring lourd, laissé au web ; export PDF finances = lien à ajouter.)*
 - [x] **Commentaires (modération)** : liste filtrable (en attente/approuvés/rejetés/tous), **approuver/rejeter/supprimer** (`/api/commentaires/moderate` + delete). *(Rédaction Blog + catégories = authoring, laissé au web pour l'instant.)*
 - [x] **Correspondance** : boîte de réception des `Contact` (statuts + « répondu »), **détail + réponse** (`/repondre/:id`), **boîte d'envoi** (composer/envoyer via `/api/messages`).
-- [ ] **Newsletters** : rédaction, envoi (flux tâche de fond + `/progress`), stats, gestion abonnés — **à faire**.
+- [x] **Newsletters** : liste + rédaction (`POST /api/newsletters`), envoi (flux tâche de fond `/:id/send`) avec **barre de progression** (polling `/:id/progress`), suppression ; **Abonnés** (liste + statut actif/inactif/désabonné via `/api/abonnes`).
 - [x] **Dons** : liste des intentions + **bascule de statut** (annoncé/confirmé), total confirmé par devise.
 
 **DoD** : branché sur l'API réelle, permissions vérifiées via `/api/auth/profile`, parité fonctionnelle avec les équivalents web déjà en production.
