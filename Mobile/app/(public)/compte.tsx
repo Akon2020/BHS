@@ -78,6 +78,10 @@ export default function Compte() {
             onPress={() => router.push("/(public)/rendez-vous")}
           />
           <SettingsRow
+            label={fr.calendrier.title}
+            onPress={() => router.push("/(public)/calendrier")}
+          />
+          <SettingsRow
             label={fr.compte.resources}
             onPress={() => router.push("/(public)/fichiers")}
           />
