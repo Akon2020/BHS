@@ -29,9 +29,15 @@ export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
   membre: ["/admin", "/admin/team", "/admin/taches", "/admin/profile"],
 };
 
-/** Le rôle `admin` a accès à tout ; sinon, correspondance exacte ou préfixe. */
+/**
+ * Le rôle `admin` a accès à tout ; sinon, correspondance exacte ou préfixe.
+ * La racine `/admin` (tableau de bord) ne matche qu'en **exact** — sinon elle
+ * accorderait par préfixe l'accès à toutes les sous-pages `/admin/*`.
+ */
 export const hasAccessToPage = (role: UserRole, path: string): boolean => {
   if (role === "admin") return true;
   const allowed = ADMIN_PAGE_PERMISSIONS[role] ?? [];
-  return allowed.some((p) => path === p || path.startsWith(p + "/"));
+  return allowed.some(
+    (p) => path === p || (p !== "/admin" && path.startsWith(p + "/")),
+  );
 };
