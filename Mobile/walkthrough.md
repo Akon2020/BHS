@@ -123,9 +123,17 @@
 
 **Points ouverts backend** (`project.md §9`) : anniversaires accessibles aux membres (décision confidentialité + endpoint), « Mes inscriptions » événements, « Mes messages » contact.
 
-**Phase 3 : ✅ (RDV, calendrier, notifications mock).** Anniversaires in-app différés.
+**Phase 3 : ✅ (RDV, calendrier, notifications mock, anniversaires).**
 
-**Vérifs** : `tsc --noEmit` + `expo lint` propres. Commits séparés par fonctionnalité.
+### Anniversaires ✅ (décision : endpoint membre sans année)
+- Backend : nouvel endpoint **`GET /api/anniversaires/a-venir`** (authentifié admin/éditeur/**membre**), renvoie nom + jour/mois + `dansJours` **sans l'année de naissance** (confidentialité). Swagger 106 chemins.
+- Mobile : service `services/api/anniversaires` + écran `app/(member)/anniversaires.tsx` (liste, badge J-x/Aujourd'hui/Demain) + **intégration au calendrier** (items journée entière) + entrée dans Compte.
+
+### Consolidation qualité ✅
+- **Suite de tests** : `jest-expo` configuré (`jest.config.js`, script `npm test`), tests unitaires sur la logique pure — `lib/permissions`, `utils/html`, `lib/calendar-link` (**11 tests verts**).
+- **Correctif de sécurité** (révélé par les tests) : `"/admin"` dans les listes `editeur`/`membre` accordait par préfixe l'accès à **toutes** les sous-pages `/admin/*`. Corrigé dans **les deux** `lib/permissions.ts` (mobile + web) : la racine `/admin` ne matche qu'en **exact**. Le backend `authorizeRoles` protégeait déjà les données.
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres ; `npm test` (11/11) ; web `tsc` propre.
 
 ---
 
