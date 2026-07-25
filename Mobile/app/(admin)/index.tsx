@@ -78,6 +78,10 @@ export default function AdminHome() {
             onPress={() => router.push("/(admin)/evenements")}
           />
           <SettingsRow
+            label={fr.agendaAdmin.title}
+            onPress={() => router.push("/(admin)/agenda")}
+          />
+          <SettingsRow
             label={fr.newsletters.title}
             onPress={() => router.push("/(admin)/newsletters")}
           />
