@@ -22,6 +22,8 @@ export default function Compte() {
   const status = useSession((s) => s.status);
   const user = useSession((s) => s.user);
   const logout = useSession((s) => s.logout);
+  const can = useSession((s) => s.can);
+  const isStaff = can("/admin/blog"); // éditeur ou admin
 
   return (
     <Screen>
@@ -55,6 +57,12 @@ export default function Compte() {
                 onPress={() => router.push("/(member)/anniversaires")}
               />
             </SettingsGroup>
+            {isStaff ? (
+              <Button
+                label={fr.admin.title}
+                onPress={() => router.push("/(admin)")}
+              />
+            ) : null}
             <Button
               label={fr.compte.logout}
               variant="outline"
