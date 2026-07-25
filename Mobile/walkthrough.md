@@ -106,9 +106,28 @@
 
 ---
 
-## Phase 3 — Membre : RDV, calendrier, anniversaires, notifications
+## Phase 3 — Membre : RDV, calendrier, notifications
 
-_(à compléter)_
+### Rendez-vous ✅
+- Service `services/api/agenda` (types + `getParametreAgenda`, `getCreneauxDisponibles`, `reserverRdv`, `suiviRdv`).
+- Écran `app/(public)/rendez-vous/` : coordinateur, sélection de créneau, formulaire de réservation (`useMutation`), et **suivi par email** avec badges de statut. 100 % endpoints publics réels. Masqué des onglets, accès via Compte › Services.
+
+### Calendrier agrégé ✅
+- `lib/calendar-link.ts` (`googleCalendarUrl`, porté de `Frontend/lib/ics.ts`).
+- Écran `app/(public)/calendrier.tsx` : navigation mensuelle, liste chronologique agrégeant **événements** publics + **ses RDV** (suivi email si connecté), **ajout à Google Agenda** par item (`expo-web-browser`). Anniversaires/entrées manuelles non agrégés (admin-only, cf. `project.md §9`).
+
+### Notifications (mock) ✅
+- Module `services/api/notifications` au pattern **mock/real/index** (bascule `EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS`) ; types alignés sur le contrat `project.md §5.1`.
+- Écran `app/(member)/notifications.tsx` : liste (non-lu, catégorie, date), marquer lu / tout lu, bouton **Activer les notifications**, bandeau de démonstration.
+- `lib/push.ts` : permission + token Expo (best-effort), enregistrement device token mocké tant que `/api/dispositifs` n'existe pas. `expo-notifications`/`expo-device` installés.
+
+**Points ouverts backend** (`project.md §9`) : anniversaires accessibles aux membres (décision confidentialité + endpoint), « Mes inscriptions » événements, « Mes messages » contact.
+
+**Phase 3 : ✅ (RDV, calendrier, notifications mock).** Anniversaires in-app différés.
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres. Commits séparés par fonctionnalité.
+
+---
 
 ---
 

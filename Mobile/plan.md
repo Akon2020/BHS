@@ -53,11 +53,11 @@
 
 ## Phase 3 — Membre : RDV, calendrier, anniversaires, notifications (mock uniquement pour push)
 
-- [ ] **Rendez-vous** : consultation du coordinateur actif (`ParametreAgenda`), créneaux disponibles (`CreneauRdv`), réservation, "Mes rendez-vous" avec statuts (`en_attente/approuve/refuse/reprogramme`), suivi (branché sur `/api/agenda/*` réel)
-- [ ] **Calendrier agrégé** : reproduire l'agrégation événements + RDV + anniversaires + entrées manuelles (côté client si pas d'endpoint unique dédié — à vérifier), export `.ics` / lien Google Agenda (`expo-calendar` ou lien direct, en portant la logique de `Frontend/lib/ics.ts`)
-- [ ] **Anniversaires** : liste des prochains, alerte du jour (`/api/anniversaires` réel)
-- [ ] **Centre de notifications** : UI complète mais **données mockées** (module §5.1 pas encore backend) — préparer la structure exacte des types pour un branchement direct dès disponibilité
-- [ ] Scaffold `expo-notifications` : permission (pré-prompt), enregistrement device token (mock de `/api/dispositifs/enregistrer`)
+- [x] **Rendez-vous** : coordinateur actif (`ParametreAgenda`), créneaux disponibles (`CreneauRdv`), **réservation**, **« Suivre mes demandes »** par email avec statuts (`en_attente/approuve/refuse/reprogramme`) — 100 % API réelle (`/api/agenda/*` public).
+- [x] **Calendrier agrégé** : navigation mensuelle + liste chronologique agrégeant **événements** (public) + **ses propres RDV** (via suivi email), **ajout à Google Agenda** par item (`lib/calendar-link.ts` porté de `lib/ics.ts`). *(Anniversaires + entrées manuelles = admin-only → non agrégés côté membre, cf. §9.)*
+- [~] **Anniversaires** : **différé** — pas d'endpoint accessible aux membres (`/api/anniversaires` = admin/éditeur). Point ouvert `project.md §9` (décision confidentialité + endpoint à ajouter). L'alerte jour J passe déjà par email/cron.
+- [x] **Centre de notifications** : UI complète, **données mockées** via le pattern `mock.ts`/`real.ts`/`index.ts` (bascule `EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS`), types alignés sur `project.md §5.1` — bascule triviale dès le backend prêt.
+- [x] Amorce `expo-notifications` : `lib/push.ts` (permission + token best-effort ; enregistrement device token mocké tant que `/api/dispositifs` n'existe pas).
 
 **DoD** : RDV et calendrier 100% réels ; notifications mockées mais avec des types/contrats identiques à ceux proposés en `project.md` §5.1 (bascule triviale plus tard).
 
