@@ -46,8 +46,13 @@ export default function Compte() {
               onPress={() => router.push("/(member)/profil")}
             />
             <Button
-              label={fr.compte.logout}
+              label={fr.notifications.title}
               variant="outline"
+              onPress={() => router.push("/(member)/notifications")}
+            />
+            <Button
+              label={fr.compte.logout}
+              variant="ghost"
               onPress={() => logout()}
             />
           </>
