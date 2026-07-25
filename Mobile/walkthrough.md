@@ -141,7 +141,29 @@
 
 ## Phase 4 — Admin : modules déjà réels
 
-_(à compléter)_
+### Hub admin + dashboard ✅
+- Groupe `(admin)` gardé (éditeur/admin via la matrice), accessible depuis l'onglet **Compte** (visible seulement pour le staff).
+- `app/(admin)/index.tsx` : KPIs (`GET /api/dashboard`) + stats rapides + menu de gestion (`SettingsGroup`).
+
+### Dons ✅
+- `services/api/dons` (liste + bascule statut) ; écran `app/(admin)/dons.tsx` (liste, total confirmé par devise, bouton annoncé↔confirmé via `useMutation`).
+
+### Correspondance ✅
+- `services/api/correspondance` (`getContacts`, `getContact`, `replyContact`, `sendMessage`).
+- `app/(admin)/contacts/` : inbox (statuts + « répondu »), détail + **formulaire de réponse**, et **composer** (boîte d'envoi `/api/messages`).
+
+### Commentaires (modération) ✅
+- `services/api/commentaires` étendu (getAll, moderer, delete). Écran `app/(admin)/commentaires.tsx` : filtre segmenté (attente/approuvés/rejetés/tous), **approuver/rejeter/supprimer** (confirmation `Alert` native).
+
+### Événements (gestion) ✅
+- `services/api/evenements` étendu (`getEvenementsAdmin`, `getEvenementAdmin`, `updatePaiement`, `getFinances`, `resendTicket`) + types (`EvenementAdmin`, `InscriptionEvenement`, `FinancesResponse`).
+- `app/(admin)/evenements/` : liste (tous statuts), détail avec **carte finances** (attendu/encaissé/reste/inscrits), **liste des inscrits** + **suivi de paiement** (feuille `PaymentSheet` : non payé/partiel[+montant]/payé/accepté-non-payé) + **renvoi de billet**.
+
+**Reste Phase 4** : **Newsletters** (rédaction/envoi + `/progress`/stats/abonnés) ; authoring Blog + création/édition d'événements (constructeur de champs perso) — laissés au web pour l'instant (UX de rédaction lourde sur mobile), à cadrer.
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres ; `npm test` (11/11). Commits séparés par module.
+
+---
 
 ---
 

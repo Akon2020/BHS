@@ -65,12 +65,12 @@
 
 ## Phase 4 — Admin : modules déjà réels
 
-- [ ] **Dashboard admin** : réutilisation de `GET /api/dashboard` (KPIs, séries 6 mois) dans une version mobile condensée
-- [ ] **CRUD Événements** : y compris constructeur de champs personnalisés, config paiement, liste des inscrits, suivi financier (`GET /:id/finances` + export PDF via lien), renvoi de ticket, doublons
-- [ ] **CRUD Blog & Catégories & Commentaires** : rédaction/modération, y compris les 3 catégories fixes éditoriales
-- [ ] **Correspondance** : boîte des `Contact` (statuts nouveau/lu/traite/archive), réponse (`ReponseContact`), boîte d'envoi `MessageEnvoye`
-- [ ] **Newsletters** : rédaction, envoi (réutiliser le flux tâche de fond + `/progress` déjà existant côté web), stats, gestion abonnés
-- [ ] **Dons** : liste des intentions, mise à jour de statut
+- [x] **Dashboard admin** : hub `(admin)` gardé (éditeur/admin) + `GET /api/dashboard` (KPIs utilisateurs/articles/événements/abonnés + RDV en attente, tâches actives, heures, inscriptions). Accès depuis l'onglet Compte.
+- [x] **Événements (gestion)** : liste admin (`/api/evenements/admin`), détail avec **inscrits**, **suivi de paiement** (non payé/partiel[+montant]/payé/accepté-non-payé via feuille), **finances** (`/:id/finances`), **renvoi de billet**. *(Création/édition d'événement + constructeur de champs perso = authoring lourd, laissé au web ; export PDF finances = lien à ajouter.)*
+- [x] **Commentaires (modération)** : liste filtrable (en attente/approuvés/rejetés/tous), **approuver/rejeter/supprimer** (`/api/commentaires/moderate` + delete). *(Rédaction Blog + catégories = authoring, laissé au web pour l'instant.)*
+- [x] **Correspondance** : boîte de réception des `Contact` (statuts + « répondu »), **détail + réponse** (`/repondre/:id`), **boîte d'envoi** (composer/envoyer via `/api/messages`).
+- [ ] **Newsletters** : rédaction, envoi (flux tâche de fond + `/progress`), stats, gestion abonnés — **à faire**.
+- [x] **Dons** : liste des intentions + **bascule de statut** (annoncé/confirmé), total confirmé par devise.
 
 **DoD** : branché sur l'API réelle, permissions vérifiées via `/api/auth/profile`, parité fonctionnelle avec les équivalents web déjà en production.
 
