@@ -57,6 +57,37 @@ export interface GetEvenementResponse {
   event: Evenement;
 }
 
+export interface InscriptionEvenement {
+  idInscription: number;
+  nomComplet: string;
+  email: string;
+  telephone: string;
+  sexe: "homme" | "femme";
+  statutPaiement: StatutPaiement;
+  montantPaye: string | number;
+  reponsesPersonnalisees?: Record<string, string> | null;
+  dateInscription: string;
+}
+
+export interface EvenementAdmin extends Evenement {
+  inscriptions: InscriptionEvenement[];
+}
+
+export interface FinancesResponse {
+  evenement: {
+    idEvenement: number;
+    titre: string;
+    estPayant: boolean;
+    montant: number;
+    devise: string;
+  };
+  nbInscrits: number;
+  parStatut: Record<StatutPaiement, number>;
+  attendu: number;
+  encaisse: number;
+  reste: number;
+}
+
 // Valeurs des champs de base + réponses personnalisées (hors fichiers).
 export interface InscriptionBase {
   nomComplet: string;
