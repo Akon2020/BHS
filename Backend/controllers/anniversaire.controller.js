@@ -31,6 +31,36 @@ export const getAnniversaires = async (req, res, next) => {
   }
 };
 
+// Prochains anniversaires pour l'app (membres connectés) — sans l'année de naissance.
+export const getAnniversairesAVenir = async (req, res, next) => {
+  try {
+    const now = new Date(Date.now() + 2 * 60 * 60 * 1000); // UTC+2
+    const debutJour = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    );
+    const anniversaires = await Anniversaire.findAll({
+      where: { actif: true },
+      attributes: ["nom", "jour", "mois"],
+    });
+    const aVenir = anniversaires
+      .map((a) => {
+        let cible = new Date(Date.UTC(now.getUTCFullYear(), a.mois - 1, a.jour));
+        if (cible < debutJour) {
+          cible = new Date(Date.UTC(now.getUTCFullYear() + 1, a.mois - 1, a.jour));
+        }
+        const dansJours = Math.round((cible - debutJour) / (1000 * 60 * 60 * 24));
+        return { nom: a.nom, jour: a.jour, mois: a.mois, dansJours };
+      })
+      .sort((x, y) => x.dansJours - y.dansJours)
+      .slice(0, 30);
+    return res.status(200).json({ nombre: aVenir.length, anniversaires: aVenir });
+  } catch (error) {
+    console.error("Erreur anniversaires à venir :", error);
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
 export const createAnniversaire = async (req, res, next) => {
   try {
     const { nom, jour, mois, annee, email, note, delaiRappelJours } = req.body;

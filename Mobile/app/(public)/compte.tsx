@@ -41,18 +41,23 @@ export default function Compte() {
               </View>
             </Card>
 
-            <Button
-              label={fr.compte.myProfile}
-              onPress={() => router.push("/(member)/profil")}
-            />
-            <Button
-              label={fr.notifications.title}
-              variant="outline"
-              onPress={() => router.push("/(member)/notifications")}
-            />
+            <SettingsGroup>
+              <SettingsRow
+                label={fr.compte.myProfile}
+                onPress={() => router.push("/(member)/profil")}
+              />
+              <SettingsRow
+                label={fr.notifications.title}
+                onPress={() => router.push("/(member)/notifications")}
+              />
+              <SettingsRow
+                label={fr.anniversaires.title}
+                onPress={() => router.push("/(member)/anniversaires")}
+              />
+            </SettingsGroup>
             <Button
               label={fr.compte.logout}
-              variant="ghost"
+              variant="outline"
               onPress={() => logout()}
             />
           </>

@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getEvenements } from "@/services/api/evenements";
 import { suiviRdv } from "@/services/api/agenda";
+import { getAnniversairesAVenir } from "@/services/api/anniversaires";
 import { useSession } from "@/stores/session";
 import { getColors } from "@/theme/colors";
 import { googleCalendarUrl, type CalendarItem } from "@/lib/calendar-link";
@@ -25,13 +26,15 @@ const MOIS = [
 
 interface Item {
   key: string;
-  type: "event" | "rdv";
+  type: "event" | "rdv" | "anniversaire";
   date: string;
   heureDebut?: string;
   title: string;
   slug?: string;
   cal: CalendarItem;
 }
+
+const pad = (n: number) => String(n).padStart(2, "0");
 
 export default function Calendrier() {
   const colors = getColors(useColorScheme());
@@ -50,6 +53,11 @@ export default function Calendrier() {
     queryKey: ["agenda", "suivi", user?.email],
     queryFn: () => suiviRdv(user!.email),
     enabled: status === "authenticated" && !!user?.email,
+  });
+  const { data: anniversaires } = useQuery({
+    queryKey: ["anniversaires", "a-venir"],
+    queryFn: getAnniversairesAVenir,
+    enabled: status === "authenticated",
   });
 
   const items = useMemo<Item[]>(() => {
@@ -96,12 +104,23 @@ export default function Calendrier() {
         },
       });
     }
+    for (const a of anniversaires ?? []) {
+      if (a.mois - 1 !== month) continue;
+      const date = `${year}-${pad(a.mois)}-${pad(a.jour)}`;
+      list.push({
+        key: `a-${a.nom}-${a.jour}-${a.mois}`,
+        type: "anniversaire",
+        date,
+        title: `${fr.calendrier.anniversaire} — ${a.nom}`,
+        cal: { title: `Anniversaire — ${a.nom}`, date, allDay: true },
+      });
+    }
     return list.sort(
       (a, b) =>
         a.date.localeCompare(b.date) ||
         (a.heureDebut ?? "").localeCompare(b.heureDebut ?? ""),
     );
-  }, [eventsData, rdvs, cursor]);
+  }, [eventsData, rdvs, anniversaires, cursor]);
 
   const changeMonth = (delta: number) =>
     setCursor((c) => {
@@ -164,8 +183,20 @@ export default function Calendrier() {
                 </Text>
                 <View className="mt-0.5 flex-row items-center gap-2">
                   <Badge
-                    label={it.type === "event" ? fr.calendrier.event : fr.calendrier.rdv}
-                    tone={it.type === "event" ? "primary" : "success"}
+                    label={
+                      it.type === "event"
+                        ? fr.calendrier.event
+                        : it.type === "rdv"
+                          ? fr.calendrier.rdv
+                          : fr.calendrier.anniversaire
+                    }
+                    tone={
+                      it.type === "event"
+                        ? "primary"
+                        : it.type === "rdv"
+                          ? "success"
+                          : "warning"
+                    }
                   />
                   {it.heureDebut ? (
                     <Text variant="small">{formatHeure(it.heureDebut)}</Text>

@@ -176,8 +176,17 @@ export const fr = {
     empty: "Rien de prévu ce mois-ci.",
     event: "Événement",
     rdv: "Rendez-vous",
+    anniversaire: "Anniversaire",
     addToCalendar: "Ajouter à mon agenda",
     loginNeeded: "Connectez-vous pour voir vos rendez-vous dans le calendrier.",
+  },
+  anniversaires: {
+    title: "Anniversaires",
+    subtitle: "Les prochains anniversaires de la communauté.",
+    empty: "Aucun anniversaire à venir.",
+    error: "Impossible de charger les anniversaires.",
+    today: "Aujourd'hui",
+    tomorrow: "Demain",
   },
   notifications: {
     title: "Notifications",
