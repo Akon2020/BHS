@@ -32,6 +32,8 @@ export const fr = {
     password: "Mot de passe",
     signIn: "Se connecter",
     signUp: "S'inscrire",
+    legalPrefix: "En créant un compte, vous acceptez nos",
+    legalAnd: "et notre",
     sendLink: "Envoyer le lien",
     noAccount: "Pas encore de compte ?",
     hasAccount: "Déjà un compte ?",
@@ -541,6 +543,9 @@ export const fr = {
     contact: "Nous contacter",
     newsletter: "Newsletter",
     resources: "Ressources",
+    about: "À propos",
+    privacy: "Politique de confidentialité",
+    terms: "Conditions d'utilisation",
   },
   fichiers: {
     title: "Ressources",

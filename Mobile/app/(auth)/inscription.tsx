@@ -84,6 +84,17 @@ export default function InscriptionScreen() {
               loading={formState.isSubmitting}
               onPress={handleSubmit(onSubmit)}
             />
+            <Text variant="small" className="text-center">
+              {fr.auth.legalPrefix}{" "}
+              <Link href="/(public)/conditions" asChild>
+                <Text className="text-xs font-semibold text-primary">{fr.compte.terms}</Text>
+              </Link>{" "}
+              {fr.auth.legalAnd}{" "}
+              <Link href="/(public)/confidentialite" asChild>
+                <Text className="text-xs font-semibold text-primary">{fr.compte.privacy}</Text>
+              </Link>
+              .
+            </Text>
             <View className="flex-row items-center justify-center gap-1">
               <Text variant="muted">{fr.auth.hasAccount}</Text>
               <Link href="/(auth)/login" asChild>

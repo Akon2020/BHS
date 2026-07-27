@@ -116,6 +116,18 @@ export default function Compte() {
             onPress={() => router.push("/(public)/newsletter")}
           />
         </SettingsGroup>
+
+        {/* Informations légales (conformité stores) */}
+        <SettingsGroup title={fr.compte.about}>
+          <SettingsRow
+            label={fr.compte.privacy}
+            onPress={() => router.push("/(public)/confidentialite")}
+          />
+          <SettingsRow
+            label={fr.compte.terms}
+            onPress={() => router.push("/(public)/conditions")}
+          />
+        </SettingsGroup>
       </ScrollView>
     </Screen>
   );

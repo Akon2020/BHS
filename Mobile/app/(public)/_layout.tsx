@@ -71,6 +71,8 @@ export default function PublicLayout() {
       <Tabs.Screen name="identite" options={{ href: null }} />
       <Tabs.Screen name="rendez-vous" options={{ href: null }} />
       <Tabs.Screen name="calendrier" options={{ href: null }} />
+      <Tabs.Screen name="confidentialite" options={{ href: null }} />
+      <Tabs.Screen name="conditions" options={{ href: null }} />
     </Tabs>
   );
 }
