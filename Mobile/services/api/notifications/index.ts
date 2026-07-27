@@ -2,12 +2,13 @@ import { mockApi } from "./mock";
 import { realApi } from "./real";
 import type { NotificationsApi } from "./types";
 
-// Seul module autorisé à être mocké (CLAUDE.md §2). Bascule par variable d'env :
-// EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS=false → implémentation réelle.
-const useMock = process.env.EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS !== "false";
+// Le module backend (§5.1) est désormais implémenté : réel par défaut.
+// Bascule mock possible pour le dev hors-ligne : EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS=true.
+const useMock = process.env.EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS === "true";
 
 export const notificationsApi: NotificationsApi = useMock ? mockApi : realApi;
 export const NOTIFICATIONS_MOCKED = useMock;
 
 export const { getMesNotifications, marquerLue, marquerToutesLues } =
   notificationsApi;
+export { getPreferences, updatePreference } from "./preferences";

@@ -9,6 +9,7 @@ import {
 import type { Utilisateur } from "@/services/api/auth/types";
 import { hasAccessToPage, type UserRole } from "@/lib/permissions";
 import { queryClient } from "@/lib/query-client";
+import { unregisterPush } from "@/lib/push";
 
 type SessionStatus = "loading" | "authenticated" | "guest";
 
@@ -77,6 +78,7 @@ export const useSession = create<SessionState>((set, get) => ({
   setUser: (user) => set({ user }),
 
   logout: async () => {
+    await unregisterPush();
     await apiLogout();
     await purge();
     set({ status: "guest", user: null });

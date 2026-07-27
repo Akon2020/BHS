@@ -1,5 +1,6 @@
 import { View, ScrollView, Pressable, useColorScheme } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Screen } from "@/components/ui/screen";
@@ -57,7 +58,7 @@ export default function NotificationsScreen() {
     const res = await registerForPush();
     if (res === "granted") toast.success(fr.notifications.enabled);
     else if (res === "denied") toast.error(fr.notifications.denied);
-    else toast.info(fr.notifications.demoNote);
+    else toast.info(fr.notifications.unsupported);
   };
 
   const notifications = data ?? [];
@@ -66,7 +67,19 @@ export default function NotificationsScreen() {
   return (
     <Screen>
       <Stack.Screen
-        options={{ headerShown: true, title: fr.notifications.title }}
+        options={{
+          headerShown: true,
+          title: fr.notifications.title,
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push("/(member)/notifications-preferences")}
+              accessibilityLabel={fr.notifications.preferences}
+              className="px-2"
+            >
+              <Ionicons name="options-outline" size={22} color={colors.primary} />
+            </Pressable>
+          ),
+        }}
       />
       <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
         {NOTIFICATIONS_MOCKED ? (
@@ -104,8 +117,8 @@ export default function NotificationsScreen() {
           <View className="gap-3">
             {notifications.map((n) => (
               <Pressable
-                key={n.id}
-                onPress={() => !n.lu && readOne.mutate(n.id)}
+                key={n.idNotification}
+                onPress={() => !n.lu && readOne.mutate(n.idNotification)}
                 className="flex-row gap-3 rounded-xl border border-border bg-card p-4"
               >
                 <View className="pt-1">

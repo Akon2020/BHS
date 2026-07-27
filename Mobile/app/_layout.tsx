@@ -33,6 +33,7 @@ import { useSession } from "@/stores/session";
 import { usePreferences } from "@/stores/preferences";
 import { getColors } from "@/theme/colors";
 import { initSentry, withSentry } from "@/lib/sentry";
+import { useNotificationNavigation, refreshPushToken } from "@/lib/push";
 import { ToastHost } from "@/components/ui/toast";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 import { ErrorScreen } from "@/components/ui/error-screen";
@@ -89,6 +90,14 @@ function RootLayout() {
   useEffect(() => {
     void bootstrap();
   }, [bootstrap]);
+
+  // Navigation profonde depuis une notification (tap / démarrage à froid).
+  useNotificationNavigation();
+
+  // Rafraîchit le token push si la permission est déjà accordée (sans prompt).
+  useEffect(() => {
+    if (status === "authenticated") void refreshPushToken();
+  }, [status]);
 
   // Applique le mode de thème choisi aux classes NativeWind.
   useEffect(() => {
