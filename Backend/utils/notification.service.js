@@ -60,6 +60,46 @@ export const notifierUtilisateurs = async (userIds, payload) => {
   }
 };
 
+/** Notifie l'utilisateur dont l'email correspond (si un compte existe). */
+export const notifierParEmail = async (email, payload) => {
+  try {
+    if (!email) return;
+    const user = await Utilisateur.findOne({
+      where: { email },
+      attributes: ["idUtilisateur"],
+    });
+    if (user) await notifierUtilisateurs([user.idUtilisateur], payload);
+  } catch (err) {
+    console.error("Erreur notifierParEmail :", err.message);
+  }
+};
+
+// Slugs des 3 catégories éditoriales fixes → catégorie de notification.
+const SLUG_VERS_CATEGORIE = {
+  "echos-de-priere": "echo_priere",
+  "pensee-du-jour": "pensee_du_jour",
+  meditation: "meditation",
+};
+
+/**
+ * Notifie toute la communauté de la publication d'un article éditorial
+ * (uniquement les 3 catégories fixes : échos de prière / pensée du jour / méditation).
+ */
+export const notifierPublicationBlog = async (blog) => {
+  try {
+    const categorie = SLUG_VERS_CATEGORIE[blog?.categorie?.slug];
+    if (!categorie) return;
+    await notifierTous({
+      titre: blog.titre,
+      corps: "Un nouveau contenu spirituel vient d'être publié.",
+      categorie,
+      donnees: { type: "blog", slug: blog.slug },
+    });
+  } catch (err) {
+    console.error("Erreur notifierPublicationBlog :", err.message);
+  }
+};
+
 /** Notifie tous les utilisateurs d'un ou plusieurs rôles. */
 export const notifierParRole = async (roles, payload) => {
   const users = await Utilisateur.findAll({

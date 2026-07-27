@@ -107,9 +107,11 @@ export function routeFromData(data: unknown): string | null {
     case "tache":
       return d.id ? `/(admin)/taches/${d.id}` : "/(admin)/taches";
     case "evenement":
-      return d.slug ? `/(public)/evenement/${d.slug}` : "/(public)/evenements";
+      return d.slug ? `/(public)/evenements/${d.slug}` : "/(public)/evenements";
+    case "blog":
+      return d.slug ? `/(public)/spiritualite/${d.slug}` : "/(public)/spiritualite";
     case "correspondance":
-      return "/(admin)/contacts";
+      return "/(member)/notifications";
     case "newsletter":
       return "/(admin)/newsletters";
     default:

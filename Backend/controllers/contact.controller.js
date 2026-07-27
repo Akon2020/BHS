@@ -7,6 +7,7 @@ import {
   contactReplyEmailTemplate,
 } from "../utils/email.template.js";
 import { formatDateForUser } from "../utils/user.utils.js";
+import { notifierParEmail } from "../utils/notification.service.js";
 
 export const getAllContacts = async (req, res, next) => {
   try {
@@ -157,6 +158,14 @@ export const repondreContact = async (req, res, next) => {
     contact.repondu = true;
     contact.statut = "traite";
     await contact.save();
+
+    // Push (additif) : au contact s'il possède un compte.
+    notifierParEmail(contact.email, {
+      titre: "Réponse à votre message",
+      corps: sujetReponse,
+      categorie: "correspondance",
+      donnees: { type: "correspondance" },
+    }).catch(() => {});
 
     return res.status(200).json({
       message: `Une réponse a été envoyée avec succès à ${contact.nomComplet}`,

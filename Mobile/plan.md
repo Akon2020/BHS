@@ -98,7 +98,7 @@
 - [x] Deep linking : tap / démarrage à froid → écran concerné (`routeFromData`).
 - [ ] **Credentials FCM (Android) + APNs (iOS) via EAS** — étape propriétaire (`eas credentials`), cf. `release/README.md`.
 - [ ] **Test sur devices physiques iOS + Android** — étape propriétaire (nécessite un build EAS + `projectId`).
-- [ ] Accroches push complémentaires (agenda, blog, événements, commentaires, contacts) — cœur d'abord fait ; le reste à câbler ensuite.
+- [x] Accroches push complémentaires : **agenda** (RDV approuvé/refusé/reprogrammé → demandeur), **blog** (publication d'un contenu des 3 catégories fixes → communauté), **événements** (nouvel événement public → communauté), **commentaires** (réponse approuvée → auteur du parent), **contacts** (réponse → expéditeur). Deep-link `blog` ajouté ; route événement corrigée (`evenements/[slug]`).
 
 **DoD** : une notification push reçue (RDV, anniversaire, nouvel Écho/Pensée/Méditation...) ouvre le bon écran ; préférences respectées. *(Émission + réception réelles à valider sur device après `eas init` + build.)*
 
