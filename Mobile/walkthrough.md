@@ -174,7 +174,36 @@
 
 ## Phase 5 — Admin : modules avancés
 
-_(à compléter)_
+### Agenda ✅
+- `services/api/agenda` étendu (admin) : `updateParametreAgenda`, `getCreneaux`, `createCreneau`, `deleteCreneau`, `getRendezVous`, `updateStatutRdv`, `deleteRdv`.
+- `app/(admin)/agenda/` : file des demandes filtrable (en attente/approuvé/refusé/toutes) avec **approuver/refuser/reprogrammer** (feuille `reschedule-sheet`) **/supprimer** ; `creneaux.tsx` (liste + création/suppression, places restantes) ; `parametre.tsx` (coordinateur nom/fonction/message + activation).
+
+### Anniversaires ✅
+- `services/api/anniversaires` étendu (admin) : `getAnniversaires`, `createAnniversaire`, `updateAnniversaire`, `deleteAnniversaire`.
+- `app/(admin)/anniversaires.tsx` + `features/anniversaires/anniversaire-sheet` : liste, création/édition (nom, jour/mois, année, email, note, délai de rappel), suppression.
+
+### Calendrier ✅
+- `services/api/calendrier` (CRUD `EntreeCalendrier`). `app/(admin)/calendrier.tsx` + `features/calendrier/entree-sheet` : liste, création/édition (titre, date, journée entière ↔ plage horaire, lieu, description), suppression.
+
+### Fichiers ✅
+- `services/api/fichiers` étendu (admin) : `getAllFichiers`, `createFichierResource`, `updateFichierResource`, `deleteFichierResource`.
+- `app/(admin)/fichiers/` : liste (statut/catégorie/nb fichiers) + suppression ; `nouveau.tsx` : nom, description, catégorie (chips depuis `/api/categories`), statut, mode d'accès, **upload multi-fichiers** via `expo-document-picker` (FormData multipart).
+
+### Utilisateurs ✅
+- `services/api/users` étendu (admin) : `getUsers`, `createUser`, `updateUserRole`, `deleteUser`.
+- `app/(admin)/utilisateurs/` : liste (avatar, rôle), changement de rôle (Alert) et suppression réservés aux admins, création (nom/email/rôle → mot de passe généré et envoyé par email côté serveur). **Page gardée admin-only** (Redirect + entrée du hub conditionnelle) car `GET /api/users` n'autorise pas l'éditeur.
+
+### Todos / Kanban ✅
+- `services/api/taches` (getTaches + assignables, getTache, create/update/delete, commentaires add/delete).
+- `app/(admin)/taches/` : board (colonnes à faire/en cours/fait avec compteurs + boutons avancer/reculer le statut), `nouveau.tsx` (titre, description, statut, priorité, échéance, récurrence, **assignations multiples**), `[id].tsx` (détail + changement de statut + **commentaires** ajout/suppression + suppression).
+
+### Pointage (+ « pointer maintenant ») ✅
+- **Backend** (ajouts additifs, scoés `project.md` §5) : `POST /api/pointages/pointer` (démarre une session ouverte, horodatée UTC+2 serveur via `nowTzDateTime`, refuse une 2ᵉ session ouverte pour le même profil) + `POST /api/pointages/:id/cloturer` (heure de fin = maintenant, durée calculée par le hook du modèle). Swagger à jour.
+- `services/api/pointages` (profils, liste, création manuelle, `pointerMaintenant`, `cloturerPointage`, suppression, stats).
+- `app/(admin)/pointage/` : sélecteur de période (semaine/mois/année) + **stats** (présences, profils actifs, temps cumulé) ; section profils avec **Pointer / Clôturer** selon session ouverte ; **saisie manuelle** (`features/pointage/manual-sheet`) ; pointages récents (durée ou « En cours ») + suppression.
+- **Point ouvert** : export PDF laissé au web (l'endpoint `/api/pointages/export` exige une auth Bearer non transmissible par le navigateur mobile ; nécessiterait `expo-file-system`+`expo-sharing` ou un lien signé — cf. `project.md` §9).
+
+**Vérifs** : `tsc --noEmit` + `expo lint` propres ; `npm test` (11/11) ; syntaxe backend vérifiée (`node --check`). Un commit par module.
 
 ---
 

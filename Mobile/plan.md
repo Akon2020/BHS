@@ -78,13 +78,13 @@
 
 ## Phase 5 — Admin : modules avancés déjà réels
 
-- [ ] **Agenda (admin)** : gestion des créneaux, `ParametreAgenda` (coordinateur), file des demandes, approbation/refus/reprogrammation
-- [ ] **Fichiers (admin)** : CRUD, upload multi-fichiers, `modeAcces`
-- [ ] **Todos/Kanban** : vue Kanban (à_faire/en_cours/fait), création perso/communautaire (`assignes` JSON), récurrence (déjà auto-gérée backend), commentaires (`TacheCommentaire`)
-- [ ] **Anniversaires (admin)** : CRUD
-- [ ] **Pointage** : saisie manuelle de session (flux web actuel) **+ « pointer maintenant »** (nouveau flux natif horodaté — nécessite l'ajout backend `POST /api/pointages/pointer` + `POST /api/pointages/:id/cloturer`, cf. `project.md` §9, décidé), consultation stats, export PDF (lien)
-- [ ] **Calendrier (admin)** : CRUD entrées manuelles
-- [ ] **Utilisateurs** : gestion des comptes internes selon permissions
+- [x] **Agenda (admin)** : gestion des créneaux (création/suppression, places restantes), `ParametreAgenda` (coordinateur), file des demandes filtrable, approbation/refus/reprogrammation/suppression.
+- [x] **Fichiers (admin)** : liste (statut/catégorie), création avec upload multi-fichiers (`document-picker` → multipart), `modeAcces`, suppression.
+- [x] **Todos/Kanban** : board (à_faire/en_cours/fait) avec compteurs + déplacement de statut, création (priorité, échéance, récurrence, `assignes`), détail avec commentaires (`TacheCommentaire`) et suppression.
+- [x] **Anniversaires (admin)** : CRUD (liste, création/édition via feuille, suppression).
+- [x] **Pointage** : saisie manuelle de session **+ « pointer maintenant »** (nouveaux endpoints backend `POST /api/pointages/pointer` + `POST /api/pointages/:id/cloturer`, horodatage UTC+2 serveur), stats par période, clôture d'une session ouverte, suppression. *(Export PDF laissé au web : l'endpoint exige une auth Bearer que le navigateur mobile ne transmet pas — cf. `project.md` §9.)*
+- [x] **Calendrier (admin)** : CRUD entrées manuelles (journée entière ou plage horaire, lieu).
+- [x] **Utilisateurs** : liste (rôle/avatar), changement de rôle, création (email + rôle), suppression — réservés aux admins (page gardée).
 
 **DoD** : tous les écrans admin avancés branchés sur l'API réelle.
 

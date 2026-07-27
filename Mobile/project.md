@@ -190,12 +190,13 @@ Confirmé : 3 catégories fixes du module `Blog` existant, chacune avec son prop
 
 ## 9. Points ouverts
 
-- **Pointage mobile** — **DÉCIDÉ** : en plus de la saisie manuelle a posteriori (flux web actuel), le mobile propose un vrai **« pointer maintenant »** (bouton unique horodaté). C'est une **évolution backend à ajouter** (non présente sur le web), planifiée en Phase 5 :
-  - `POST /api/pointages/pointer` (admin/editeur) → ouvre une session pour le profil courant à l'heure serveur (UTC+2), sans `heureFin`.
-  - `POST /api/pointages/:id/cloturer` → renseigne `heureFin` = maintenant (réutilise la logique de clôture a posteriori existante).
-  - Additif et non destructif : la saisie manuelle reste inchangée.
+- **Pointage mobile** — **FAIT (Phase 5)** : en plus de la saisie manuelle a posteriori, le mobile propose un vrai **« pointer maintenant »**. Endpoints backend ajoutés (additifs, non destructifs) :
+  - `POST /api/pointages/pointer` (admin/editeur) → ouvre une session pour le profil à l'heure serveur (UTC+2 via `nowTzDateTime`), sans `heureFin` ; refuse une 2ᵉ session ouverte pour le même profil (409).
+  - `POST /api/pointages/:id/cloturer` → renseigne `heureFin` = maintenant ; la durée est calculée par le hook du modèle.
+  - ⚠️ **Redéploiement backend requis** pour activer ces routes en production.
+  - **Export PDF** (`/api/pointages/export`) laissé au web : l'endpoint s'authentifie par Bearer/cookie que le navigateur mobile n'envoie pas. À faire plus tard via `expo-file-system`+`expo-sharing` (download tokené) ou un lien signé court.
 - **Swagger à jour** : le fichier `api-docs.json` fourni initialement est partiel — en demander une régénération (`npm run swagger:gen` côté `Backend/`) avant la Phase 2 de `Mobile/plan.md`, pour figer les noms de routes exacts (Agenda, Todos, Calendrier, Fichiers) avant de coder les adaptateurs.
 - **Fichiers publics vs privés** : confirmer le champ/la logique exacte de filtrage (§5.4).
 - **« Mes inscriptions » (événements)** : aucun endpoint ne liste les inscriptions d'un utilisateur/visiteur donné (le web les expose seulement par événement, côté admin). Pour l'écran « Mes inscriptions » mobile, ajouter un endpoint **authentifié** type `GET /api/evenements/mes-inscriptions` (par `idUtilisateur`) et/ou un **suivi par email** pour les visiteurs (comme le suivi RDV). Additif. En attendant, l'inscription fonctionne mais l'historique personnel n'est pas listé.
-- **Anniversaires accessibles aux membres** : `GET /api/anniversaires` est réservé **admin/éditeur**. Pour afficher « prochains anniversaires » dans l'app membre (Phase 3), il faut un endpoint lisible par un membre — à cadrer côté **confidentialité** (exposer noms + dates de naissance à tout membre est une décision du propriétaire). Options : endpoint authentifié `GET /api/anniversaires/a-venir` (limité, sans année de naissance), ou s'appuyer uniquement sur les **notifications** (alerte jour J déjà envoyée par email/cron). En attendant, la liste in-app des anniversaires est **différée** (le calendrier mobile n'agrège donc que événements + RDV côté membre).
+- **Anniversaires accessibles aux membres** — **FAIT (Phase 3)** : endpoint authentifié `GET /api/anniversaires/a-venir` ajouté (membres/éditeur/admin), **sans année de naissance**, alimentant l'écran « prochains anniversaires ». Le CRUD complet (`GET/POST/PUT/DELETE /api/anniversaires`) reste réservé admin/éditeur (écran admin Phase 5). ⚠️ Redéploiement backend requis pour l'endpoint `/a-venir` en production.
 - **`COOKIE_DOMAIN`** : sans impact direct sur le mobile (qui n'utilise pas les cookies), mais à garder en tête si un jour un WebView est utilisé (ex. pour le don, redirigé vers le site).
