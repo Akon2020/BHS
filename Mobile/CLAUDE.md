@@ -41,10 +41,10 @@ Mobile/
 
 ### Modules et statut mock/réel
 
-Tous les modules sont branchés sur l'API réelle **sauf** `notifications` (et `dispositifs`), mockés jusqu'à l'implémentation backend décrite dans `Mobile/project.md` §5.1. Bascule via variable d'environnement :
+Tous les modules sont branchés sur l'API réelle. Le backend push (§5.1) est **implémenté** (Phase 6) : `notifications` et `dispositifs` sont désormais **réels par défaut**. Le mock `notifications` est conservé uniquement pour le dev hors-ligne, activable via variable d'environnement :
 
 ```
-EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS=true
+EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS=true   # optionnel, dev hors-ligne
 ```
 
 Aucun autre module ne doit avoir de flag mock — si un endpoint attendu n'existe pas encore côté backend au moment de coder un écran, **le signaler** plutôt que de mocker silencieusement (cf. `Mobile/project.md` §9, points ouverts).

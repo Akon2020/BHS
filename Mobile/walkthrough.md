@@ -209,22 +209,42 @@
 
 ## Phase 6 — Notifications push
 
-_(à compléter)_
+### Backend (Expo Push) ✅
+- **Modèles** (additifs, créés par `db.sync`) : `DispositifPush` (token, plateforme, idUtilisateur nullable), `Notification` (titre, corps, catégorie, données JSON, lu), `PreferenceNotification` (idUtilisateur, catégorie, active) — associations + export dans `models/index.model.js`.
+- **Envoi** : `utils/push.js` (API Expo `exp.host`, chunk 100, désactivation des tokens `DeviceNotRegistered`) + `utils/notification.service.js` (`notifierUtilisateurs`/`notifierParRole`/`notifierTous`/`notifierSegment`, persistance in-app + respect des préférences).
+- **Endpoints** : `POST /api/dispositifs/enregistrer` (optionalAuth → invité possible) + `DELETE /desenregistrer` ; `GET /api/notifications/mes-notifications`, `PATCH /:id/lue`, `PATCH /lues-toutes`, `GET|PATCH /preferences`, `POST /diffuser` (admin). Swagger à jour.
+- **Accroches cron (cœur)** : `verifierAnniversaires` (jour J → `notifierTous`, rappel → `notifierParRole` admin/éditeur) et `verifierRappelsTaches` (assignés + créateur). Additif, la logique email reste inchangée. *(Accroches agenda/blog/événements/commentaires/contacts : à câbler ensuite.)*
+
+### Mobile ✅
+- Module `notifications` basculé en **réel** (mock conservé pour dev hors-ligne via `EXPO_PUBLIC_USE_MOCK_NOTIFICATIONS=true`). Service `preferences` + service `dispositifs` (enregistrement/désenregistrement).
+- `lib/push.ts` : permission + token Expo (`getExpoPushTokenAsync` avec `projectId`), enregistrement dispositif, `refreshPushToken` silencieux au démarrage si permission accordée, `unregisterPush` à la déconnexion, handler de premier plan, **deep linking** (`routeFromData` + `useNotificationNavigation` : tap + démarrage à froid) branché dans `app/_layout.tsx`.
+- Écran **préférences** (`(member)/notifications-preferences.tsx`) : 9 catégories, toggles optimistes. Centre de notifications aligné sur `idNotification`.
+
+**Point ouvert** : émission/réception réelles à valider sur appareil après `eas init` (projectId) + build EAS (Expo Go ne délivre pas de token push en SDK récent).
 
 ---
 
 ## Phase 7 — Durcissement
 
-_(à compléter)_
+- **Confidentialité + CGU in-app** ✅ : `components/features/legal/legal-screen.tsx` + contenu FR centralisé `i18n/legal.ts` (à faire relire), routes `(public)/confidentialite` et `(public)/conditions` (masquées des onglets), liées depuis Compte (groupe « À propos ») et l'inscription.
+- **Suppression de compte** ✅ : flux Profil → `DELETE /api/auth/compte` → purge (token secure-store + cache Query) + désenregistrement push.
+- **Purge sécurisée** ✅ : déconnexion/suppression purgent tout et désenregistrent le dispositif.
+- **États complets** ✅ : chargement/vide/erreur/succès présents sur les écrans.
+- **À poursuivre** : audit perf/bundle et passe lecteur d'écran sur build réel ; verrouillage biométrique à l'ouverture (préférence déjà en place) ; revue orthographe finale.
 
 ---
 
-## Phase 8 — Publication
+## Phase 8 — Publication (artefacts préparés)
 
-_(à compléter)_
+- `app.json` : identifiants `org.burningheartihs.mobile` (iOS/Android), plugin `expo-notifications` (couleur crimson), permission `NOTIFICATIONS`, `extra.eas.projectId` (placeholder à renseigner par `eas init`), smartphone uniquement (`supportsTablet: false`).
+- `eas.json` : profils `development`/`preview`(APK)/`production` avec `EXPO_PUBLIC_API_URL` prod ; bloc `submit.production` (placeholders Apple/Google).
+- `release/README.md` (checklist de publication, étapes propriétaire clairement marquées) + `release/store-listing-fr.md` (métadonnées stores FR, déclaration confidentialité, liste des captures).
+- **Étapes propriétaire restantes** : comptes développeurs, `eas init`/`credentials`, builds, captures, soumission.
 
 ---
 
 ## Phase 9 — Post-lancement
 
-_(à compléter)_
+- Sentry déjà intégré (`lib/sentry`). Backlog V2 documenté dans `plan.md` (Équipes/Témoignages in-app, don natif, multi-langue, accroches push complémentaires, export PDF pointage mobile).
+
+**Vérifs Phases 6-8** : `tsc --noEmit` + `expo lint` propres ; `npx expo config` valide ; syntaxe backend vérifiée (`node --check`).

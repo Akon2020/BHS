@@ -92,39 +92,41 @@
 
 ## Phase 6 — Notifications push (backend + mobile, seul module réellement neuf)
 
-- [ ] Implémentation backend du contrat §5.1 de `project.md` (modèles `DispositifPush`/`Notification`/`PreferenceNotification`, endpoints, accroches dans `scheduler.js` + contrôleurs concernés)
-- [ ] Intégration FCM (Android) + APNs (iOS) via EAS
-- [ ] Branchement réel `/api/dispositifs/enregistrer`, remplacement du mock de Phase 3
-- [ ] Centre de notifications, préférences par catégorie (9 catégories, toggle séparé) branchés en réel
-- [ ] Deep linking : chaque notification ouvre l'écran concerné
-- [ ] Test sur devices physiques iOS + Android
+- [x] Implémentation backend du contrat §5.1 (modèles `DispositifPush`/`Notification`/`PreferenceNotification` additifs, endpoints `/api/dispositifs` + `/api/notifications`, **envoi via Expo Push**, accroches cron anniversaires + rappels tâches). Swagger à jour.
+- [x] Branchement réel `/api/dispositifs/enregistrer` (token Expo), remplacement du mock (réel par défaut, mock possible pour dev hors-ligne).
+- [x] Centre de notifications + préférences par catégorie (9 catégories, toggle séparé) branchés en réel.
+- [x] Deep linking : tap / démarrage à froid → écran concerné (`routeFromData`).
+- [ ] **Credentials FCM (Android) + APNs (iOS) via EAS** — étape propriétaire (`eas credentials`), cf. `release/README.md`.
+- [ ] **Test sur devices physiques iOS + Android** — étape propriétaire (nécessite un build EAS + `projectId`).
+- [ ] Accroches push complémentaires (agenda, blog, événements, commentaires, contacts) — cœur d'abord fait ; le reste à câbler ensuite.
 
-**DoD** : une notification push reçue (RDV, anniversaire, nouvel Écho/Pensée/Méditation...) ouvre le bon écran ; préférences respectées.
+**DoD** : une notification push reçue (RDV, anniversaire, nouvel Écho/Pensée/Méditation...) ouvre le bon écran ; préférences respectées. *(Émission + réception réelles à valider sur device après `eas init` + build.)*
 
 ---
 
 ## Phase 7 — Durcissement
 
-- [ ] Audit performance (FlashList, images, bundle)
-- [ ] Audit accessibilité (VoiceOver/TalkBack, contrastes, cibles tactiles ≥ 44pt)
-- [ ] Tests devices bas de gamme Android
-- [ ] États vide/erreur/chargement exhaustifs sur chaque écran
-- [ ] Revue orthographe/traduction FR
-- [ ] Politique de confidentialité + CGU in-app
-- [ ] Flux de suppression de compte testé de bout en bout
-- [ ] Biométrie complète, purge sécurisée à la déconnexion
+- [x] Politique de confidentialité + CGU in-app (modèle FR à faire relire), liées depuis Compte + inscription.
+- [x] Flux de suppression de compte de bout en bout (écran Profil → `DELETE /api/auth/compte` → purge + désenregistrement push).
+- [x] Purge sécurisée à la déconnexion (token secure-store, cache TanStack Query, désenregistrement dispositif push).
+- [x] États vide/erreur/chargement présents sur chaque écran (Skeleton / EmptyState / retry).
+- [ ] Audit performance (FlashList, images, bundle) — étape à mener sur build réel.
+- [ ] Audit accessibilité approfondi (VoiceOver/TalkBack) — labels en place ; passe lecteur d'écran à faire sur device.
+- [ ] Tests devices bas de gamme Android — étape propriétaire.
+- [ ] Revue orthographe/traduction FR finale.
+- [ ] Biométrie complète (préférence `biometricEnabled` en place ; verrouillage à l'ouverture à finaliser).
 
 ---
 
 ## Phase 8 — Publication
 
-- [ ] Assets stores (icônes, splash, captures, description FR)
-- [ ] Compte Apple Developer (à créer — bloquant TestFlight/App Store, cf. décision précédente)
-- [ ] Google Play Console configuré
-- [ ] Build EAS production iOS + Android
-- [ ] TestFlight + test interne Android
-- [ ] Corrections retours bêta
-- [ ] Soumission App Store + Play Store
+- [x] Configuration `app.json` (identifiants `org.burningheartihs.mobile`, plugin `expo-notifications`, permission NOTIFICATIONS) + `eas.json` (profils build/submit, API prod).
+- [x] Métadonnées stores FR + checklist de publication (`release/store-listing-fr.md`, `release/README.md`).
+- [ ] Compte Apple Developer + Google Play Console — étape propriétaire (comptes payants).
+- [ ] `eas init` (renseigne `projectId`) + `eas credentials` — étape propriétaire.
+- [ ] Build EAS production iOS + Android — étape propriétaire.
+- [ ] Captures d'écran finales (liste dans `release/store-listing-fr.md`).
+- [ ] TestFlight + test interne Android, puis soumission App Store + Play Store — étape propriétaire.
 
 ---
 
