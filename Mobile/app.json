@@ -28,7 +28,9 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["NOTIFICATIONS"]
+      "permissions": [
+        "NOTIFICATIONS"
+      ]
     },
     "web": {
       "output": "static",
@@ -63,8 +65,15 @@
     },
     "extra": {
       "eas": {
-        "projectId": "REMPLACER_PAR_EAS_INIT"
-      }
+        "projectId": "f8d02292-d531-480f-bece-043f455d6514"
+      },
+      "router": {}
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f8d02292-d531-480f-bece-043f455d6514"
     }
   }
 }
