@@ -8,6 +8,7 @@ import { Heading, Text } from "@/components/ui/text";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsGroup, SettingsRow } from "@/components/ui/settings-row";
 import { getDashboard } from "@/services/api/dashboard";
+import { useSession } from "@/stores/session";
 import { getColors } from "@/theme/colors";
 import { fr } from "@/i18n/fr";
 
@@ -35,6 +36,7 @@ function Kpi({
 
 export default function AdminHome() {
   const colors = getColors(useColorScheme());
+  const isAdmin = useSession((s) => s.user?.role === "admin");
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "dashboard"],
     queryFn: getDashboard,
@@ -101,6 +103,12 @@ export default function AdminHome() {
             label={fr.fichiersAdmin.title}
             onPress={() => router.push("/(admin)/fichiers")}
           />
+          {isAdmin ? (
+            <SettingsRow
+              label={fr.utilisateursAdmin.title}
+              onPress={() => router.push("/(admin)/utilisateurs")}
+            />
+          ) : null}
           <SettingsRow
             label={fr.admin.comments}
             onPress={() => router.push("/(admin)/commentaires")}
