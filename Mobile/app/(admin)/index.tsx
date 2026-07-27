@@ -100,6 +100,10 @@ export default function AdminHome() {
             onPress={() => router.push("/(admin)/taches")}
           />
           <SettingsRow
+            label={fr.pointage.title}
+            onPress={() => router.push("/(admin)/pointage")}
+          />
+          <SettingsRow
             label={fr.calendrierAdmin.title}
             onPress={() => router.push("/(admin)/calendrier")}
           />

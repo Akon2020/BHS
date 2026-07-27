@@ -8,6 +8,7 @@ import {
   getPeriodeRange,
   formatDuree,
   formatPeriodeLabel,
+  nowTzDateTime,
 } from "../utils/pointage.utils.js";
 import { generatePointagePdf } from "../utils/pointage-pdf.js";
 
@@ -206,6 +207,85 @@ export const createPointage = async (req, res, next) => {
       .json({ message: "Pointage enregistré avec succès", data: created });
   } catch (error) {
     console.error("Erreur lors de la création du pointage :", error);
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
+/**
+ * Démarre une session de pointage horodatée « maintenant » (heure UTC+2 serveur).
+ * La session reste ouverte (heureFin nulle) jusqu'à sa clôture.
+ */
+export const pointerMaintenant = async (req, res, next) => {
+  try {
+    const { idProfil, note } = req.body;
+
+    if (!idProfil) {
+      return res.status(400).json({ message: "Le profil est requis." });
+    }
+
+    const profil = await ProfilPointage.findByPk(idProfil);
+    if (!profil) {
+      return res.status(404).json({ message: "Profil introuvable." });
+    }
+
+    // Empêche deux sessions ouvertes simultanées pour un même profil.
+    const ouverte = await Pointage.findOne({
+      where: { idProfil, heureFin: null },
+    });
+    if (ouverte) {
+      return res
+        .status(409)
+        .json({ message: "Une session est déjà ouverte pour ce profil." });
+    }
+
+    const { date, heure } = nowTzDateTime();
+    const pointage = await Pointage.create({
+      idProfil,
+      date,
+      heureDebut: heure,
+      heureFin: null,
+      note: note || null,
+      createdBy: req.user?.idUtilisateur || null,
+    });
+
+    const created = await Pointage.findByPk(pointage.idPointage, {
+      include: [profilInclude],
+    });
+
+    return res.status(201).json({ message: "Pointage démarré", data: created });
+  } catch (error) {
+    console.error("Erreur lors du démarrage du pointage :", error);
+    res.status(500).json({ message: "Erreur serveur" });
+    next(error);
+  }
+};
+
+/**
+ * Clôture une session de pointage ouverte en enregistrant l'heure de fin
+ * (heure UTC+2 serveur). La durée est calculée par le hook du modèle.
+ */
+export const cloturerPointage = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const pointage = await Pointage.findByPk(id);
+    if (!pointage) {
+      return res.status(404).json({ message: "Pointage introuvable." });
+    }
+    if (pointage.heureFin) {
+      return res
+        .status(400)
+        .json({ message: "Cette session est déjà clôturée." });
+    }
+
+    const { heure } = nowTzDateTime();
+    pointage.heureFin = heure;
+    await pointage.save();
+
+    const updated = await Pointage.findByPk(id, { include: [profilInclude] });
+    return res.status(200).json({ message: "Session clôturée", data: updated });
+  } catch (error) {
+    console.error("Erreur lors de la clôture du pointage :", error);
     res.status(500).json({ message: "Erreur serveur" });
     next(error);
   }

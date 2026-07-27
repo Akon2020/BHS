@@ -12,6 +12,18 @@ const toISODate = (d) =>
   `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 
 /**
+ * Date + heure courantes dans le fuseau de référence (UTC+2).
+ * @returns {{ date: string, heure: string }} date `YYYY-MM-DD`, heure `HH:MM:SS`
+ */
+export const nowTzDateTime = (anchorISO) => {
+  const d = nowInTz(anchorISO);
+  return {
+    date: toISODate(d),
+    heure: `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`,
+  };
+};
+
+/**
  * Calcule les bornes de date (YYYY-MM-DD) pour une période.
  * @param {"hebdo"|"mensuel"|"annuel"} periode
  * @param {string} [anchorISO] date d'ancrage (défaut : maintenant en UTC+2)
