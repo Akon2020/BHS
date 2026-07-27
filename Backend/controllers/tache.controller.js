@@ -7,6 +7,7 @@ import {
 import transporter from "../config/nodemailer.js";
 import { EMAIL } from "../config/env.js";
 import { taskReminderTemplate } from "../utils/tache-email.template.js";
+import { notifierUtilisateurs } from "../utils/notification.service.js";
 
 const STATUTS = ["a_faire", "en_cours", "fait"];
 const RECURRENCES = ["aucune", "quotidien", "hebdo", "mensuel"];
@@ -361,6 +362,17 @@ export const verifierRappelsTaches = async () => {
         echeanceStr: `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`,
         joursRestants,
       }),
+    });
+
+    // Push (additif) : rappel aux assignés + créateur.
+    await notifierUtilisateurs(ids, {
+      titre: `Rappel : ${t.titre}`,
+      corps:
+        joursRestants === 0
+          ? "Échéance aujourd'hui."
+          : `Échéance dans ${joursRestants} jour(s).`,
+      categorie: "systeme",
+      donnees: { type: "tache", id: t.idTache },
     });
 
     t.dernierRappel = aujourdhui;

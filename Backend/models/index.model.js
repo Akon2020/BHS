@@ -26,6 +26,9 @@ import Anniversaire from "./anniversaire.model.js";
 import Tache from "./tache.model.js";
 import TacheCommentaire from "./tacheCommentaire.model.js";
 import EntreeCalendrier from "./entreeCalendrier.model.js";
+import DispositifPush from "./dispositifPush.model.js";
+import Notification from "./notification.model.js";
+import PreferenceNotification from "./preferenceNotification.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -234,6 +237,46 @@ Contact.hasMany(ReponseContact, {
   hooks: true,
 });
 
+// Notifications push associations
+DispositifPush.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "utilisateur",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Utilisateur.hasMany(DispositifPush, {
+  foreignKey: "idUtilisateur",
+  as: "dispositifs",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+Notification.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "destinataire",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Utilisateur.hasMany(Notification, {
+  foreignKey: "idUtilisateur",
+  as: "notifications",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+PreferenceNotification.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "utilisateur",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Utilisateur.hasMany(PreferenceNotification, {
+  foreignKey: "idUtilisateur",
+  as: "preferencesNotification",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
 // Synchronisation des modèles
 const syncModels = async () => {
   try {
@@ -340,5 +383,8 @@ export {
   Tache,
   TacheCommentaire,
   EntreeCalendrier,
+  DispositifPush,
+  Notification,
+  PreferenceNotification,
   syncModels,
 };

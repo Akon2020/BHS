@@ -10,6 +10,10 @@ import {
   birthdayAlertTemplate,
   birthdayReminderTemplate,
 } from "../utils/anniversaire-email.template.js";
+import {
+  notifierTous,
+  notifierParRole,
+} from "../utils/notification.service.js";
 
 /* -------------------------------- CRUD -------------------------------- */
 
@@ -164,6 +168,13 @@ export const verifierAnniversaires = async () => {
         subject: `Joyeux anniversaire ${a.nom} !`,
         html: birthdayAlertTemplate(a.nom),
       });
+      // Push (additif) : alerte du jour à toute la communauté.
+      await notifierTous({
+        titre: `Joyeux anniversaire ${a.nom} !`,
+        corps: "Souhaitons ensemble un bel anniversaire aujourd'hui 🎉",
+        categorie: "anniversaire",
+        donnees: { type: "anniversaire", id: a.idAnniversaire },
+      });
     }
   }
 
@@ -190,6 +201,13 @@ export const verifierAnniversaires = async () => {
         bcc: adminBcc,
         subject: `Rappel : anniversaire de ${a.nom}`,
         html: birthdayReminderTemplate(a.nom, dateStr, a.delaiRappelJours),
+      });
+      // Push (additif) : rappel en amont aux admins / éditeurs.
+      await notifierParRole(["admin", "editeur"], {
+        titre: `Rappel : anniversaire de ${a.nom}`,
+        corps: `Le ${dateStr} · pensez à préparer un message.`,
+        categorie: "anniversaire",
+        donnees: { type: "anniversaire", id: a.idAnniversaire },
       });
       rappels += 1;
     }
