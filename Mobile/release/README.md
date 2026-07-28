@@ -20,6 +20,19 @@
 - [ ] Renseigner `eas.json > submit.production` : `appleId`, `ascAppId`, `appleTeamId`,
       et `google-service-account.json` (clé de service Play Console, **non commitée**).
 
+## 1 bis. Sentry (source maps)
+
+Par défaut, l'upload des source maps est **désactivé pendant la build**
+(`SENTRY_DISABLE_AUTO_UPLOAD=true` dans `eas.json`), sinon la tâche Gradle
+`...SentryUpload` fait **échouer la build** faute d'organisation/token. Le reporting
+Sentry runtime (via `EXPO_PUBLIC_SENTRY_DSN`) fonctionne quand même.
+
+Pour **réactiver** l'upload (stack traces symboliquées dans Sentry) :
+
+- [ ] Définir les secrets EAS : `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`
+      (`eas env:create ... --visibility sensitive`).
+- [ ] Retirer `SENTRY_DISABLE_AUTO_UPLOAD` des profils `eas.json`.
+
 ## 2. Identité de l'app
 
 - [ ] Vérifier `app.json` : `ios.bundleIdentifier` / `android.package` = `org.burningheartihs.mobile`.
