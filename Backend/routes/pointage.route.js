@@ -6,6 +6,8 @@ import {
   deleteProfil,
   getPointages,
   createPointage,
+  pointerMaintenant,
+  cloturerPointage,
   updatePointage,
   deletePointage,
   getStats,
@@ -137,6 +139,43 @@ pointageRouter.get("/export", exportPdf);
  */
 pointageRouter.get("/", getPointages);
 pointageRouter.post("/", createPointage);
+
+/**
+ * @swagger
+ * /api/pointages/pointer:
+ *   post:
+ *     summary: Démarrer une session de pointage horodatée « maintenant » (UTC+2)
+ *     tags: [Pointage]
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [idProfil]
+ *             properties:
+ *               idProfil: { type: integer }
+ *               note: { type: string }
+ *     responses:
+ *       201: { description: Pointage démarré }
+ *       409: { description: Une session est déjà ouverte pour ce profil }
+ */
+pointageRouter.post("/pointer", pointerMaintenant);
+
+/**
+ * @swagger
+ * /api/pointages/{id}/cloturer:
+ *   post:
+ *     summary: Clôturer une session de pointage ouverte (heure de fin = maintenant, UTC+2)
+ *     tags: [Pointage]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+ *     responses:
+ *       200: { description: Session clôturée }
+ *       400: { description: Session déjà clôturée }
+ */
+pointageRouter.post("/:id/cloturer", cloturerPointage);
 
 /**
  * @swagger

@@ -1,0 +1,5 @@
+# Outils d'agent (Claude Code) présents à la racine du monorepo.
+# Non liés au projet ; contiennent des liens symboliques qui cassent
+# l'archive EAS Build sous Windows (EPERM symlink). Exclus du dépôt et des builds.
+/.claude/
+/.agents/

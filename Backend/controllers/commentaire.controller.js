@@ -1,5 +1,32 @@
-import { Commentaire, Utilisateur } from "../models/index.model.js";
+import { Commentaire, Utilisateur, Blog } from "../models/index.model.js";
+import {
+  notifierUtilisateurs,
+  notifierParEmail,
+} from "../utils/notification.service.js";
 // import { Op } from "sequelize";
+
+// Notifie l'auteur du commentaire parent qu'une réponse a été publiée.
+const notifierReponseParent = async (reponse) => {
+  try {
+    if (!reponse?.idCommentaireParent) return;
+    const parent = await Commentaire.findByPk(reponse.idCommentaireParent);
+    if (!parent) return;
+    const blog = await Blog.findByPk(reponse.idBlog, { attributes: ["slug"] });
+    const payload = {
+      titre: "Nouvelle réponse à votre commentaire",
+      corps: reponse.contenu?.slice(0, 120) ?? "",
+      categorie: "systeme",
+      donnees: blog?.slug ? { type: "blog", slug: blog.slug } : { type: "blog" },
+    };
+    if (parent.idUtilisateur) {
+      await notifierUtilisateurs([parent.idUtilisateur], payload);
+    } else {
+      await notifierParEmail(parent.email, payload);
+    }
+  } catch (err) {
+    console.error("Erreur notifierReponseParent :", err.message);
+  }
+};
 
 export const getAllCommentaires = async (req, res, next) => {
   try {
@@ -142,9 +169,15 @@ export const modererCommentaire = async (req, res, next) => {
     if (!commentaire)
       return res.status(404).json({ message: "Commentaire non trouvé" });
 
+    const etaitApprouve = commentaire.statut === "approuve";
     commentaire.statut = statut;
     commentaire.modereBy = modereBy;
     await commentaire.save();
+
+    // Push (additif) : à l'approbation d'une réponse, on prévient l'auteur du parent.
+    if (statut === "approuve" && !etaitApprouve && commentaire.idCommentaireParent) {
+      notifierReponseParent(commentaire).catch(() => {});
+    }
 
     return res
       .status(200)

@@ -3,8 +3,10 @@ import {
   login,
   logout,
   register,
+  inscription,
   resetPassword,
   updatePassword,
+  supprimerCompte,
 } from "../controllers/auth.controller.js";
 import {
   authenticationJWT,
@@ -119,6 +121,40 @@ authRouter.post("/login", login);
 
 /**
  * @swagger
+ * /api/auth/inscription:
+ *   post:
+ *     summary: Inscription publique (crée un compte membre)
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nomComplet
+ *               - email
+ *               - password
+ *             properties:
+ *               nomComplet:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Compte créé (renvoie token + user)
+ *       400:
+ *         description: Données invalides
+ *       409:
+ *         description: Email déjà utilisé
+ */
+authRouter.post("/inscription", inscription);
+
+/**
+ * @swagger
  * /api/auth/reset-password:
  *   post:
  *     summary: Demande de réinitialisation de mot de passe
@@ -187,5 +223,21 @@ authRouter.post("/resetpassword", updatePassword);
  *         description: Déconnexion réussie
  */
 authRouter.post("/logout", logout);
+
+/**
+ * @swagger
+ * /api/auth/compte:
+ *   delete:
+ *     summary: Supprime définitivement son propre compte
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Compte supprimé
+ *       401:
+ *         description: Non authentifié
+ */
+authRouter.delete("/compte", authenticationJWT, supprimerCompte);
 
 export default authRouter;

@@ -26,7 +26,9 @@ import {
   Quote,
   HandHeart,
   CalendarClock,
+  CalendarDays,
   Cake,
+  ListTodo,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,128 +69,179 @@ export default function AdminSidebar({
     }
   };
 
-  const allRoutes = [
+  const menuGroups = [
     {
-      label: "Tableau de bord",
-      icon: LayoutDashboard,
-      href: "/admin",
-      active: pathname === "/admin",
+      label: "Général",
+      items: [
+        {
+          label: "Tableau de bord",
+          icon: LayoutDashboard,
+          href: "/admin",
+          active: pathname === "/admin",
+        },
+        {
+          label: "Calendrier",
+          icon: CalendarDays,
+          href: "/admin/calendrier",
+          active: pathname.startsWith("/admin/calendrier"),
+        },
+      ],
     },
     {
-      label: "Utilisateurs",
-      icon: Users,
-      href: "/admin/users",
-      active: pathname.startsWith("/admin/users"),
+      label: "Contenu",
+      items: [
+        {
+          label: "Blog",
+          icon: FileText,
+          href: "/admin/blog",
+          active: pathname.startsWith("/admin/blog"),
+        },
+        {
+          label: "Catégories",
+          icon: Tags,
+          href: "/admin/categories",
+          active: pathname.startsWith("/admin/categories"),
+        },
+        {
+          label: "Commentaires",
+          icon: MessageSquareText,
+          href: "/admin/comments",
+          active: pathname.startsWith("/admin/comments"),
+        },
+        {
+          label: "Témoignages",
+          icon: Quote,
+          href: "/admin/temoignages",
+          active: pathname.startsWith("/admin/temoignages"),
+        },
+        {
+          label: "Événements",
+          icon: Calendar,
+          href: "/admin/events",
+          active: pathname.startsWith("/admin/events"),
+        },
+        {
+          label: "Fichiers",
+          icon: Folder,
+          href: "/admin/files",
+          active: pathname === "/admin/files",
+        },
+      ],
     },
     {
-      label: "Identités",
-      icon: IdCard,
-      href: "/admin/identities",
-      active: pathname.startsWith("/admin/identities"),
+      label: "Membres",
+      items: [
+        {
+          label: "Utilisateurs",
+          icon: Users,
+          href: "/admin/users",
+          active: pathname.startsWith("/admin/users"),
+        },
+        {
+          label: "Identités",
+          icon: IdCard,
+          href: "/admin/identities",
+          active: pathname.startsWith("/admin/identities"),
+        },
+        {
+          label: "Équipe (Membre interne)",
+          icon: Users,
+          href: "/admin/team",
+          active: pathname.startsWith("/admin/team"),
+        },
+      ],
     },
     {
-      label: "Catégories",
-      icon: Tags,
-      href: "/admin/categories",
-      active: pathname.startsWith("/admin/categories"),
+      label: "Communication",
+      items: [
+        {
+          label: "Messages",
+          icon: MessageSquare,
+          href: "/admin/contact",
+          active: pathname.startsWith("/admin/contact"),
+        },
+        {
+          label: "Newsletter",
+          icon: Mail,
+          href: "/admin/newsletter",
+          active: pathname.startsWith("/admin/newsletter"),
+        },
+        {
+          label: "Abonnés Newsletter",
+          icon: UserPlus,
+          href: "/admin/abonnes",
+          active: pathname.startsWith("/admin/abonnes"),
+        },
+      ],
     },
     {
-      label: "Blog",
-      icon: FileText,
-      href: "/admin/blog",
-      active: pathname.startsWith("/admin/blog"),
+      label: "Organisation",
+      items: [
+        {
+          label: "Agenda / RDV",
+          icon: CalendarClock,
+          href: "/admin/agenda",
+          active: pathname.startsWith("/admin/agenda"),
+        },
+        {
+          label: "Tâches",
+          icon: ListTodo,
+          href: "/admin/taches",
+          active: pathname.startsWith("/admin/taches"),
+        },
+        {
+          label: "Anniversaires",
+          icon: Cake,
+          href: "/admin/anniversaires",
+          active: pathname.startsWith("/admin/anniversaires"),
+        },
+        {
+          label: "Pointage",
+          icon: Timer,
+          href: "/admin/pointage",
+          active: pathname.startsWith("/admin/pointage"),
+        },
+      ],
     },
     {
-      label: "Témoignages",
-      icon: Quote,
-      href: "/admin/temoignages",
-      active: pathname.startsWith("/admin/temoignages"),
+      label: "Finances",
+      items: [
+        {
+          label: "Dons",
+          icon: HandHeart,
+          href: "/admin/dons",
+          active: pathname.startsWith("/admin/dons"),
+        },
+      ],
     },
     {
-      label: "Commentaires",
-      icon: MessageSquareText,
-      href: "/admin/comments",
-      active: pathname.startsWith("/admin/comments"),
-    },
-    {
-      label: "Messages",
-      icon: MessageSquare,
-      href: "/admin/contact",
-      active: pathname.startsWith("/admin/contact"),
-    },
-    {
-      label: "Newsletter",
-      icon: Mail,
-      href: "/admin/newsletter",
-      active: pathname.startsWith("/admin/newsletter"),
-    },
-    {
-      label: "Abonnés Newsletter",
-      icon: UserPlus,
-      href: "/admin/abonnes",
-      active: pathname.startsWith("/admin/abonnes"),
-    },
-    {
-      label: "Événements",
-      icon: Calendar,
-      href: "/admin/events",
-      active: pathname.startsWith("/admin/events"),
-    },
-    {
-      label: "Dons",
-      icon: HandHeart,
-      href: "/admin/dons",
-      active: pathname.startsWith("/admin/dons"),
-    },
-    {
-      label: "Équipe (Membre interne)",
-      icon: Users,
-      href: "/admin/team",
-      active: pathname.startsWith("/admin/team"),
-    },
-    {
-      label: "Fichiers",
-      icon: Folder,
-      href: "/admin/files",
-      active: pathname === "/admin/files",
-    },
-    {
-      label: "Pointage",
-      icon: Timer,
-      href: "/admin/pointage",
-      active: pathname.startsWith("/admin/pointage"),
-    },
-    {
-      label: "Agenda / RDV",
-      icon: CalendarClock,
-      href: "/admin/agenda",
-      active: pathname.startsWith("/admin/agenda"),
-    },
-    {
-      label: "Anniversaires",
-      icon: Cake,
-      href: "/admin/anniversaires",
-      active: pathname.startsWith("/admin/anniversaires"),
-    },
-    {
-      label: "Profil",
-      icon: UserCircle,
-      href: "/admin/profile",
-      active: pathname === "/admin/profile",
-    },
-    {
-      label: "Paramètres",
-      icon: Settings,
-      href: "/admin/settings",
-      active: pathname === "/admin/settings",
+      label: "Compte",
+      items: [
+        {
+          label: "Profil",
+          icon: UserCircle,
+          href: "/admin/profile",
+          active: pathname === "/admin/profile",
+        },
+        {
+          label: "Paramètres",
+          icon: Settings,
+          href: "/admin/settings",
+          active: pathname === "/admin/settings",
+        },
+      ],
     },
   ];
 
-  // Filtrer les routes selon le rôle de l'utilisateur
-  const routes = allRoutes.filter((route) => {
-    if (!user) return false;
-    return hasAccessToPage(user.role, route.href);
-  });
+  // Filtrer les items selon le rôle, puis retirer les groupes devenus vides.
+  const groups = menuGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (route) => user && hasAccessToPage(user.role, route.href),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   // Le label est masqué uniquement en mode réduit ET sur desktop (≥ lg).
   // Sur mobile le drawer est toujours pleine largeur, donc on garde les libellés.
@@ -255,27 +308,40 @@ export default function AdminSidebar({
           </Button>
         </div>
 
-        <ScrollArea className="flex-1 py-2">
-          <nav className="grid gap-1 px-2">
-            {routes.map((route) => (
-              <Link
-                key={route.href}
-                href={route.href}
-                onClick={onMobileClose}
-                title={route.label}
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all hover:bg-accent",
-                  collapsed && "lg:justify-center",
-                  route.active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground",
-                )}
-              >
-                <route.icon size={20} className="shrink-0" />
-                <span className={cn("truncate", labelHidden)}>
-                  {route.label}
-                </span>
-              </Link>
+        <ScrollArea className="min-h-0 flex-1 py-2">
+          <nav className="flex flex-col gap-1 px-2">
+            {groups.map((group) => (
+              <div key={group.label} className="flex flex-col gap-1">
+                {/* Titre de groupe (masqué en mode réduit sur desktop) */}
+                <p
+                  className={cn(
+                    "px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70",
+                    collapsed && "lg:hidden",
+                  )}
+                >
+                  {group.label}
+                </p>
+                {group.items.map((route) => (
+                  <Link
+                    key={route.href}
+                    href={route.href}
+                    onClick={onMobileClose}
+                    title={route.label}
+                    className={cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all hover:bg-accent",
+                      collapsed && "lg:justify-center",
+                      route.active
+                        ? "bg-accent text-accent-foreground"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    <route.icon size={20} className="shrink-0" />
+                    <span className={cn("truncate", labelHidden)}>
+                      {route.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             ))}
           </nav>
         </ScrollArea>

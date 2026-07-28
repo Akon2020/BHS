@@ -6,6 +6,7 @@ import {
   Commentaire,
 } from "../models/index.model.js";
 import { Op } from "sequelize";
+import { notifierPublicationBlog } from "../utils/notification.service.js";
 
 export const getAllBlogs = async (req, res, next) => {
   try {
@@ -184,6 +185,11 @@ export const createBlog = async (req, res, next) => {
       ],
     });
 
+    // Push (additif) : publication d'un contenu éditorial (3 catégories fixes).
+    if (blogComplet.statut === "publie") {
+      notifierPublicationBlog(blogComplet).catch(() => {});
+    }
+
     return res.status(201).json({
       message: `Blog "${titre}" créé avec succès.`,
       blog: blogComplet,
@@ -231,6 +237,7 @@ export const updateBlog = async (req, res, next) => {
       return res.status(404).json({ message: "Blog non trouvé" });
     }
 
+    const ancienStatut = blog.statut;
     await blog.update(donneesAMettreAJour);
 
     const blogMisAJour = await Blog.findByPk(id, {
@@ -244,6 +251,11 @@ export const updateBlog = async (req, res, next) => {
         { model: Commentaire, as: "commentaires", required: false },
       ],
     });
+
+    // Push (additif) : uniquement à la transition brouillon → publié.
+    if (ancienStatut !== "publie" && blogMisAJour.statut === "publie") {
+      notifierPublicationBlog(blogMisAJour).catch(() => {});
+    }
 
     return res.status(200).json({
       message: `Blog "${blog.titre}" mis à jour avec succès.`,

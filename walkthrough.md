@@ -553,3 +553,111 @@ Vérification : `tsc` 0 erreur ; `build` OK. **Bilan 5.1** : agenda/RDV complet.
 - `app/admin/anniversaires/page.tsx` : ajout (nom, jour, mois, rappel, email/année), table (date, rappel, actif switch, édition dialog, suppression), bouton **« Lancer la vérification »**. Sidebar « Anniversaires » (Cake) + permission éditeur.
 
 Vérification : `node --check` OK ; `tsc` 0 erreur ; `build` OK. **À tester runtime** : ajouter un anniversaire du jour → « Lancer la vérification » → email aux abonnés ; anniversaire à J-N → rappel aux admins.
+
+## Lot 5.4 — Tâches / Kanban
+
+**Backend**
+- Modèles `Tache` (titre, description, priorité, statut a_faire|en_cours|fait, échéance, récurrence aucune|quotidien|hebdo|mensuel, assignes JSON multi-utilisateurs, rappelJoursAvant, dernierRappel, createdBy) et `TacheCommentaire` (idTache, idUtilisateur, contenu). Getter JSON défensif sur `assignes`.
+- Associations : Tache→createur, Tache↔TacheCommentaire (CASCADE), TacheCommentaire→auteur.
+- Contrôleur `tache.controller.js` : CRUD + filtres (?statut, ?assigne=me), commentaires (ajout/suppression auteur ou admin), `getTaches` renvoie aussi la liste des `assignables` (évite un appel à /api/users). Reprogrammation auto d'une tâche récurrente marquée « fait » (échéance suivante + retour à a_faire). Rappels e-mail (assignés + créateur) via `verifierRappelsTaches`.
+- Routes `/api/taches` (staff : admin/éditeur/membre) + `/api/taches/rappels` (admin/éditeur). Gabarit e-mail `tache-email.template.js`.
+- Planificateur : nouveau cron quotidien 07:30 Africa/Lubumbashi pour les rappels de tâches.
+- Swagger régénéré (101 chemins).
+
+**Frontend**
+- Types `Tache`, `TacheCommentaire`, `TacheAssigne`, statuts/priorités/récurrences + réponses.
+- Action `actions/tache.ts` (CRUD, commentaires, rappels).
+- Page `/admin/taches` : vue Kanban 3 colonnes avec drag & drop (mise à jour optimiste du statut), cartes (priorité, échéance en retard, récurrence, compteur de commentaires, avatars assignés), dialog création/édition (priorité, échéance, récurrence, rappel, assignés multi via cases), dialog détail + fil de commentaires, filtre « Mes tâches », bouton « Lancer les rappels » (admin/éditeur).
+- Sidebar + permission `/admin/taches` (éditeur + membre) synchronisées via `permissions.ts` (proxy.ts réutilise `hasAccessToPage`).
+
+**Vérifs** : `node --check` OK sur tous les fichiers backend ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Lot 5.5 — Tableau de bord (mise à jour)
+
+**Backend** — `dashboard.controller.js` étendu (clés ajoutées, rétro-compatible) :
+- `rendezVous` : 5 prochains RDV (à venir, en attente/approuvés) + nombre en attente.
+- `anniversaires` : 5 anniversaires les plus proches (calcul de la prochaine occurrence + `dansJours`).
+- `taches` : compteurs `aFaire`/`enCours` + 5 prochaines échéances.
+- `pointage` : sessions et heures pointées du mois en cours.
+- `dons` : 5 dons récents + total confirmé par devise.
+- `finances` : nombre d'inscriptions événements + encaissé par devise.
+- Swagger : propriétés de réponse documentées, régénéré (101 chemins).
+
+**Frontend**
+- Types `dashboard.ts` étendus (DashboardRdv, DashboardAnniversaire, DashboardTache, DashboardDon + sous-objets).
+- Composant `components/admin/dashboard-overview.tsx` : 4 cartes de stats secondaires cliquables (RDV en attente, tâches actives, heures pointées, inscrits) + 5 panneaux (Prochains RDV, Anniversaires à venir, Tâches à échéance, Dons récents, Finances événements) avec liens « Voir tout », badges statut/priorité, états vides.
+- Intégré dans `app/admin/page.tsx` entre les cartes de stats et le graphique.
+
+**Vérifs** : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Lot 5.2 — Calendrier agrégé + export .ics
+
+**Utilitaire & composant partagés**
+- `lib/ics.ts` : génération de fichiers .ics (iCalendar) et de liens Google Agenda. Gère les événements horaires (début/fin, fin par défaut +1 h), la journée entière et la récurrence annuelle (anniversaires), avec échappement des caractères spéciaux.
+- `components/add-to-calendar.tsx` : bouton réutilisable (menu déroulant) — « Télécharger (.ics) » ou « Google Agenda ».
+
+**Admin** — page `/admin/calendrier` :
+- Agrège événements (getAllEventsAdmin), rendez-vous (getRendezVous) et anniversaires (getAnniversaires).
+- Vue **mois** (grille 6 semaines lundi→dimanche, jour courant surligné, 3 items max/jour + « +N de plus ») et vue **liste** chronologique.
+- Navigation par mois + bouton « Aujourd'hui », filtres par type (couleurs : événement=primary, RDV=bleu, anniversaire=ambre).
+- Clic sur une entrée → modal détail (date longue, lieu, statut, description) avec export .ics/Google.
+- Sidebar + permission éditeur (`/admin/calendrier`).
+
+**Public**
+- Détail événement (`event-detail-client.tsx`) : bouton « Ajouter au calendrier » à côté de l'inscription.
+- Suivi des RDV (`rdv-client.tsx`) : export .ics par rendez-vous non refusé.
+
+**Vérifs** : `tsc --noEmit` propre ; `npm run build` réussi (route `/admin/calendrier`). Lot 100 % frontend, aucune donnée touchée.
+
+## Refonte visuelle du tableau de bord (UI/UX)
+
+Application du design system « Bento Grid + Data-Dense Dashboard » (skill ui-ux-pro-max), thème crimson via tokens.
+- Hiérarchie repensée : **KPIs héro** (4 cartes cliquables : utilisateurs, articles, événements, abonnés + badge de tendance mensuelle) → **bento** (graphique des visites sur 2/3 + carte « Aperçu rapide » sur 1/3) → **panneaux temps-réel** (RDV, anniversaires, tâches) → **finances** (dons, événements) → **activité récente** (onglets).
+- Micro-interactions cohérentes : hover (bordure primaire, ombre douce), transitions 150–300ms, focus visibles, `cursor-pointer` sur les cartes cliquables, chiffres en `tabular-nums`.
+- États de chargement : **skeletons** pour les KPIs, l'aperçu rapide et les panneaux (au lieu d'un écran vide).
+- En-tête enrichi (titre serif + date du jour en toutes lettres).
+- Composant `dashboard-overview.tsx` scindé : `DashboardQuickStats` (rail du bento) + panneaux agrégés.
+
+Vérifs : `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Dashboard façon « Maxton » (données réelles + graphiques)
+
+Refonte inspirée d'un dashboard premium (carte d'accueil, KPIs à sparkline, donut, barres, jauges radiales) — branchée uniquement sur de vraies agrégations.
+
+**Backend** (`dashboard.controller.js`)
+- `serie` : séries des 6 derniers mois (nouveaux utilisateurs, abonnés, événements, articles) pour les sparklines et la croissance.
+- `taches.fait` ajouté (répartition complète à faire / en cours / fait).
+- `dons` : périmètres mois courant et année (`moisParDevise`, `anneeParDevise`, `moisCount`, `anneeCount`) pour les jauges.
+
+**Frontend**
+- Infra graphiques `components/admin/charts/chart-core.ts` : enregistrement chart.js + palette dérivée des tokens `--chart-*` lue au runtime et ré-évaluée au changement de thème (clair/sombre), helper `withAlpha` (oklch).
+- Composants : `KpiSparkline` (mini-courbe), `TasksDonut` (répartition tâches, centre = total), `GrowthBar` (barres groupées utilisateurs vs abonnés), `DonsRadial` (jauge dons mois/année).
+- Page `/admin` recomposée : en-tête + **carte d'accueil** (salutation, dons confirmés de l'année, CTA) + aperçu rapide ; **4 KPIs** avec tendance + sparkline réelle ; **répartition des tâches** + **croissance 6 mois** ; **dons ce mois / cette année** (jauges) ; panneaux agrégés ; activité récente. Skeletons de chargement partout.
+- Le graphique « visites » à données aléatoires est retiré au profit de données réelles.
+
+Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Dashboard — recentrage analytique (événements, articles, users, abonnés, pointage)
+
+Sur retour utilisateur : dons rétrogradés à un simple KPI, focus sur l'analyse.
+
+**Backend** (`dashboard.controller.js`)
+- Pointage : série des heures sur 6 mois (`serie.heures`), tendance mensuelle (`pointage.stat`), `pointage.topContributeurs` (top 5 du mois par profil).
+- Événements : `aVenir`, `passes`, `tauxRemplissage` (places inscrites / totales).
+- Articles : `blogs.parCategorie` (répartition par catégorie).
+- Abonnés : `abonnes.parStatut` (actif / inactif / désabonné).
+
+**Frontend**
+- Nouveaux composants graphiques : `DonutChart` (générique), `HoursLine` (courbe heures), `CategoryBar` (barres horizontales). Suppression de `tasks-donut` et `dons-radial`.
+- Page `/admin` recentrée : en-tête (salutation) ; **6 KPIs** (utilisateurs, abonnés, événements, articles, heures pointées avec tendance+sparkline, dons en KPI compact) ; **Croissance 6 mois** + carte **Événements** (donut à venir/passés, taux de remplissage, inscriptions, encaissé) ; **Heures pointées 6 mois** + **Top contributeurs** ; **Articles par catégorie** + **Abonnés par statut** ; panneaux opérationnels (RDV, anniversaires, tâches) ; activité récente.
+- `dashboard-overview` allégé aux 3 panneaux opérationnels (dons/finances/quickstats retirés).
+
+Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Calendrier — entrées manuelles
+
+Ajout d'un module d'entrées de calendrier saisies à la main (rappels, réunions internes, notes).
+- Backend : modèle `EntreeCalendrier` (titre, description, date, heureDebut/Fin, lieu, journeeEntiere, createdBy) + CRUD `/api/calendrier` (admin/éditeur). Nouvelle table auto-créée par `db.sync` (aucune donnée touchée). Swagger régénéré (103 chemins).
+- Frontend : types + `actions/calendrier.ts` ; page `/admin/calendrier` enrichie — bouton « Ajouter », formulaire (titre, date, journée entière ou heures début/fin, lieu, description), nouveau type « Perso » (couleur émeraude) agrégé dans les vues mois/liste et le filtre, édition/suppression depuis la modale de détail, export .ics automatique.
+
+Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.

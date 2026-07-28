@@ -36,7 +36,7 @@ const organizationJsonLd = {
     addressCountry: "CD",
   },
   email: "contact@burningheartihs.org",
-  telephone: "+243849005240",
+  telephone: "+243898961612",
   sameAs: [
     "https://facebook.com/burningheart87",
     "https://instagram.com/burningheart87",

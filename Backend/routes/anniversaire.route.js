@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getAnniversaires,
+  getAnniversairesAVenir,
   createAnniversaire,
   updateAnniversaire,
   deleteAnniversaire,
@@ -51,6 +52,23 @@ anniversaireRouter.post("/", ...admin, createAnniversaire);
  *       200: { description: Vérification exécutée }
  */
 anniversaireRouter.post("/verifier", ...admin, declencherVerification);
+
+/**
+ * @swagger
+ * /api/anniversaires/a-venir:
+ *   get:
+ *     summary: Prochains anniversaires (membres connectés, sans année de naissance)
+ *     tags: [Anniversaires]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200: { description: Liste des anniversaires à venir }
+ */
+anniversaireRouter.get(
+  "/a-venir",
+  authenticationJWT,
+  authorizeRoles("admin", "editeur", "membre"),
+  getAnniversairesAVenir,
+);
 
 /**
  * @swagger

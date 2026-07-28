@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import { verifierAnniversaires } from "../controllers/anniversaire.controller.js";
+import { verifierRappelsTaches } from "../controllers/tache.controller.js";
 
 // Démarre les tâches planifiées (rappels/alertes).
 export const startScheduler = () => {
@@ -17,5 +18,21 @@ export const startScheduler = () => {
     { timezone: "Africa/Lubumbashi" },
   );
 
-  console.log("Planificateur démarré (anniversaires : 07:00 Africa/Lubumbashi)");
+  // Chaque jour à 07:30 (Africa/Lubumbashi) : rappels des tâches à échéance.
+  cron.schedule(
+    "30 7 * * *",
+    async () => {
+      try {
+        const resume = await verifierRappelsTaches();
+        console.log("Rappels tâches :", resume);
+      } catch (e) {
+        console.error("Erreur planificateur tâches :", e.message);
+      }
+    },
+    { timezone: "Africa/Lubumbashi" },
+  );
+
+  console.log(
+    "Planificateur démarré (anniversaires 07:00 · tâches 07:30 · Africa/Lubumbashi)",
+  );
 };

@@ -8,6 +8,7 @@ import {
 } from "../models/index.model.js";
 import { EMAIL, FRONT_URL, HOST_URL } from "../config/env.js";
 import transporter from "../config/nodemailer.js";
+import { notifierTous } from "../utils/notification.service.js";
 import {
   eventPublishedNotificationTemplate,
   eventRegistrationWithPDFTemplate,
@@ -361,6 +362,16 @@ export const createEvent = async (req, res, next) => {
     });
 
     if (newEvent.statut === "publie") {
+      // Push (additif) : nouvel événement grand public, à toute la communauté.
+      notifierTous({
+        titre: `Nouvel événement : ${newEvent.titre}`,
+        corps: newEvent.lieu
+          ? `${new Date(newEvent.dateEvenement).toLocaleDateString("fr-FR")} · ${newEvent.lieu}`
+          : new Date(newEvent.dateEvenement).toLocaleDateString("fr-FR"),
+        categorie: "evenement",
+        donnees: { type: "evenement", slug: newEvent.slug },
+      }).catch(() => {});
+
       const abonnes = await Abonne.findAll({
         where: { statut: "actif" },
         attributes: ["email", "nomComplet"],
@@ -378,7 +389,7 @@ export const createEvent = async (req, res, next) => {
               newEvent.titre,
               newEvent.dateEvenement,
               newEvent.lieu,
-              `${FRONT_URL}/evenements/${newEvent.idEvenement}`,
+              `${FRONT_URL}/events/${newEvent.slug}`,
             ),
           };
 

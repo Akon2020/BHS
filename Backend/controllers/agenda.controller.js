@@ -11,6 +11,13 @@ import {
   rdvConfirmationTemplate,
   rdvStatutTemplate,
 } from "../utils/agenda-email.template.js";
+import { notifierParEmail } from "../utils/notification.service.js";
+
+const STATUT_RDV_LABEL = {
+  approuve: "Votre rendez-vous est approuvé",
+  refuse: "Votre demande de rendez-vous a été refusée",
+  reprogramme: "Votre rendez-vous a été reprogrammé",
+};
 
 const OCCUPE = ["en_attente", "approuve", "reprogramme"];
 const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -323,6 +330,16 @@ export const updateStatutRdv = async (req, res, next) => {
         rdv.email,
         `Votre rendez-vous - Burning Heart`,
       );
+
+      // Push (additif) : au demandeur s'il possède un compte.
+      notifierParEmail(rdv.email, {
+        titre: STATUT_RDV_LABEL[statut] ?? "Mise à jour de votre rendez-vous",
+        corps: `${new Date(rdv.date).toLocaleDateString("fr-FR")} à ${String(
+          rdv.heureDebut,
+        ).slice(0, 5)}`,
+        categorie: "rendezvous",
+        donnees: { type: "rendezvous", id: rdv.idRendezVous },
+      }).catch(() => {});
     }
   } catch (error) {
     console.error("Erreur maj statut RDV :", error);

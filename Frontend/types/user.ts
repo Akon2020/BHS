@@ -925,3 +925,96 @@ export interface GetAnniversairesResponse {
   nombre: number;
   anniversaires: Anniversaire[];
 }
+
+/* --------------------------- Entrées calendrier --------------------------- */
+
+export interface EntreeCalendrier {
+  idEntree: number;
+  titre: string;
+  description?: string | null;
+  date: string;
+  heureDebut?: string | null;
+  heureFin?: string | null;
+  lieu?: string | null;
+  journeeEntiere: boolean;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetEntreesCalendrierResponse {
+  nombre: number;
+  entrees: EntreeCalendrier[];
+}
+
+export interface EntreeCalendrierBody {
+  titre: string;
+  description?: string;
+  date: string;
+  heureDebut?: string | null;
+  heureFin?: string | null;
+  lieu?: string;
+  journeeEntiere?: boolean;
+}
+
+/* -------------------------------- Tâches -------------------------------- */
+
+export type StatutTache = "a_faire" | "en_cours" | "fait";
+export type PrioriteTache = "basse" | "normale" | "haute";
+export type RecurrenceTache = "aucune" | "quotidien" | "hebdo" | "mensuel";
+
+export interface TacheAssigne {
+  idUtilisateur: number;
+  nomComplet: string;
+  role?: UserRole;
+}
+
+export interface TacheCommentaire {
+  idCommentaireTache: number;
+  idTache: number;
+  idUtilisateur: number;
+  contenu: string;
+  createdAt: string;
+  updatedAt: string;
+  auteur?: { idUtilisateur: number; nomComplet: string };
+}
+
+export interface Tache {
+  idTache: number;
+  titre: string;
+  description?: string | null;
+  statut: StatutTache;
+  priorite: PrioriteTache;
+  echeance?: string | null;
+  recurrence: RecurrenceTache;
+  assignes: number[];
+  assignesDetails?: TacheAssigne[];
+  rappelJoursAvant: number;
+  dernierRappel?: string | null;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
+  createur?: { idUtilisateur: number; nomComplet: string };
+  commentaires?: TacheCommentaire[];
+}
+
+export interface GetTachesResponse {
+  nombre: number;
+  taches: Tache[];
+  assignables: TacheAssigne[];
+}
+
+export interface GetTacheResponse {
+  tache: Tache;
+}
+
+export interface CreateTacheBody {
+  titre: string;
+  description?: string;
+  statut?: StatutTache;
+  priorite?: PrioriteTache;
+  echeance?: string | null;
+  recurrence?: RecurrenceTache;
+  assignes?: number[];
+  rappelJoursAvant?: number;
+}

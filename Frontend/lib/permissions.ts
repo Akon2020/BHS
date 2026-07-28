@@ -27,9 +27,11 @@ export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
     "/admin/dons",
     "/admin/agenda",
     "/admin/anniversaires",
+    "/admin/taches",
+    "/admin/calendrier",
     "/admin/profile",
   ],
-  membre: ["/admin", "/admin/team", "/admin/profile"],
+  membre: ["/admin", "/admin/team", "/admin/taches", "/admin/profile"],
 };
 
 /**
@@ -44,9 +46,12 @@ export const hasAccessToPage = (
 
   const allowedPages = ADMIN_PAGE_PERMISSIONS[userRole] ?? [];
 
-  // Vérifier si le chemin exact est autorisé ou commence par un chemin autorisé
+  // Chemin exact autorisé, ou commençant par un chemin autorisé.
+  // La racine `/admin` (tableau de bord) ne matche qu'en exact — sinon elle
+  // accorderait par préfixe l'accès à toutes les sous-pages `/admin/*`.
   return allowedPages.some(
-    (page) => pathname === page || pathname.startsWith(page + "/"),
+    (page) =>
+      pathname === page || (page !== "/admin" && pathname.startsWith(page + "/")),
   );
 };
 

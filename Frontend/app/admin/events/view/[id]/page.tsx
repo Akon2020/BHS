@@ -1151,10 +1151,11 @@ export default function ViewEventAdminPage() {
                 </div>
               )}
 
-              {(event?.champsPersonnalises?.length ?? 0) > 0 && (
+              {Array.isArray(event?.champsPersonnalises) &&
+                event.champsPersonnalises.length > 0 && (
                 <div className="space-y-2 border-t pt-3">
                   <p className="font-medium">Réponses au formulaire</p>
-                  {event!.champsPersonnalises!.map((c) => {
+                  {event.champsPersonnalises.map((c) => {
                     const val = detailsFor.reponsesPersonnalisees?.[c.id];
                     return (
                       <div

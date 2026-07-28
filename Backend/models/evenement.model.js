@@ -77,6 +77,20 @@ const Evenement = db.define(
       defaultValue: [],
       comment:
         "Config des champs additionnels : [{ id, type, label, requis, options? }]",
+      // Certains drivers renvoient la colonne JSON comme chaîne : on garantit un tableau.
+      get() {
+        const v = this.getDataValue("champsPersonnalises");
+        if (Array.isArray(v)) return v;
+        if (typeof v === "string") {
+          try {
+            const parsed = JSON.parse(v);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return v ?? [];
+      },
     },
     createdBy: {
       type: DataTypes.INTEGER,

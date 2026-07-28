@@ -23,6 +23,12 @@ import CreneauRdv from "./creneauRdv.model.js";
 import RendezVous from "./rendezVous.model.js";
 import ParametreAgenda from "./parametreAgenda.model.js";
 import Anniversaire from "./anniversaire.model.js";
+import Tache from "./tache.model.js";
+import TacheCommentaire from "./tacheCommentaire.model.js";
+import EntreeCalendrier from "./entreeCalendrier.model.js";
+import DispositifPush from "./dispositifPush.model.js";
+import Notification from "./notification.model.js";
+import PreferenceNotification from "./preferenceNotification.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -189,6 +195,34 @@ CreneauRdv.hasMany(RendezVous, {
   as: "rendezVous",
 });
 
+// Tâches / Kanban associations
+Tache.belongsTo(Utilisateur, { foreignKey: "createdBy", as: "createur" });
+Utilisateur.hasMany(Tache, { foreignKey: "createdBy", as: "taches" });
+
+TacheCommentaire.belongsTo(Tache, {
+  foreignKey: "idTache",
+  as: "tache",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Tache.hasMany(TacheCommentaire, {
+  foreignKey: "idTache",
+  as: "commentaires",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+TacheCommentaire.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "auteur",
+});
+
+// Entrée de calendrier associations
+EntreeCalendrier.belongsTo(Utilisateur, {
+  foreignKey: "createdBy",
+  as: "createur",
+});
+
 // Contact-Réponse associations
 ReponseContact.belongsTo(Contact, {
   foreignKey: "idContact",
@@ -199,6 +233,46 @@ ReponseContact.belongsTo(Contact, {
 Contact.hasMany(ReponseContact, {
   foreignKey: "idContact",
   as: "reponses",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+// Notifications push associations
+DispositifPush.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "utilisateur",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Utilisateur.hasMany(DispositifPush, {
+  foreignKey: "idUtilisateur",
+  as: "dispositifs",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+Notification.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "destinataire",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Utilisateur.hasMany(Notification, {
+  foreignKey: "idUtilisateur",
+  as: "notifications",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+
+PreferenceNotification.belongsTo(Utilisateur, {
+  foreignKey: "idUtilisateur",
+  as: "utilisateur",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+Utilisateur.hasMany(PreferenceNotification, {
+  foreignKey: "idUtilisateur",
+  as: "preferencesNotification",
   onDelete: "CASCADE",
   hooks: true,
 });
@@ -306,5 +380,11 @@ export {
   RendezVous,
   ParametreAgenda,
   Anniversaire,
+  Tache,
+  TacheCommentaire,
+  EntreeCalendrier,
+  DispositifPush,
+  Notification,
+  PreferenceNotification,
   syncModels,
 };
