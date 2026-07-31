@@ -332,6 +332,10 @@ const syncModels = async () => {
       type: DataTypes.JSON,
       allowNull: true,
     });
+    await addColumnIfMissing("evenements", "dateLimiteInscription", {
+      type: DataTypes.DATE,
+      allowNull: true,
+    });
 
     // Backfill inscriptions — statut de paiement + réponses personnalisées.
     await addColumnIfMissing("inscriptionsevenements", "statutPaiement", {

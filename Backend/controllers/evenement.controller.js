@@ -322,6 +322,7 @@ export const createEvent = async (req, res, next) => {
       lieu,
       nombrePlaces,
       statut,
+      dateLimiteInscription,
     } = req.body;
 
     const generatedSlug = slugify(titre, { lower: true, strict: true });
@@ -352,6 +353,7 @@ export const createEvent = async (req, res, next) => {
       heureFin,
       lieu,
       nombrePlaces: nombrePlaces || 100,
+      dateLimiteInscription: dateLimiteInscription || null,
       imageEvenement,
       statut: statut || "brouillon",
       estPayant,
@@ -467,6 +469,10 @@ export const updateEvent = async (req, res, next) => {
         req.body.champsPersonnalises,
       );
     }
+    // Date limite d'inscription (une chaîne vide efface l'échéance).
+    if (req.body.dateLimiteInscription !== undefined) {
+      event.dateLimiteInscription = req.body.dateLimiteInscription || null;
+    }
 
     if (req.file) event.imageEvenement = req.file.path;
 
@@ -526,6 +532,14 @@ export const inscrireAUnEvenement = async (req, res, next) => {
     if (eventDate < now)
       return res.status(400).json({
         message: "Impossible de s'inscrire à un événement déjà passé.",
+      });
+
+    if (
+      event.dateLimiteInscription &&
+      new Date(event.dateLimiteInscription) < now
+    )
+      return res.status(400).json({
+        message: "La date limite d'inscription pour cet événement est dépassée.",
       });
 
     if (event.nombreInscrits >= event.nombrePlaces)
@@ -684,6 +698,14 @@ export const registerToEvent = async (req, res, next) => {
     if (eventDate < now)
       return res.status(400).json({
         message: "Impossible de s'inscrire à un événement déjà passé.",
+      });
+
+    if (
+      event.dateLimiteInscription &&
+      new Date(event.dateLimiteInscription) < now
+    )
+      return res.status(400).json({
+        message: "La date limite d'inscription pour cet événement est dépassée.",
       });
 
     if (event.nombreInscrits >= event.nombrePlaces)

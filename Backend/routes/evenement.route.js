@@ -223,6 +223,10 @@ evenementRouter.get(
  *                 type: string
  *               lieu:
  *                 type: string
+ *               dateLimiteInscription:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Date/heure limite d'inscription (ISO). Passé ce délai, les inscriptions publiques sont fermées.
  *               nombrePlaces:
  *                 type: integer
  *               statut:
@@ -278,6 +282,10 @@ evenementRouter.post(
  *                 type: string
  *               lieu:
  *                 type: string
+ *               dateLimiteInscription:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Date/heure limite d'inscription (ISO). Chaîne vide pour effacer.
  *               nombrePlaces:
  *                 type: integer
  *               statut:
