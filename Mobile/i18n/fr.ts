@@ -108,6 +108,8 @@ export const fr = {
     paid: "Payant",
     places: "places",
     full: "Complet",
+    deadlineUntil: "Inscriptions jusqu'au",
+    deadlinePassed: "Date limite d'inscription dépassée.",
     register: "S'inscrire",
     registerTitle: "Inscription",
     nomComplet: "Nom complet",

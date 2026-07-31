@@ -34,6 +34,9 @@ export default function EvenementDetail() {
     event.nombrePlaces > 0 &&
     event.nombreInscrits >= event.nombrePlaces;
   const restantes = event ? Math.max(event.nombrePlaces - event.nombreInscrits, 0) : 0;
+  const inscriptionsCloses =
+    !!event?.dateLimiteInscription &&
+    new Date(event.dateLimiteInscription).getTime() < Date.now();
 
   return (
     <Screen>
@@ -98,19 +101,32 @@ export default function EvenementDetail() {
                       : `${restantes} ${fr.evenements.places}`}
                   </Row>
                 ) : null}
+                {event.dateLimiteInscription ? (
+                  <Row icon="hourglass-outline" color={colors.mutedForeground}>
+                    {inscriptionsCloses
+                      ? fr.evenements.deadlinePassed
+                      : `${fr.evenements.deadlineUntil} ${formatDate(event.dateLimiteInscription)}`}
+                  </Row>
+                ) : null}
               </View>
 
               <Text className="leading-6 text-foreground">{event.description}</Text>
             </View>
           </ScrollView>
 
-          {!complet && event.statut === "publie" ? (
+          {event.statut === "publie" && !complet && !inscriptionsCloses ? (
             <View className="border-t border-border bg-card p-4">
               <Button
                 label={fr.evenements.register}
                 size="lg"
                 onPress={() => setRegister(true)}
               />
+            </View>
+          ) : inscriptionsCloses && !complet ? (
+            <View className="border-t border-border bg-card p-4">
+              <Text variant="muted" className="text-center">
+                {fr.evenements.deadlinePassed}
+              </Text>
             </View>
           ) : null}
 
