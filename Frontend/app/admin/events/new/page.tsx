@@ -54,6 +54,7 @@ export default function NewEventPage() {
     time: "",
     endTime: "",
     location: "",
+    registrationDeadline: "",
     maxAttendees: "",
     requiresRegistration: false,
     image: null as File | null,
@@ -157,6 +158,12 @@ export default function NewEventPage() {
       formData.append("heureDebut", eventData.time);
       if (eventData.endTime) formData.append("heureFin", eventData.endTime);
       formData.append("lieu", eventData.location);
+
+      if (eventData.registrationDeadline)
+        formData.append(
+          "dateLimiteInscription",
+          new Date(eventData.registrationDeadline).toISOString(),
+        );
 
       if (eventData.maxAttendees)
         formData.append("nombrePlaces", eventData.maxAttendees);
@@ -328,6 +335,26 @@ export default function NewEventPage() {
                       />
                     </div>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="registrationDeadline">
+                    Date limite d&apos;inscription
+                  </Label>
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <Input
+                      id="registrationDeadline"
+                      name="registrationDeadline"
+                      type="datetime-local"
+                      value={eventData.registrationDeadline}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Passé cette date, les inscriptions publiques sont fermées.
+                    Laisser vide pour aucune limite.
+                  </p>
                 </div>
               </div>
             </CardContent>

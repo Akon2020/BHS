@@ -192,6 +192,7 @@ export const updateEvent = async (
         heureDebut: string;
         heureFin: string;
         lieu: string;
+        dateLimiteInscription: string;
         nombrePlaces: number;
         statut: string;
         imageEvenement: File;

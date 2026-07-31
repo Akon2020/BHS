@@ -489,6 +489,7 @@ export interface Evenement {
   heureDebut: string;
   heureFin: string;
   lieu: string;
+  dateLimiteInscription?: string | null;
   nombrePlaces: number;
   nombreInscrits: number;
   imageEvenement: string;
@@ -544,6 +545,7 @@ export interface CreateEvenementBody {
   heureDebut: string;
   heureFin: string;
   lieu: string;
+  dateLimiteInscription?: string | null;
   nombrePlaces?: number;
   statut?: EvenementStatut;
 }
@@ -562,6 +564,7 @@ export interface UpdateEvenementBody {
   heureDebut?: string;
   heureFin?: string;
   lieu?: string;
+  dateLimiteInscription?: string | null;
   nombrePlaces?: number;
   statut?: EvenementStatut;
 }

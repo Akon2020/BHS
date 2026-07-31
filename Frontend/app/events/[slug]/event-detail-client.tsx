@@ -98,6 +98,9 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
 
   const isPast =
     new Date(event!.dateEvenement).getTime() < Date.now();
+  const isClosed =
+    !!event?.dateLimiteInscription &&
+    new Date(event.dateLimiteInscription).getTime() < Date.now();
   const totalPlaces = event?.nombrePlaces ?? null;
   const totalInscrits = event?.nombreInscrits ?? 0;
   const placesRestantes =
@@ -125,7 +128,7 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
                 variant={
                   placesRestantes === 0
                     ? "destructive"
-                    : isPast
+                    : isPast || isClosed
                     ? "secondary"
                     : "default"
                 }
@@ -134,6 +137,8 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
                   ? "Complet"
                   : isPast
                   ? "Passé"
+                  : isClosed
+                  ? "Inscriptions closes"
                   : "À venir"}
               </Badge>
             </div>
@@ -171,6 +176,22 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
                   </span>
                 </div>
               )}
+
+              {event!.dateLimiteInscription && (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>
+                    Inscriptions {isClosed ? "closes le" : "jusqu’au"}{" "}
+                    {new Date(event!.dateLimiteInscription).toLocaleString(
+                      "fr-FR",
+                      {
+                        dateStyle: "long",
+                        timeStyle: "short",
+                      },
+                    )}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -201,8 +222,20 @@ export default function EventDetailsPage({ slug }: { slug: string }) {
             </p> */}
           </div>
 
+          {/* Inscriptions fermées (date limite dépassée) */}
+          {!isPast && isClosed && placesRestantes !== 0 && (
+            <div className="mt-12 rounded-xl border border-dashed bg-muted/30 p-8 text-center">
+              <h3 className="font-serif text-2xl font-bold">
+                Inscriptions closes
+              </h3>
+              <p className="mt-2 text-muted-foreground leading-relaxed">
+                La date limite d’inscription à cet événement est dépassée.
+              </p>
+            </div>
+          )}
+
           {/* CTA */}
-          {!isPast && placesRestantes !== 0 && (
+          {!isPast && !isClosed && placesRestantes !== 0 && (
             <div className="mt-12 rounded-xl bg-muted/50 p-8">
               <h3 className="font-serif text-2xl font-bold">
                 Participez à cet événement
