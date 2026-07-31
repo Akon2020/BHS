@@ -13,6 +13,7 @@ import Image from "next/image";
 import { toast } from "@/components/ui/use-toast";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { HeroCarousel } from "@/components/sections/hero-carousel";
 import { UpcomingEventsSection } from "@/components/sections/upcoming-events";
 import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form";
 import { ActusSection } from "@/components/sections/actus";
@@ -80,20 +81,11 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       <Header />
-      {/* Hero Section with Background Image */}
+      {/* Hero Section avec carrousel d'images */}
       <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/bg.jpg"
-            alt="Burning Heart Hero"
-            fill
-            className="object-cover brightness-50"
-            priority
-          />
-          <div className="absolute inset-0 from-black/60 via-black/40 to-background" />
-        </div>
+        <HeroCarousel />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-24 text-center lg:px-8">
+        <div className="pointer-events-none relative z-10 mx-auto max-w-7xl px-4 py-24 text-center lg:px-8">
           <h1 className="text-balance font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Ravivez la flamme de votre foi
           </h1>
@@ -102,7 +94,7 @@ export default function HomePage() {
             trouver du soutien et discerner la volonté de Dieu dans votre vie
             quotidienne.
           </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="pointer-events-auto mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link href="/a-propos">
               <Button size="lg" className="gap-2">
                 Découvrir notre mission
@@ -311,10 +303,10 @@ export default function HomePage() {
                       </p>
                       <p>
                         <a
-                          href="mailto:burningheartihs@gmail.com"
+                          href="mailto:contact@burningheartihs.org"
                           className="text-sm text-primary hover:underline"
                         >
-                          burningheartihs@gmail.com
+                          contact@burningheartihs.org
                         </a>
                       </p>
                     </div>
