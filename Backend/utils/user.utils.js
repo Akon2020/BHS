@@ -1,5 +1,6 @@
 import {
   COOKIE_DOMAIN,
+  FRONT_URL,
   JWT_EXPIRES_IN,
   JWT_SECRET,
   NODE_ENV,
@@ -15,6 +16,28 @@ export const generateToken = (user) => {
 const AUTH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 jours
 
 /**
+ * Domaine du cookie d'auth. En production, l'API (`api.burningheartihs.org`) et
+ * le front (`burningheartihs.org`) sont sur des hôtes différents : sans `domain`
+ * partagé, le cookie reste attaché à l'API et `proxy.ts` (côté front) ne le voit
+ * jamais → boucle de redirection vers `/connexion`.
+ * Priorité à `COOKIE_DOMAIN` ; à défaut, en production, dérivé de `FRONT_URL`.
+ */
+const resolveCookieDomain = () => {
+  if (COOKIE_DOMAIN) return COOKIE_DOMAIN;
+  if (NODE_ENV !== "production" || !FRONT_URL) return undefined;
+
+  try {
+    const { hostname } = new URL(FRONT_URL);
+    if (hostname === "localhost" || /^[\d.]+$/.test(hostname)) return undefined;
+    return `.${hostname.replace(/^www\./, "")}`;
+  } catch {
+    return undefined;
+  }
+};
+
+const AUTH_COOKIE_DOMAIN = resolveCookieDomain();
+
+/**
  * Options communes du cookie d'authentification httpOnly.
  * - `secure` uniquement en production (sinon le cookie est rejeté sur http en dev).
  * - `domain` partagé entre sous-domaines en production (ex. `.burningheartihs.org`)
@@ -26,9 +49,21 @@ export const getAuthCookieOptions = ({ withMaxAge = false } = {}) => ({
   secure: NODE_ENV === "production",
   sameSite: "lax",
   path: "/",
-  ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+  ...(AUTH_COOKIE_DOMAIN ? { domain: AUTH_COOKIE_DOMAIN } : {}),
   ...(withMaxAge ? { maxAge: AUTH_COOKIE_MAX_AGE } : {}),
 });
+
+/**
+ * Efface le cookie d'auth, y compris l'ancienne variante sans `domain`
+ * (posée avant que le domaine partagé soit configuré), qui sinon garderait
+ * le navigateur authentifié auprès de l'API après une déconnexion.
+ */
+export const clearAuthCookie = (res) => {
+  res.clearCookie("token", getAuthCookieOptions());
+  if (AUTH_COOKIE_DOMAIN) {
+    res.clearCookie("token", { ...getAuthCookieOptions(), domain: undefined });
+  }
+};
 
 export const getUserWithoutPassword = (userInstance) => {
   if (!userInstance || typeof userInstance.toJSON !== "function") {

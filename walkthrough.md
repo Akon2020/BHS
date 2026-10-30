@@ -661,3 +661,18 @@ Ajout d'un module d'entrées de calendrier saisies à la main (rappels, réunion
 - Frontend : types + `actions/calendrier.ts` ; page `/admin/calendrier` enrichie — bouton « Ajouter », formulaire (titre, date, journée entière ou heures début/fin, lieu, description), nouveau type « Perso » (couleur émeraude) agrégé dans les vues mois/liste et le filtre, édition/suppression depuis la modale de détail, export .ics automatique.
 
 Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Correctif — connexion bloquée en production
+
+**Symptôme** : en prod, la connexion réussit (toast « Connexion réussie ») mais l'utilisateur reste sur `/connexion` ; toute route `/admin` renvoie vers `/connexion`.
+
+**Cause** : le cookie `token` était posé par `api.burningheartihs.org` sans attribut `Domain` (`COOKIE_DOMAIN` absent de `.env.production.local`). Cookie « host-only » → jamais envoyé à `burningheartihs.org`, donc `proxy.ts` ne voyait aucun jeton. En local, `localhost:3000` / `localhost:5500` partagent les cookies, d'où l'absence du bug en dev.
+
+**Modifications**
+- Backend `utils/user.utils.js` : domaine du cookie = `COOKIE_DOMAIN`, à défaut dérivé de `FRONT_URL` en production (`.burningheartihs.org`) ; nouveau `clearAuthCookie(res)` qui efface aussi l'ancien cookie sans domaine (sinon l'API resterait authentifiée après déconnexion). Utilisé par `logout` et `supprimerCompte`.
+- Backend `.env.production.local` : `COOKIE_DOMAIN=".burningheartihs.org"` ; nouveau `Backend/.env.example`.
+- Frontend `proxy.ts` : export renommé `config` (Next.js 16 ignore `proxyConfig`, le matcher n'était pas appliqué) ; plus de redirection `/connexion` → `/connexion` en boucle quand le jeton est invalide ou l'API injoignable.
+- Frontend `.env.production` (`NEXT_PUBLIC_API_URL` prod, lu automatiquement par `next build`) + `.env.example`.
+- Guide de mise en production : [`DEPLOIEMENT.md`](DEPLOIEMENT.md).
+
+Note : l'entrée 0.1 ci-dessus indiquait à tort que l'export `config` devient `proxyConfig` en Next.js 16 — seul le nom du fichier et de la fonction changent.
