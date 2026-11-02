@@ -139,7 +139,7 @@ export default function ViewIdentityAdminPage() {
 
       doc.setFontSize(9);
       doc.setTextColor(...MUTED);
-      doc.text("Email : burningheartihs@gmail.com", 105, 50, {
+      doc.text("Email : contact@burningheartihs.org", 105, 50, {
         align: "center",
       });
       doc.text("Tél : +243 849 005 240", 105, 55, { align: "center" });

@@ -221,7 +221,7 @@ export default function IdentityAdminPage() {
 
       doc.setFontSize(9);
       doc.setTextColor(...MUTED);
-      doc.text("Email : burningheartihs@gmail.com", 105, 50, {
+      doc.text("Email : contact@burningheartihs.org", 105, 50, {
         align: "center",
       });
       doc.text("Tél : +243 849 005 240", 105, 55, { align: "center" });
@@ -316,7 +316,9 @@ export default function IdentityAdminPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold sm:text-3xl">Gestion des Fiches d'Identité</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">
+          Gestion des Fiches d'Identité
+        </h1>
         <Button onClick={() => setIsExportModalOpen(true)}>
           <Download className="mr-2 h-4 w-4" />
           Exporter

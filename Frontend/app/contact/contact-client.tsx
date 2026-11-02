@@ -131,7 +131,7 @@ export default function ContactPage() {
                         contact@burningheartihs.org
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        burningheartihs@gmail.com
+                        contact@burningheartihs.org
                       </p>
                     </div>
                   </CardContent>
