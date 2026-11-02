@@ -11,7 +11,8 @@ export const generateEventTicketPDF = async ({ event, inscription }) => {
   const filePath = path.join(dir, fileName);
 
   const doc = new PDFDocument({ size: "A4", margin: 40 });
-  doc.pipe(fs.createWriteStream(filePath));
+  const stream = fs.createWriteStream(filePath);
+  doc.pipe(stream);
 
   const PRIMARY = "#a42223";
   const TEXT = "#111111";
@@ -26,7 +27,8 @@ export const generateEventTicketPDF = async ({ event, inscription }) => {
 
   doc.roundedRect(40, 80, 515, 230, 12).lineWidth(1).stroke(BORDER);
 
-  doc.image("public/logo.png", 60, 95, { width: 60 });
+  const logo = path.join(process.cwd(), "public", "logo.png");
+  if (fs.existsSync(logo)) doc.image(logo, 60, 95, { width: 60 });
 
   doc.fontSize(18).fillColor(PRIMARY).text("BURNING HEART", 130, 95);
 
@@ -74,6 +76,13 @@ export const generateEventTicketPDF = async ({ event, inscription }) => {
     });
 
   doc.end();
+
+  // Attendre que le fichier soit entièrement écrit sur disque avant de le
+  // retourner : sinon l'appelant joint un PDF incomplet (illisible) au mail.
+  await new Promise((resolve, reject) => {
+    stream.on("finish", resolve);
+    stream.on("error", reject);
+  });
 
   return {
     fileName,

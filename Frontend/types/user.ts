@@ -489,6 +489,7 @@ export interface Evenement {
   heureDebut: string;
   heureFin: string;
   lieu: string;
+  dateLimiteInscription?: string | null;
   nombrePlaces: number;
   nombreInscrits: number;
   imageEvenement: string;
@@ -544,6 +545,7 @@ export interface CreateEvenementBody {
   heureDebut: string;
   heureFin: string;
   lieu: string;
+  dateLimiteInscription?: string | null;
   nombrePlaces?: number;
   statut?: EvenementStatut;
 }
@@ -562,6 +564,7 @@ export interface UpdateEvenementBody {
   heureDebut?: string;
   heureFin?: string;
   lieu?: string;
+  dateLimiteInscription?: string | null;
   nombrePlaces?: number;
   statut?: EvenementStatut;
 }
@@ -1017,4 +1020,101 @@ export interface CreateTacheBody {
   recurrence?: RecurrenceTache;
   assignes?: number[];
   rappelJoursAvant?: number;
+}
+
+/* ----------------------------- Table de prière ---------------------------- */
+
+export type DemandePriereStatut = "nouvelle" | "validee" | "archivee";
+export type DemandePriereSource = "visiteur" | "equipe";
+
+export interface DemandePriere {
+  idDemandePriere: number;
+  prenom?: string | null;
+  email?: string | null;
+  intention: string;
+  intentionPublique?: string | null;
+  partagePublic: boolean;
+  statut: DemandePriereStatut;
+  datePriere?: string | null;
+  source: DemandePriereSource;
+  traitePar?: number | null;
+  traiteur?: { idUtilisateur: number; nomComplet: string } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetDemandesPriereResponse {
+  nombre: number;
+  parStatut: Record<DemandePriereStatut, number>;
+  aujourdhui: string;
+  demandes: DemandePriere[];
+}
+
+export interface IntentionPublique {
+  idDemandePriere: number;
+  prenom: string | null;
+  texte: string;
+  source: DemandePriereSource;
+}
+
+export interface PrieresDuJourResponse {
+  date: string;
+  total: number;
+  confidentielles: number;
+  intentions: IntentionPublique[];
+}
+
+export interface CreateDemandePrierePayload {
+  prenom?: string;
+  email?: string;
+  intention: string;
+  partagePublic: boolean;
+  siteWeb?: string;
+}
+
+export interface UpdateDemandePrierePayload {
+  statut?: DemandePriereStatut;
+  datePriere?: string | null;
+  intentionPublique?: string | null;
+  prenom?: string | null;
+}
+
+/* --------------------------------- Galerie -------------------------------- */
+
+export type GalerieStatut = "brouillon" | "publie";
+
+export interface PhotoGalerie {
+  idPhoto: number;
+  idGalerie: number;
+  chemin: string;
+  legende?: string | null;
+  ordre: number;
+}
+
+export interface Galerie {
+  idGalerie: number;
+  titre: string;
+  slug: string;
+  description?: string | null;
+  dateActivite?: string | null;
+  lieu?: string | null;
+  imageCouverture?: string | null;
+  statut: GalerieStatut;
+  nombrePhotos?: number;
+  photos?: PhotoGalerie[];
+  createur?: { idUtilisateur: number; nomComplet: string } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetGaleriesPublicResponse {
+  total: number;
+  page: number;
+  pages: number;
+  galeries: Galerie[];
+}
+
+export interface GetGaleriesResponse {
+  nombre: number;
+  galeries: Galerie[];
 }

@@ -661,3 +661,59 @@ Ajout d'un module d'entrées de calendrier saisies à la main (rappels, réunion
 - Frontend : types + `actions/calendrier.ts` ; page `/admin/calendrier` enrichie — bouton « Ajouter », formulaire (titre, date, journée entière ou heures début/fin, lieu, description), nouveau type « Perso » (couleur émeraude) agrégé dans les vues mois/liste et le filtre, édition/suppression depuis la modale de détail, export .ics automatique.
 
 Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
+
+## Correctif — connexion bloquée en production
+
+**Symptôme** : en prod, la connexion réussit (toast « Connexion réussie ») mais l'utilisateur reste sur `/connexion` ; toute route `/admin` renvoie vers `/connexion`.
+
+**Cause** : le cookie `token` était posé par `api.burningheartihs.org` sans attribut `Domain` (`COOKIE_DOMAIN` absent de `.env.production.local`). Cookie « host-only » → jamais envoyé à `burningheartihs.org`, donc `proxy.ts` ne voyait aucun jeton. En local, `localhost:3000` / `localhost:5500` partagent les cookies, d'où l'absence du bug en dev.
+
+**Modifications**
+- Backend `utils/user.utils.js` : domaine du cookie = `COOKIE_DOMAIN`, à défaut dérivé de `FRONT_URL` en production (`.burningheartihs.org`) ; nouveau `clearAuthCookie(res)` qui efface aussi l'ancien cookie sans domaine (sinon l'API resterait authentifiée après déconnexion). Utilisé par `logout` et `supprimerCompte`.
+- Backend `.env.production.local` : `COOKIE_DOMAIN=".burningheartihs.org"` ; nouveau `Backend/.env.example`.
+- Frontend `proxy.ts` : export renommé `config` (Next.js 16 ignore `proxyConfig`, le matcher n'était pas appliqué) ; plus de redirection `/connexion` → `/connexion` en boucle quand le jeton est invalide ou l'API injoignable.
+- Frontend `.env.production` (`NEXT_PUBLIC_API_URL` prod, lu automatiquement par `next build`) + `.env.example`.
+- Guide de mise en production : [`DEPLOIEMENT.md`](DEPLOIEMENT.md).
+
+Note : l'entrée 0.1 ci-dessus indiquait à tort que l'export `config` devient `proxyConfig` en Next.js 16 — seul le nom du fichier et de la fonction changent.
+
+## Lot 5.6 — Numéro, Table de prière, Galerie & home éditoriale
+
+**Numéro de téléphone** : `+243 898 961 612` partout (contact, footer, home, PDF générés dans l'admin, Mobile Money de la page Don, JSON-LD). Les coordonnées sont centralisées dans `Frontend/lib/site.ts` (`CONTACT_PHONE`, `CONTACT_PHONE_DISPLAY`, `CONTACT_EMAIL`, `MOBILE_MONEY_NUMBER`). La page Contact rend désormais le numéro cliquable (`tel:`).
+
+**Backend**
+- `DemandePriere` (`demandes_priere`) : prénom, email, intention, `intentionPublique` (reformulation), `partagePublic` (accord), `statut` nouvelle/validee/archivee, `datePriere`, `source` visiteur/equipe, `traitePar`.
+- `/api/prieres` : `POST /` public (validation 5–2000 caractères, email facultatif, champ piège `siteWeb`), `GET /aujourdhui` public (date du jour à Bukavu ; n'expose que prénom + texte des intentions partagées, compte les confidentielles), `GET /` + `PUT /:id` + `DELETE /:id` + `POST /equipe` (admin/éditeur). Planifier une demande la valide. Notification in-app/push aux admins/éditeurs à chaque dépôt.
+- `Galerie` (`galeries`) + `PhotoGalerie` (`photos_galerie`, cascade) : `/api/galeries/public` (paginé, tri `dateActivite` décroissant, `nombrePhotos`), `/api/galeries/public/:slug`, CRUD admin, `PUT/DELETE /:id/photos/:idPhoto`. Slug unique suffixé. Upload `uploadImagesGalerie` (champ `images`, `uploads/galeries`, JPG/PNG/WEBP/GIF, 10 Mo, 30 max, erreurs 400 lisibles). Fichiers supprimés du disque avec la photo/l'album ; couverture réattribuée si supprimée.
+- Swagger régénéré (124 chemins). Tables créées par `db.sync` (non destructif).
+
+**Frontend**
+- Types + `actions/priere.ts`, `actions/galerie.ts` ; helpers `lib/media.ts` (`mediaUrl`, dates FR).
+- Public : `/priere` (intentions du jour + formulaire avec consentement), `/galerie` (pagination « Voir plus »), `/galerie/[slug]` (métadonnées serveur, JSON-LD `ImageGallery`, grille en colonnes, visionneuse avec flèches clavier).
+- Admin : `/admin/prieres` (onglets avec compteurs, recherche, planification + reformulation, intention de l'équipe, archivage), `/admin/galerie` + `/admin/galerie/[id]` (`nouveau` pour créer ; glisser-déposer avec validation, couverture, légendes enregistrées au blur).
+- Home : hero 75svh → « À la une » (article vedette + 3 récents, colonne Agenda à venir puis passés) → bandeau Table de prière (crimson) → Galerie (bento, masquée s'il n'y a aucun album) → À propos → Témoignages → Newsletter → Contact. Doublon d'email du bloc contact supprimé.
+- Navigation : « Galerie » et « Prière » ajoutés ; le menu desktop s'affiche à partir de `xl` (1280 px) sans « Accueil » (le logo y mène), menu mobile en dessous. Footer : lien Événements corrigé (`/evenements` → `/events`), ajout Galerie et Table de prière. Sitemap : `/galerie`, `/priere` et albums.
+- Sidebar admin + `lib/permissions.ts` : `/admin/prieres` et `/admin/galerie` ouverts à l'éditeur.
+
+**Vérifications** : lint backend propre, modules/associations chargés, `tsc` propre, `npm run build` réussi. Rendu vérifié en 1440 / 768 / 375 px avec l'API de prod (articles/événements réels) et des données simulées pour les nouvelles sections. Non testé contre la base locale (MySQL arrêté).
+
+## Correctif — modal de détail du calendrier admin
+
+**Symptôme** : sur `/admin/calendrier`, le détail d'un événement affichait le HTML brut de la description (`<strong>`, `<br />`…) et, pour un long contenu, la modale débordait de l'écran (contenu tronqué, actions inaccessibles).
+
+**Modifications**
+- Nouveau `Frontend/lib/html.ts` : `sanitizeHtml` (retire scripts, iframes, formulaires, attributs `on*`/`style`, URL `javascript:`/`data:` ; liens externes en nouvel onglet) et `htmlToText` (texte brut lisible).
+- `app/admin/calendrier/page.tsx` : seules les descriptions d'**événements** (éditeur riche) sont rendues en HTML assaini ; motifs de RDV (saisis par le public), notes d'anniversaire et entrées perso restent en texte brut. Modale restructurée : en-tête et barre d'actions fixes, corps défilant (`max-h-[90dvh]`), largeur `sm:max-w-xl`. L'export `.ics` / agenda externe reçoit la description en texte brut.
+- `app/globals.css` : classe `.prose-description` (paragraphes, gras, liens, listes, titres, citations, images) basée sur les tokens du thème.
+
+**Vérifications** : `tsc` propre ; modale testée sur une page temporaire avec une description longue (contenu défilant, actions visibles, `<script>`/`onerror` neutralisés).
+
+## Correctif — photos de la galerie invisibles + choix de la couverture
+
+**Cause** : Next.js 16 refuse par défaut d'optimiser (`next/image`) une image servie par une IP privée ; en local l'API est sur `localhost:5500`, l'optimiseur répondait 400 et toutes les images de l'API apparaissaient cassées (galerie, mais aussi couvertures d'articles/événements en dev). En production l'API (`api.burningheartihs.org`) a une IP publique et n'est pas concernée.
+
+**Modifications**
+- `Frontend/next.config.mjs` : `images.dangerouslyAllowLocalIP` activé **uniquement hors production**.
+- `app/admin/galerie/[id]/page.tsx` : choix de couverture explicite — bouton « Utiliser comme couverture » sous chaque photo (état « Photo de couverture » + contour sur la photo active, chargement pendant l'enregistrement) ; aperçu « Photo de couverture » dans le panneau Informations ; à la création (ou album sans couverture), étoile sur les photos à envoyer pour choisir celle qui deviendra la couverture (placée en tête de l'envoi).
+
+**Vérifications** : `tsc` propre ; `/_next/image` répond 200 pour les photos locales ; page album vérifiée (7 photos affichées, visionneuse et flèches clavier).

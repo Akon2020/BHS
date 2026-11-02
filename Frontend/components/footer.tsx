@@ -9,6 +9,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form";
+import { CONTACT_PHONE, CONTACT_PHONE_DISPLAY } from "@/lib/site";
 
 export function Footer() {
   return (
@@ -79,10 +80,26 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/evenements"
+                  href="/events"
                   className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   Événements
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/galerie"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Galerie
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/priere"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Table de prière
                 </Link>
               </li>
               <li>
@@ -117,10 +134,10 @@ export function Footer() {
               <li className="flex items-center gap-2 text-sm">
                 <Phone className="h-5 w-5 shrink-0 text-primary" />
                 <a
-                  href="tel:+243898961612"
+                  href={`tel:${CONTACT_PHONE}`}
                   className="text-muted-foreground transition-colors duration-200 hover:text-primary hover:underline"
                 >
-                  +243 849 005 240
+                  {CONTACT_PHONE_DISPLAY}
                 </a>
               </li>
               <li className="flex items-center gap-2 text-sm">

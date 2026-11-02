@@ -38,6 +38,12 @@ const Evenement = db.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    dateLimiteInscription: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment:
+        "Date/heure limite d'inscription. Passé ce délai, les inscriptions sont fermées.",
+    },
     nombrePlaces: {
       type: DataTypes.INTEGER,
       allowNull: false,

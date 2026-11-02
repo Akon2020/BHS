@@ -58,6 +58,7 @@ export default function EditEventPage() {
     time: "",
     endTime: "",
     location: "",
+    registrationDeadline: "",
     maxAttendees: "",
     requiresRegistration: false,
     image: null as File | null,
@@ -83,6 +84,9 @@ export default function EditEventPage() {
           time: ev.heureDebut,
           endTime: ev.heureFin || "",
           location: ev.lieu,
+          registrationDeadline: ev.dateLimiteInscription
+            ? format(new Date(ev.dateLimiteInscription), "yyyy-MM-dd'T'HH:mm")
+            : "",
           maxAttendees: ev.nombrePlaces?.toString() || "",
           requiresRegistration: Boolean(ev.nombrePlaces),
           image: null,
@@ -175,6 +179,9 @@ export default function EditEventPage() {
         heureDebut: eventData.time,
         heureFin: eventData.endTime || undefined,
         lieu: eventData.location,
+        dateLimiteInscription: eventData.registrationDeadline
+          ? new Date(eventData.registrationDeadline).toISOString()
+          : "",
         nombrePlaces: eventData.maxAttendees
           ? Number(eventData.maxAttendees)
           : undefined,
@@ -341,6 +348,26 @@ export default function EditEventPage() {
                       />
                     </div>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="registrationDeadline">
+                    Date limite d&apos;inscription
+                  </Label>
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <Input
+                      id="registrationDeadline"
+                      name="registrationDeadline"
+                      type="datetime-local"
+                      value={eventData.registrationDeadline}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Passé cette date, les inscriptions publiques sont fermées.
+                    Laisser vide pour aucune limite.
+                  </p>
                 </div>
               </div>
             </CardContent>

@@ -1581,6 +1581,80 @@
         }
       }
     },
+    "/api/dispositifs/enregistrer": {
+      "post": {
+        "summary": "Enregistrer un dispositif pour les notifications push (Expo)",
+        "tags": [
+          "Dispositifs"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token",
+                  "plateforme"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "example": "ExponentPushToken[xxxx]"
+                  },
+                  "plateforme": {
+                    "type": "string",
+                    "enum": [
+                      "ios",
+                      "android"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dispositif mis à jour"
+          },
+          "201": {
+            "description": "Dispositif enregistré"
+          }
+        }
+      }
+    },
+    "/api/dispositifs/desenregistrer": {
+      "delete": {
+        "summary": "Désactiver un dispositif (déconnexion / arrêt des push)",
+        "tags": [
+          "Dispositifs"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dispositif désenregistré"
+          }
+        }
+      }
+    },
     "/api/dons": {
       "post": {
         "summary": "Enregistrer une intention de don (public)",
@@ -2157,6 +2231,11 @@
                   "lieu": {
                     "type": "string"
                   },
+                  "dateLimiteInscription": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Date/heure limite d'inscription (ISO). Passé ce délai, les inscriptions publiques sont fermées."
+                  },
                   "nombrePlaces": {
                     "type": "integer"
                   },
@@ -2226,6 +2305,11 @@
                   },
                   "lieu": {
                     "type": "string"
+                  },
+                  "dateLimiteInscription": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Date/heure limite d'inscription (ISO). Chaîne vide pour effacer."
                   },
                   "nombrePlaces": {
                     "type": "integer"
@@ -2692,6 +2776,353 @@
         }
       }
     },
+    "/api/galeries/public": {
+      "get": {
+        "summary": "Albums publiés, du plus récent au plus ancien (public)",
+        "tags": [
+          "Galeries"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 12,
+              "maximum": 50
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ total, page, pages, galeries: [... nombrePhotos] }"
+          }
+        }
+      }
+    },
+    "/api/galeries/public/{slug}": {
+      "get": {
+        "summary": "Album publié avec ses photos (public)",
+        "tags": [
+          "Galeries"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ galerie: { ..., photos } }"
+          },
+          "404": {
+            "description": "Galerie introuvable"
+          }
+        }
+      }
+    },
+    "/api/galeries": {
+      "get": {
+        "summary": "Lister tous les albums (admin, éditeur)",
+        "tags": [
+          "Galeries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des albums"
+          }
+        }
+      },
+      "post": {
+        "summary": "Créer un album avec ses photos",
+        "tags": [
+          "Galeries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "titre"
+                ],
+                "properties": {
+                  "titre": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "dateActivite": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "lieu": {
+                    "type": "string"
+                  },
+                  "statut": {
+                    "type": "string",
+                    "enum": [
+                      "brouillon",
+                      "publie"
+                    ]
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "JPG/PNG/WEBP/GIF, 10 Mo max, 30 max"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Album créé"
+          },
+          "400": {
+            "description": "Données ou fichiers invalides"
+          }
+        }
+      }
+    },
+    "/api/galeries/{id}": {
+      "get": {
+        "summary": "Récupérer un album avec ses photos (admin, éditeur)",
+        "tags": [
+          "Galeries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Album"
+          }
+        }
+      },
+      "put": {
+        "summary": "Modifier un album et/ou ajouter des photos",
+        "tags": [
+          "Galeries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "titre": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "dateActivite": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "lieu": {
+                    "type": "string"
+                  },
+                  "statut": {
+                    "type": "string",
+                    "enum": [
+                      "brouillon",
+                      "publie"
+                    ]
+                  },
+                  "couverture": {
+                    "type": "integer",
+                    "description": "idPhoto à utiliser comme couverture"
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Album mis à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer un album et ses photos",
+        "tags": [
+          "Galeries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Album supprimé"
+          }
+        }
+      }
+    },
+    "/api/galeries/{id}/photos/{idPhoto}": {
+      "put": {
+        "summary": "Modifier la légende ou l'ordre d'une photo",
+        "tags": [
+          "Galeries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idPhoto",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "legende": {
+                    "type": "string"
+                  },
+                  "ordre": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Photo mise à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer une photo d'un album",
+        "tags": [
+          "Galeries"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idPhoto",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo supprimée"
+          }
+        }
+      }
+    },
     "/api/messages": {
       "get": {
         "summary": "Lister les messages envoyés",
@@ -3067,6 +3498,197 @@
         }
       }
     },
+    "/api/notifications/mes-notifications": {
+      "get": {
+        "summary": "Lister ses notifications (paginées, filtre lu)",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lu",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des notifications"
+          }
+        }
+      }
+    },
+    "/api/notifications/preferences": {
+      "get": {
+        "summary": "Récupérer ses préférences de notification par catégorie",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Préférences"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Activer/désactiver une catégorie",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "categorie",
+                  "active"
+                ],
+                "properties": {
+                  "categorie": {
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Préférence mise à jour"
+          }
+        }
+      }
+    },
+    "/api/notifications/lues-toutes": {
+      "patch": {
+        "summary": "Marquer toutes ses notifications comme lues",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Toutes lues"
+          }
+        }
+      }
+    },
+    "/api/notifications/{id}/lue": {
+      "patch": {
+        "summary": "Marquer une notification comme lue",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification lue"
+          }
+        }
+      }
+    },
+    "/api/notifications/diffuser": {
+      "post": {
+        "summary": "Diffuser une notification à un segment (admin)",
+        "tags": [
+          "Notifications"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "titre",
+                  "corps"
+                ],
+                "properties": {
+                  "titre": {
+                    "type": "string"
+                  },
+                  "corps": {
+                    "type": "string"
+                  },
+                  "segment": {
+                    "type": "string",
+                    "enum": [
+                      "tous",
+                      "membres",
+                      "abonnes"
+                    ]
+                  },
+                  "donnees": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Diffusion lancée"
+          }
+        }
+      }
+    },
     "/api/pointages/profils": {
       "get": {
         "summary": "Lister les profils de pointage",
@@ -3306,6 +3928,79 @@
         }
       }
     },
+    "/api/pointages/pointer": {
+      "post": {
+        "summary": "Démarrer une session de pointage horodatée « maintenant » (UTC+2)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "idProfil"
+                ],
+                "properties": {
+                  "idProfil": {
+                    "type": "integer"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pointage démarré"
+          },
+          "409": {
+            "description": "Une session est déjà ouverte pour ce profil"
+          }
+        }
+      }
+    },
+    "/api/pointages/{id}/cloturer": {
+      "post": {
+        "summary": "Clôturer une session de pointage ouverte (heure de fin = maintenant, UTC+2)",
+        "tags": [
+          "Pointage"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session clôturée"
+          },
+          "400": {
+            "description": "Session déjà clôturée"
+          }
+        }
+      }
+    },
     "/api/pointages/{id}": {
       "put": {
         "summary": "Mettre à jour un pointage (clôture a posteriori possible)",
@@ -3356,6 +4051,240 @@
         "responses": {
           "200": {
             "description": "Pointage supprimé"
+          }
+        }
+      }
+    },
+    "/api/prieres/aujourdhui": {
+      "get": {
+        "summary": "Intentions planifiées pour aujourd'hui (public)",
+        "description": "N'expose que les intentions partagées (prénom + texte). Les autres sont seulement comptées.",
+        "tags": [
+          "Prieres"
+        ],
+        "responses": {
+          "200": {
+            "description": "{ date, total, confidentielles, intentions: [{ idDemandePriere, prenom, texte, source }] }"
+          }
+        }
+      }
+    },
+    "/api/prieres": {
+      "post": {
+        "summary": "Déposer une demande de prière (public)",
+        "tags": [
+          "Prieres"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "intention"
+                ],
+                "properties": {
+                  "prenom": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "intention": {
+                    "type": "string",
+                    "minLength": 5,
+                    "maxLength": 2000
+                  },
+                  "partagePublic": {
+                    "type": "boolean",
+                    "description": "Accord pour afficher l'intention sur le site"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Demande reçue"
+          },
+          "400": {
+            "description": "Données invalides"
+          }
+        }
+      },
+      "get": {
+        "summary": "Lister les demandes (admin, éditeur)",
+        "tags": [
+          "Prieres"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "statut",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nouvelle",
+                "validee",
+                "archivee"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "{ nombre, parStatut, aujourdhui, demandes }"
+          }
+        }
+      }
+    },
+    "/api/prieres/equipe": {
+      "post": {
+        "summary": "Ajouter une intention de l'équipe (admin, éditeur)",
+        "tags": [
+          "Prieres"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "intention"
+                ],
+                "properties": {
+                  "intention": {
+                    "type": "string"
+                  },
+                  "datePriere": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Par défaut : aujourd'hui"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intention ajoutée"
+          }
+        }
+      }
+    },
+    "/api/prieres/{id}": {
+      "put": {
+        "summary": "Valider, planifier, reformuler ou archiver une demande",
+        "tags": [
+          "Prieres"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "statut": {
+                    "type": "string",
+                    "enum": [
+                      "nouvelle",
+                      "validee",
+                      "archivee"
+                    ]
+                  },
+                  "datePriere": {
+                    "type": "string",
+                    "format": "date",
+                    "nullable": true
+                  },
+                  "intentionPublique": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "prenom": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Demande mise à jour"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Supprimer une demande",
+        "tags": [
+          "Prieres"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Demande supprimée"
           }
         }
       }
@@ -4028,6 +4957,10 @@
       "description": "API pour le tableau de bord administrateur"
     },
     {
+      "name": "Dispositifs",
+      "description": "Enregistrement des dispositifs mobiles pour les notifications push"
+    },
+    {
       "name": "Dons",
       "description": "Intentions de don (formulaire public + suivi admin)"
     },
@@ -4048,6 +4981,10 @@
       "description": "API de gestion des fichiers téléchargeables"
     },
     {
+      "name": "Galeries",
+      "description": "Albums photo des activités de Burning Heart"
+    },
+    {
       "name": "Messages",
       "description": "Boîte d'envoi admin (messages composés et envoyés par email)"
     },
@@ -4056,8 +4993,16 @@
       "description": "API pour la gestion des newsletters"
     },
     {
+      "name": "Notifications",
+      "description": "Centre de notifications in-app et préférences par catégorie"
+    },
+    {
       "name": "Pointage",
       "description": "Gestion du temps passé au bureau (profils, présences, statistiques, export PDF)"
+    },
+    {
+      "name": "Prieres",
+      "description": "Table de prière — intentions du jour et demandes des visiteurs"
     },
     {
       "name": "Recherche",

@@ -30,8 +30,9 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { createDon } from "@/actions/don";
 import type { DonMoyen } from "@/types/user";
+import { MOBILE_MONEY_NUMBER } from "@/lib/site";
 
-const MOBILE_MONEY = "+243 849 005 240";
+const MOBILE_MONEY = MOBILE_MONEY_NUMBER;
 
 // Coordonnées bancaires — à compléter avec les vraies informations.
 const BANK_DETAILS = [

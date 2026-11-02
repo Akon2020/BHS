@@ -15,6 +15,7 @@ import {
 import { valideEmail } from "../middlewares/email.middleware.js";
 import {
   generateToken,
+  clearAuthCookie,
   getAuthCookieOptions,
   getUserWithoutPassword,
   strongPasswd,
@@ -289,7 +290,7 @@ export const updatePassword = async (req, res, next) => {
 
 export const logout = (req, res) => {
   try {
-    res.clearCookie("token", getAuthCookieOptions());
+    clearAuthCookie(res);
 
     return res.status(200).json({
       success: true,
@@ -312,7 +313,7 @@ export const supprimerCompte = async (req, res, next) => {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
     await utilisateur.destroy();
-    res.clearCookie("token", getAuthCookieOptions());
+    clearAuthCookie(res);
     return res.status(200).json({ message: "Compte supprimé" });
   } catch (error) {
     console.error("Erreur suppression compte:", error);

@@ -66,6 +66,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CONTACT_PHONE_DISPLAY } from "@/lib/site";
 
 export default function ViewEventAdminPage() {
   const params = useParams();
@@ -139,11 +140,13 @@ export default function ViewEventAdminPage() {
     if (event?.estPayant && !Number.isNaN(id)) fetchFinances();
   }, [event?.estPayant, id]);
 
-  const [partialFor, setPartialFor] =
-    useState<InscriptionEvenement | null>(null);
+  const [partialFor, setPartialFor] = useState<InscriptionEvenement | null>(
+    null,
+  );
   const [partialAmount, setPartialAmount] = useState("");
-  const [detailsFor, setDetailsFor] =
-    useState<InscriptionEvenement | null>(null);
+  const [detailsFor, setDetailsFor] = useState<InscriptionEvenement | null>(
+    null,
+  );
 
   const doUpdatePaiement = async (
     ins: InscriptionEvenement,
@@ -438,10 +441,10 @@ export default function ViewEventAdminPage() {
 
       doc.setFontSize(9);
       doc.setTextColor(...MUTED);
-      doc.text("Email : burningheartihs@gmail.com", 105, 50, {
+      doc.text("Email : contact@burningheartihs.org", 105, 50, {
         align: "center",
       });
-      doc.text("Tél : +243 849 005 240", 105, 55, { align: "center" });
+      doc.text(`Tél : ${CONTACT_PHONE_DISPLAY}`, 105, 55, { align: "center" });
       doc.text(
         "Adresse : 259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu",
         105,
@@ -869,8 +872,7 @@ export default function ViewEventAdminPage() {
                           ) : (
                             <Send className="mr-2 h-4 w-4" />
                           )}
-                          {event?.estPayant &&
-                          ins.statutPaiement === "paye"
+                          {event?.estPayant && ins.statutPaiement === "paye"
                             ? "Renvoyer billet + reçu"
                             : "Renvoyer ticket"}
                         </Button>
@@ -1153,37 +1155,34 @@ export default function ViewEventAdminPage() {
 
               {Array.isArray(event?.champsPersonnalises) &&
                 event.champsPersonnalises.length > 0 && (
-                <div className="space-y-2 border-t pt-3">
-                  <p className="font-medium">Réponses au formulaire</p>
-                  {event.champsPersonnalises.map((c) => {
-                    const val = detailsFor.reponsesPersonnalisees?.[c.id];
-                    return (
-                      <div
-                        key={c.id}
-                        className="flex justify-between gap-3"
-                      >
-                        <span className="text-muted-foreground">
-                          {c.label}
-                        </span>
-                        {c.type === "fichier" && val ? (
-                          <a
-                            href={`${process.env.NEXT_PUBLIC_API_URL}/${val}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-right font-medium text-primary underline"
-                          >
-                            Voir le fichier
-                          </a>
-                        ) : (
-                          <span className="break-words text-right font-medium">
-                            {val || "—"}
+                  <div className="space-y-2 border-t pt-3">
+                    <p className="font-medium">Réponses au formulaire</p>
+                    {event.champsPersonnalises.map((c) => {
+                      const val = detailsFor.reponsesPersonnalisees?.[c.id];
+                      return (
+                        <div key={c.id} className="flex justify-between gap-3">
+                          <span className="text-muted-foreground">
+                            {c.label}
                           </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                          {c.type === "fichier" && val ? (
+                            <a
+                              href={`${process.env.NEXT_PUBLIC_API_URL}/${val}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-right font-medium text-primary underline"
+                            >
+                              Voir le fichier
+                            </a>
+                          ) : (
+                            <span className="break-words text-right font-medium">
+                              {val || "—"}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
             </div>
           )}
         </DialogContent>

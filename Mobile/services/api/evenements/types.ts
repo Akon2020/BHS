@@ -36,6 +36,7 @@ export interface Evenement {
   heureDebut: string;
   heureFin: string;
   lieu: string;
+  dateLimiteInscription?: string | null;
   nombrePlaces: number;
   nombreInscrits: number;
   imageEvenement?: string | null;

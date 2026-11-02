@@ -48,9 +48,10 @@ export async function proxy(req: NextRequest) {
   const user = await getUserFromSession(token);
 
   if (!user) {
-    const response = NextResponse.redirect(new URL("/connexion", req.url));
-    response.cookies.delete("token");
-    return response;
+    // Jeton expiré/invalide (ou API injoignable) : sur `/connexion` on laisse
+    // afficher le formulaire — rediriger vers lui-même bouclerait à l'infini.
+    if (isLoginRoute) return NextResponse.next();
+    return NextResponse.redirect(new URL("/connexion", req.url));
   }
 
   const role = user.role as UserRole;
@@ -66,6 +67,6 @@ export async function proxy(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const proxyConfig = {
+export const config = {
   matcher: ["/admin/:path*", "/connexion"],
 };

@@ -45,9 +45,9 @@ export const welcomeEmailTemplate = (nom, email, url) => {
       </p>
 
       <div style="text-align: center; margin: 15px 0;">
-        <a href="mailto:burningheartihs@gmail.com" 
+        <a href="mailto:contact@burningheartihs.org" 
            style="background-color: #a42223; color: #fff; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
-          burningheartihs@gmail.com
+          contact@burningheartihs.org
         </a>
       </div>
 
@@ -300,7 +300,9 @@ export const contactReplyEmailTemplate = (
 };
 
 export const messageAdminTemplate = (destinataireNom, sujet, message) => {
-  const salutation = destinataireNom ? `Bonjour ${destinataireNom},` : "Bonjour,";
+  const salutation = destinataireNom
+    ? `Bonjour ${destinataireNom},`
+    : "Bonjour,";
   return `
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4; padding: 40px 1rem;">
     <tr>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HomePage from "./home-client";
+import { CONTACT_PHONE } from "@/lib/site";
 
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL || "https://burningheartihs.org"
@@ -36,7 +37,7 @@ const organizationJsonLd = {
     addressCountry: "CD",
   },
   email: "contact@burningheartihs.org",
-  telephone: "+243898961612",
+  telephone: CONTACT_PHONE,
   sameAs: [
     "https://facebook.com/burningheart87",
     "https://instagram.com/burningheart87",
