@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { User } from "@/types/user";
 
+/** Événement à émettre après une modification du profil (nom, avatar). */
+export const PROFIL_MIS_A_JOUR = "bhs:profil-mis-a-jour";
+
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,6 +29,8 @@ export const useAuth = () => {
     };
 
     checkAuth();
+    window.addEventListener(PROFIL_MIS_A_JOUR, checkAuth);
+    return () => window.removeEventListener(PROFIL_MIS_A_JOUR, checkAuth);
   }, []);
 
   const logout = async () => {

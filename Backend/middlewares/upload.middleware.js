@@ -26,36 +26,56 @@ const storage = multer.diskStorage({
 
 const IMAGES_AUTORISEES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
+const filtreImages = (req, file, cb) => {
+  if (IMAGES_AUTORISEES.includes(file.mimetype)) return cb(null, true);
+  cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", file.fieldname));
+};
+
 /**
- * Upload d'images de galerie (champ `images`) : formats image uniquement,
- * 10 Mo max par fichier, 30 fichiers max par requête. Les erreurs de
- * validation renvoient un 400 lisible au lieu d'une erreur serveur.
+ * Enveloppe un middleware Multer d'images : les erreurs de validation
+ * renvoient un 400 lisible au lieu d'une erreur serveur.
  */
-const uploadImagesMulter = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024, files: 30 },
-  fileFilter: (req, file, cb) => {
-    if (IMAGES_AUTORISEES.includes(file.mimetype)) return cb(null, true);
-    cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", file.fieldname));
-  },
-}).fields([{ name: "images", maxCount: 30 }]);
-
-const MESSAGES_UPLOAD = {
-  LIMIT_FILE_SIZE: "Chaque image doit faire 10 Mo maximum.",
-  LIMIT_FILE_COUNT: "30 images maximum par envoi.",
-  LIMIT_UNEXPECTED_FILE: "Seules les images JPG, PNG, WEBP ou GIF sont acceptées.",
+const avecErreursLisibles = (middleware, { tailleMo, maxFichiers }) => {
+  const messages = {
+    LIMIT_FILE_SIZE:
+      maxFichiers > 1
+        ? `Chaque image doit faire ${tailleMo} Mo maximum.`
+        : `L'image doit faire ${tailleMo} Mo maximum.`,
+    LIMIT_FILE_COUNT: `${maxFichiers} image(s) maximum par envoi.`,
+    LIMIT_UNEXPECTED_FILE:
+      "Seules les images JPG, PNG, WEBP ou GIF sont acceptées.",
+  };
+  return (req, res, next) => {
+    middleware(req, res, (err) => {
+      if (!err) return next();
+      const message =
+        err instanceof multer.MulterError
+          ? messages[err.code] || "Fichier refusé."
+          : "Erreur lors de l'envoi de l'image.";
+      return res.status(400).json({ message });
+    });
+  };
 };
 
-export const uploadImagesGalerie = (req, res, next) => {
-  uploadImagesMulter(req, res, (err) => {
-    if (!err) return next();
-    const message =
-      err instanceof multer.MulterError
-        ? MESSAGES_UPLOAD[err.code] || "Fichier refusé."
-        : "Erreur lors de l'envoi des images.";
-    return res.status(400).json({ message });
-  });
-};
+/** Images de galerie (champ `images`) : 10 Mo max par fichier, 30 max. */
+export const uploadImagesGalerie = avecErreursLisibles(
+  multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024, files: 30 },
+    fileFilter: filtreImages,
+  }).fields([{ name: "images", maxCount: 30 }]),
+  { tailleMo: 10, maxFichiers: 30 },
+);
+
+/** Photo de profil (champ `avatar`) : une image, 5 Mo max. */
+export const uploadAvatar = avecErreursLisibles(
+  multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+    fileFilter: filtreImages,
+  }).single("avatar"),
+  { tailleMo: 5, maxFichiers: 1 },
+);
 
 const upload = multer({ storage });
 

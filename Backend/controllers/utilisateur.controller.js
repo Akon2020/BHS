@@ -164,18 +164,38 @@ export const createUtilisateur = async (req, res, next) => {
   }
 };
 
+const ROLES = ["admin", "editeur", "membre"];
+
 export const updateUtilisateur = async (req, res, next) => {
   try {
     const { id } = req.params;
 
+    // Un non-admin ne peut modifier que son propre compte.
+    const estAdmin = req.user?.role === "admin";
+    if (!estAdmin && req.user?.idUtilisateur !== Number(id)) {
+      if (req.file) await deleteFile(req.file.path);
+      return res
+        .status(403)
+        .json({ message: "Vous ne pouvez modifier que votre propre profil." });
+    }
+
     const user = await Utilisateur.findByPk(id);
 
     if (!user) {
+      if (req.file) await deleteFile(req.file.path);
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
-    const champsModifiables = ["nomComplet", "email", "role"];
+    // Seul un admin peut changer un rôle.
+    const champsModifiables = estAdmin
+      ? ["nomComplet", "email", "role"]
+      : ["nomComplet", "email"];
     const donneesAMettreAJour = {};
+
+    if (estAdmin && req.body.role !== undefined && !ROLES.includes(req.body.role)) {
+      if (req.file) await deleteFile(req.file.path);
+      return res.status(400).json({ message: "Rôle invalide" });
+    }
 
     champsModifiables.forEach((champ) => {
       if (req.body[champ] !== undefined) {

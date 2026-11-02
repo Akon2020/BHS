@@ -22,6 +22,7 @@ import {
   getUserInitials,
 } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { mediaUrl } from "@/lib/media";
 import { Badge } from "@/components/ui/badge";
 
 interface AdminHeaderProps {
@@ -105,7 +106,7 @@ export default function AdminHeader({ onOpenSidebar }: AdminHeaderProps) {
             >
               <Avatar className="size-9 border">
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_API_URL}/${currentUser?.avatar || undefined}`}
+                  src={mediaUrl(currentUser?.avatar)}
                   alt={getUserDisplayName(currentUser)}
                   className="object-cover"
                 />

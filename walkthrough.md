@@ -717,3 +717,16 @@ Note : l'entrée 0.1 ci-dessus indiquait à tort que l'export `config` devient `
 - `app/admin/galerie/[id]/page.tsx` : choix de couverture explicite — bouton « Utiliser comme couverture » sous chaque photo (état « Photo de couverture » + contour sur la photo active, chargement pendant l'enregistrement) ; aperçu « Photo de couverture » dans le panneau Informations ; à la création (ou album sans couverture), étoile sur les photos à envoyer pour choisir celle qui deviendra la couverture (placée en tête de l'envoi).
 
 **Vérifications** : `tsc` propre ; `/_next/image` répond 200 pour les photos locales ; page album vérifiée (7 photos affichées, visionneuse et flèches clavier).
+
+## Correctif — photo de profil (`/admin/profile`)
+
+**Cause** : l'instance axios (`lib/axios.ts`) impose `Content-Type: application/json` ; axios 1.x convertit alors un `FormData` en JSON et le fichier est perdu. `updateUser` et `createUser` (`actions/users.ts`) n'indiquaient pas `multipart/form-data` (contrairement à la galerie/aux témoignages). Vérifié avec l'axios du projet : sans en-tête → `application/json`, fichier absent ; avec → multipart, fichier présent. L'aperçu local (`data:`) était en plus préfixé par l'URL de l'API, d'où un aperçu cassé.
+
+**Modifications**
+- `actions/users.ts` : `multipart/form-data` explicite pour `createUser` et `updateUser` (corrige aussi l'avatar dans la modale d'édition d'utilisateur).
+- `app/admin/profile/page.tsx` : la photo est **enregistrée dès qu'elle est choisie** (spinner sur l'avatar, toast), validation format/taille (JPG/PNG/WEBP/GIF, 5 Mo), bouton clavier-accessible ; le formulaire « Compte » ne gère plus que nom + email.
+- `hooks/useAuth.ts` : événement `PROFIL_MIS_A_JOUR` pour rafraîchir l'utilisateur ; les en-têtes (site + admin) affichent la nouvelle photo sans recharger et utilisent `mediaUrl` (plus de requête `…/undefined`).
+- Backend `middlewares/upload.middleware.js` : `uploadAvatar` (une image, 5 Mo, formats image, erreurs 400 lisibles) ; filtre d'images mutualisé avec la galerie. Utilisé par `POST /api/users/add` et `PATCH /api/users/update/:id`.
+- **Sécurité** `controllers/utilisateur.controller.js` : un non-admin ne peut plus modifier le compte d'un autre (403) ni changer de rôle (auparavant un `membre` pouvait se donner le rôle `admin`) ; rôle validé côté admin. Fichier envoyé supprimé en cas de refus. Swagger mis à jour.
+
+**Vérifications** : `tsc` propre, lint backend propre, API démarrée (routes OK, 401 sans jeton). Non testé connecté (pas d'accès au compte).
