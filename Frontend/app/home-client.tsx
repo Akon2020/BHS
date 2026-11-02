@@ -19,6 +19,7 @@ import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form"
 import { ActusSection } from "@/components/sections/actus";
 import { TestimonialsSection } from "@/components/sections/testimonials";
 import { createContact } from "@/actions/contact";
+import { CONTACT_PHONE, CONTACT_PHONE_DISPLAY } from "@/lib/site";
 
 export default function HomePage() {
   const [formData, setFormData] = useState({
@@ -278,10 +279,10 @@ export default function HomePage() {
                     <div>
                       <h4 className="font-medium mb-1">Téléphone</h4>
                       <a
-                        href="tel:+243898961612"
+                        href={`tel:${CONTACT_PHONE}`}
                         className="text-sm text-primary hover:underline"
                       >
-                        +243 849 005 240
+                        {CONTACT_PHONE_DISPLAY}
                       </a>
                     </div>
                   </div>

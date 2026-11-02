@@ -66,6 +66,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CONTACT_PHONE_DISPLAY } from "@/lib/site";
 
 export default function ViewEventAdminPage() {
   const params = useParams();
@@ -443,7 +444,7 @@ export default function ViewEventAdminPage() {
       doc.text("Email : contact@burningheartihs.org", 105, 50, {
         align: "center",
       });
-      doc.text("Tél : +243 849 005 240", 105, 55, { align: "center" });
+      doc.text(`Tél : ${CONTACT_PHONE_DISPLAY}`, 105, 55, { align: "center" });
       doc.text(
         "Adresse : 259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu",
         105,

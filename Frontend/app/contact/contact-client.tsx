@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { createContact } from "@/actions/contact";
+import { CONTACT_PHONE, CONTACT_PHONE_DISPLAY } from "@/lib/site";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -113,9 +114,12 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold">Téléphone</h3>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        +243 849 005 240
-                      </p>
+                      <a
+                        href={`tel:${CONTACT_PHONE}`}
+                        className="mt-1 block text-sm text-muted-foreground transition-colors hover:text-primary"
+                      >
+                        {CONTACT_PHONE_DISPLAY}
+                      </a>
                     </div>
                   </CardContent>
                 </Card>

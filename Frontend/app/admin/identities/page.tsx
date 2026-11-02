@@ -45,6 +45,7 @@ import {
 
 import { getAllIdentity, deleteIdentity } from "@/actions/identity";
 import type { FicheIdentite } from "@/types/user";
+import { CONTACT_PHONE_DISPLAY } from "@/lib/site";
 
 export default function IdentityAdminPage() {
   type ExportMode = "approved" | "new" | "all";
@@ -224,7 +225,7 @@ export default function IdentityAdminPage() {
       doc.text("Email : contact@burningheartihs.org", 105, 50, {
         align: "center",
       });
-      doc.text("Tél : +243 849 005 240", 105, 55, { align: "center" });
+      doc.text(`Tél : ${CONTACT_PHONE_DISPLAY}`, 105, 55, { align: "center" });
       doc.text(
         "Adresse : 259 Avenue Patrice Emery Lumumba, Q. Nyalukemba, Bukavu",
         105,
