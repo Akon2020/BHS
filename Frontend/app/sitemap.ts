@@ -35,6 +35,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/services",
     "/blog",
     "/events",
+    "/galerie",
+    "/priere",
     "/files",
     "/contact",
     "/don",
@@ -46,10 +48,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === "" ? 1 : 0.7,
   }));
 
-  const [blogs, events, files] = await Promise.all([
+  const [blogs, events, files, galeries] = await Promise.all([
     fetchList("/api/blogs?statut=publie&limit=1000", "blogs"),
     fetchList("/api/evenements?limit=1000", "events"),
     fetchList("/api/fichiers/public?limit=1000", "fichiers"),
+    fetchList("/api/galeries/public?limit=50", "galeries"),
   ]);
 
   const blogRoutes: MetadataRoute.Sitemap = blogs
@@ -79,5 +82,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     }));
 
-  return [...staticRoutes, ...blogRoutes, ...eventRoutes, ...fileRoutes];
+  const galerieRoutes: MetadataRoute.Sitemap = galeries
+    .filter((g) => g.slug)
+    .map((g) => ({
+      url: `${SITE_URL}/galerie/${g.slug}`,
+      lastModified: g.updatedAt ? new Date(g.updatedAt) : new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    }));
+
+  return [
+    ...staticRoutes,
+    ...blogRoutes,
+    ...eventRoutes,
+    ...fileRoutes,
+    ...galerieRoutes,
+  ];
 }

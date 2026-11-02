@@ -29,6 +29,8 @@ import {
   CalendarDays,
   Cake,
   ListTodo,
+  Flame,
+  Images,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -119,6 +121,18 @@ export default function AdminSidebar({
           icon: Calendar,
           href: "/admin/events",
           active: pathname.startsWith("/admin/events"),
+        },
+        {
+          label: "Table de prière",
+          icon: Flame,
+          href: "/admin/prieres",
+          active: pathname.startsWith("/admin/prieres"),
+        },
+        {
+          label: "Galerie",
+          icon: Images,
+          href: "/admin/galerie",
+          active: pathname.startsWith("/admin/galerie"),
         },
         {
           label: "Fichiers",

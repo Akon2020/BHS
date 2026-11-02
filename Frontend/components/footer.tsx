@@ -80,10 +80,26 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/evenements"
+                  href="/events"
                   className="text-sm text-muted-foreground hover:text-foreground"
                 >
                   Événements
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/galerie"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Galerie
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/priere"
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Table de prière
                 </Link>
               </li>
               <li>

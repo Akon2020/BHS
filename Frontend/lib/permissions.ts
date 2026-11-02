@@ -8,7 +8,7 @@ export type UserRole = "admin" | "editeur" | "membre";
 /**
  * Matrice de permissions par rôle (source unique partagée avec `proxy.ts`).
  * - `admin`  : accès total à l'espace admin (géré par court-circuit dans `hasAccessToPage`).
- * - `editeur`: contenu (blog, catégories, événements, fichiers, contacts, équipe, pointage) + profil + lecture du tableau de bord.
+ * - `editeur`: contenu (blog, catégories, événements, table de prière, galerie, fichiers, contacts, équipe, pointage) + profil + lecture du tableau de bord.
  * - `membre` : profil + équipe + lecture du tableau de bord.
  */
 export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
@@ -19,6 +19,8 @@ export const ADMIN_PAGE_PERMISSIONS: Record<UserRole, string[]> = {
     "/admin/comments",
     "/admin/categories",
     "/admin/events",
+    "/admin/prieres",
+    "/admin/galerie",
     "/admin/files",
     "/admin/contact",
     "/admin/team",

@@ -42,6 +42,8 @@ const navigation = [
   { name: "Services", href: "/services" },
   { name: "Événements", href: "/events" },
   { name: "Blog", href: "/blog" },
+  { name: "Galerie", href: "/galerie" },
+  { name: "Prière", href: "/priere" },
   { name: "Fichiers", href: "/files" },
   { name: "Rendez-vous", href: "/rendez-vous" },
   { name: "Contact", href: "/contact" },
@@ -100,8 +102,11 @@ export function Header() {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex lg:gap-x-8">
-          {navigation.map((item) => (
+        <div className="hidden xl:flex xl:gap-x-6">
+          {/* Le logo mène déjà à l'accueil : lien omis sur desktop. */}
+          {navigation
+            .filter((item) => item.href !== "/")
+            .map((item) => (
             <Link
               key={item.name}
               href={item.href}
@@ -228,7 +233,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="xl:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
@@ -242,7 +247,7 @@ export function Header() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden">
+        <div className="xl:hidden">
           <div className="space-y-1 px-4 pb-3 pt-2">
             {navigation.map((item) => (
               <Link
