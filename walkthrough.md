@@ -696,3 +696,14 @@ Note : l'entrée 0.1 ci-dessus indiquait à tort que l'export `config` devient `
 - Sidebar admin + `lib/permissions.ts` : `/admin/prieres` et `/admin/galerie` ouverts à l'éditeur.
 
 **Vérifications** : lint backend propre, modules/associations chargés, `tsc` propre, `npm run build` réussi. Rendu vérifié en 1440 / 768 / 375 px avec l'API de prod (articles/événements réels) et des données simulées pour les nouvelles sections. Non testé contre la base locale (MySQL arrêté).
+
+## Correctif — modal de détail du calendrier admin
+
+**Symptôme** : sur `/admin/calendrier`, le détail d'un événement affichait le HTML brut de la description (`<strong>`, `<br />`…) et, pour un long contenu, la modale débordait de l'écran (contenu tronqué, actions inaccessibles).
+
+**Modifications**
+- Nouveau `Frontend/lib/html.ts` : `sanitizeHtml` (retire scripts, iframes, formulaires, attributs `on*`/`style`, URL `javascript:`/`data:` ; liens externes en nouvel onglet) et `htmlToText` (texte brut lisible).
+- `app/admin/calendrier/page.tsx` : seules les descriptions d'**événements** (éditeur riche) sont rendues en HTML assaini ; motifs de RDV (saisis par le public), notes d'anniversaire et entrées perso restent en texte brut. Modale restructurée : en-tête et barre d'actions fixes, corps défilant (`max-h-[90dvh]`), largeur `sm:max-w-xl`. L'export `.ics` / agenda externe reçoit la description en texte brut.
+- `app/globals.css` : classe `.prose-description` (paragraphes, gras, liens, listes, titres, citations, images) basée sur les tokens du thème.
+
+**Vérifications** : `tsc` propre ; modale testée sur une page temporaire avec une description longue (contenu défilant, actions visibles, `<script>`/`onerror` neutralisés).

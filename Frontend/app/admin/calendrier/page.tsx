@@ -40,6 +40,7 @@ import {
   updateEntreeCalendrier,
   deleteEntreeCalendrier,
 } from "@/actions/calendrier";
+import { htmlToText, sanitizeHtml } from "@/lib/html";
 
 type CalType = "evenement" | "rdv" | "anniversaire" | "perso";
 
@@ -52,6 +53,8 @@ interface CalItem {
   heureFin?: string;
   location?: string;
   description?: string;
+  /** Description en HTML (éditeur riche) : uniquement pour les événements. */
+  descriptionHtml?: boolean;
   badge?: string;
   entreeId?: number; // présent pour les entrées manuelles (type "perso")
   ics: IcsItem;
@@ -200,11 +203,12 @@ export default function CalendrierPage() {
         heureFin: e.heureFin,
         location: e.lieu,
         description: e.description,
+        descriptionHtml: true,
         badge: e.statut,
         ics: {
           uid: `evt-${e.idEvenement}@burningheart`,
           title: e.titre,
-          description: e.description,
+          description: htmlToText(e.description),
           location: e.lieu,
           date: e.dateEvenement,
           heureDebut: e.heureDebut,
@@ -622,85 +626,98 @@ export default function CalendrierPage() {
 
       {/* Détail d'une entrée */}
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="pr-6">{selected?.title}</DialogTitle>
+        {/* En-tête et actions fixes ; seule la description défile. */}
+        <DialogContent className="flex max-h-[90dvh] flex-col gap-0 p-0 sm:max-w-xl">
+          <DialogHeader className="border-b px-6 pb-4 pt-6 text-left">
+            <DialogTitle className="pr-6 leading-snug">
+              {selected?.title}
+            </DialogTitle>
           </DialogHeader>
           {selected && (
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 text-xs font-medium",
-                    TYPE_CONFIG[selected.type].chip,
-                  )}
-                >
-                  {TYPE_CONFIG[selected.type].label.replace(/s$/, "")}
-                </span>
-                {selected.badge && (
-                  <Badge variant="outline" className="capitalize">
-                    {selected.badge.replace(/_/g, " ")}
-                  </Badge>
-                )}
-              </div>
-              <div className="space-y-1 text-sm">
-                <p className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  {new Date(selected.date).toLocaleDateString("fr-FR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                  {selected.heureDebut && !selected.ics.allDay
-                    ? ` · ${selected.heureDebut.slice(0, 5)}${
-                        selected.heureFin
-                          ? `–${selected.heureFin.slice(0, 5)}`
-                          : ""
-                      }`
-                    : selected.ics.allDay
-                      ? " · Journée entière"
-                      : ""}
-                </p>
-                {selected.location && (
-                  <p className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    {selected.location}
-                  </p>
-                )}
-              </div>
-              {selected.description && (
-                <p className="whitespace-pre-line text-sm text-muted-foreground">
-                  {selected.description}
-                </p>
-              )}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex gap-2">
-                  {selected.type === "perso" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEdit(selected)}
-                      >
-                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                        Modifier
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => setToDelete(selected)}
-                      >
-                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                        Supprimer
-                      </Button>
-                    </>
+            <>
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-medium",
+                      TYPE_CONFIG[selected.type].chip,
+                    )}
+                  >
+                    {TYPE_CONFIG[selected.type].label.replace(/s$/, "")}
+                  </span>
+                  {selected.badge && (
+                    <Badge variant="outline" className="capitalize">
+                      {selected.badge.replace(/_/g, " ")}
+                    </Badge>
                   )}
                 </div>
-                <AddToCalendar item={selected.ics} variant="default" />
+                <div className="space-y-1 text-sm">
+                  <p className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    {new Date(selected.date).toLocaleDateString("fr-FR", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                    {selected.heureDebut && !selected.ics.allDay
+                      ? ` · ${selected.heureDebut.slice(0, 5)}${
+                          selected.heureFin
+                            ? `–${selected.heureFin.slice(0, 5)}`
+                            : ""
+                        }`
+                      : selected.ics.allDay
+                        ? " · Journée entière"
+                        : ""}
+                  </p>
+                  {selected.location && (
+                    <p className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      {selected.location}
+                    </p>
+                  )}
+                </div>
+                {selected.description &&
+                  (selected.descriptionHtml ? (
+                    <div
+                      className="prose-description break-words text-sm leading-relaxed text-muted-foreground"
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeHtml(selected.description),
+                      }}
+                    />
+                  ) : (
+                    <p className="whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
+                      {selected.description}
+                    </p>
+                  ))}
               </div>
-            </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t px-6 py-4">
+                  <div className="flex gap-2">
+                    {selected.type === "perso" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEdit(selected)}
+                        >
+                          <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                          Modifier
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setToDelete(selected)}
+                        >
+                          <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                          Supprimer
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  <AddToCalendar item={selected.ics} variant="default" />
+                </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
