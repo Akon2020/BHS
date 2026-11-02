@@ -676,3 +676,23 @@ Vérifs : `node --check` OK ; `tsc --noEmit` propre ; `npm run build` réussi.
 - Guide de mise en production : [`DEPLOIEMENT.md`](DEPLOIEMENT.md).
 
 Note : l'entrée 0.1 ci-dessus indiquait à tort que l'export `config` devient `proxyConfig` en Next.js 16 — seul le nom du fichier et de la fonction changent.
+
+## Lot 5.6 — Numéro, Table de prière, Galerie & home éditoriale
+
+**Numéro de téléphone** : `+243 898 961 612` partout (contact, footer, home, PDF générés dans l'admin, Mobile Money de la page Don, JSON-LD). Les coordonnées sont centralisées dans `Frontend/lib/site.ts` (`CONTACT_PHONE`, `CONTACT_PHONE_DISPLAY`, `CONTACT_EMAIL`, `MOBILE_MONEY_NUMBER`). La page Contact rend désormais le numéro cliquable (`tel:`).
+
+**Backend**
+- `DemandePriere` (`demandes_priere`) : prénom, email, intention, `intentionPublique` (reformulation), `partagePublic` (accord), `statut` nouvelle/validee/archivee, `datePriere`, `source` visiteur/equipe, `traitePar`.
+- `/api/prieres` : `POST /` public (validation 5–2000 caractères, email facultatif, champ piège `siteWeb`), `GET /aujourdhui` public (date du jour à Bukavu ; n'expose que prénom + texte des intentions partagées, compte les confidentielles), `GET /` + `PUT /:id` + `DELETE /:id` + `POST /equipe` (admin/éditeur). Planifier une demande la valide. Notification in-app/push aux admins/éditeurs à chaque dépôt.
+- `Galerie` (`galeries`) + `PhotoGalerie` (`photos_galerie`, cascade) : `/api/galeries/public` (paginé, tri `dateActivite` décroissant, `nombrePhotos`), `/api/galeries/public/:slug`, CRUD admin, `PUT/DELETE /:id/photos/:idPhoto`. Slug unique suffixé. Upload `uploadImagesGalerie` (champ `images`, `uploads/galeries`, JPG/PNG/WEBP/GIF, 10 Mo, 30 max, erreurs 400 lisibles). Fichiers supprimés du disque avec la photo/l'album ; couverture réattribuée si supprimée.
+- Swagger régénéré (124 chemins). Tables créées par `db.sync` (non destructif).
+
+**Frontend**
+- Types + `actions/priere.ts`, `actions/galerie.ts` ; helpers `lib/media.ts` (`mediaUrl`, dates FR).
+- Public : `/priere` (intentions du jour + formulaire avec consentement), `/galerie` (pagination « Voir plus »), `/galerie/[slug]` (métadonnées serveur, JSON-LD `ImageGallery`, grille en colonnes, visionneuse avec flèches clavier).
+- Admin : `/admin/prieres` (onglets avec compteurs, recherche, planification + reformulation, intention de l'équipe, archivage), `/admin/galerie` + `/admin/galerie/[id]` (`nouveau` pour créer ; glisser-déposer avec validation, couverture, légendes enregistrées au blur).
+- Home : hero 75svh → « À la une » (article vedette + 3 récents, colonne Agenda à venir puis passés) → bandeau Table de prière (crimson) → Galerie (bento, masquée s'il n'y a aucun album) → À propos → Témoignages → Newsletter → Contact. Doublon d'email du bloc contact supprimé.
+- Navigation : « Galerie » et « Prière » ajoutés ; le menu desktop s'affiche à partir de `xl` (1280 px) sans « Accueil » (le logo y mène), menu mobile en dessous. Footer : lien Événements corrigé (`/evenements` → `/events`), ajout Galerie et Table de prière. Sitemap : `/galerie`, `/priere` et albums.
+- Sidebar admin + `lib/permissions.ts` : `/admin/prieres` et `/admin/galerie` ouverts à l'éditeur.
+
+**Vérifications** : lint backend propre, modules/associations chargés, `tsc` propre, `npm run build` réussi. Rendu vérifié en 1440 / 768 / 375 px avec l'API de prod (articles/événements réels) et des données simulées pour les nouvelles sections. Non testé contre la base locale (MySQL arrêté).

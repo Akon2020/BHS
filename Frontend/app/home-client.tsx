@@ -14,12 +14,17 @@ import { toast } from "@/components/ui/use-toast";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { HeroCarousel } from "@/components/sections/hero-carousel";
-import { UpcomingEventsSection } from "@/components/sections/upcoming-events";
 import { NewsletterSubscribeForm } from "@/components/newsletter-subscribe-form";
-import { ActusSection } from "@/components/sections/actus";
+import { ALaUneSection } from "@/components/sections/a-la-une";
+import { PriereDuJourSection } from "@/components/sections/priere-du-jour";
+import { GalerieApercuSection } from "@/components/sections/galerie-apercu";
 import { TestimonialsSection } from "@/components/sections/testimonials";
 import { createContact } from "@/actions/contact";
-import { CONTACT_PHONE, CONTACT_PHONE_DISPLAY } from "@/lib/site";
+import {
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  CONTACT_PHONE_DISPLAY,
+} from "@/lib/site";
 
 export default function HomePage() {
   const [formData, setFormData] = useState({
@@ -83,10 +88,10 @@ export default function HomePage() {
     <div className="flex flex-col">
       <Header />
       {/* Hero Section avec carrousel d'images */}
-      <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-[75svh] items-center justify-center overflow-hidden">
         <HeroCarousel />
 
-        <div className="pointer-events-none relative z-10 mx-auto max-w-7xl px-4 py-24 text-center lg:px-8">
+        <div className="pointer-events-none relative z-10 mx-auto max-w-7xl px-4 py-20 text-center lg:px-8">
           <h1 className="text-balance font-serif text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             Ravivez la flamme de votre foi
           </h1>
@@ -114,6 +119,15 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* À la une : derniers articles + agenda */}
+      <ALaUneSection />
+
+      {/* Table de prière : intentions du jour */}
+      <PriereDuJourSection />
+
+      {/* Galerie : derniers albums */}
+      <GalerieApercuSection />
 
       {/* À Propos de Nous Section */}
       <section className="py-24 bg-background">
@@ -199,12 +213,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Événements à Venir Section */}
-      <UpcomingEventsSection />
-
-      {/* Actualites Recentes Section */}
-      <ActusSection />
 
       {/* Témoignages Section (dynamique) */}
       <TestimonialsSection />
@@ -294,22 +302,12 @@ export default function HomePage() {
                     </div>
                     <div>
                       <h4 className="font-medium mb-1">Email</h4>
-                      <p>
-                        <a
-                          href="mailto:contact@burningheartihs.org"
-                          className="text-sm text-primary hover:underline"
-                        >
-                          contact@burningheartihs.org
-                        </a>
-                      </p>
-                      <p>
-                        <a
-                          href="mailto:contact@burningheartihs.org"
-                          className="text-sm text-primary hover:underline"
-                        >
-                          contact@burningheartihs.org
-                        </a>
-                      </p>
+                      <a
+                        href={`mailto:${CONTACT_EMAIL}`}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        {CONTACT_EMAIL}
+                      </a>
                     </div>
                   </div>
 

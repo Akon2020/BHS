@@ -262,6 +262,16 @@ Chaque goal est cochable. Statut : `[ ]` à faire · `[~]` en cours · `[x]` fai
 ### 5.5 📊 Dashboard admin — mise à jour  🔵 — *fait*
 - [x] 🔵 Intégrer au tableau de bord : **prochains RDV** (+ nb en attente), **anniversaires à venir** (prochaine occurrence / J-x), **tâches** à faire·en cours + prochaines échéances, stats **pointage** (sessions & heures du mois), **dons** récents + total confirmé par devise, inscriptions/finances **événements** (encaissé par devise). Contrôleur `dashboard` étendu + composant `dashboard-overview.tsx` (4 stats secondaires + 5 panneaux liés aux pages).
 
+### 5.6 🙏 Table de prière, 🖼️ Galerie & home éditoriale  🟢 — *fait*
+- [x] 🟢 **Numéro de téléphone** `+243 898 961 612` partout (contact, footer, home, PDF admin, Mobile Money des dons, JSON-LD) — source unique `Frontend/lib/site.ts`.
+- [x] 🟢 Backend **Table de prière** : modèle `DemandePriere` ; dépôt public `POST /api/prieres` (champ piège anti-robot, consentement de partage), `GET /api/prieres/aujourdhui` (fuseau Bukavu, n'expose que les intentions partagées), admin : liste filtrable + compteurs, planification/validation/reformulation/archivage, intentions de l'équipe, notification admin/éditeur.
+- [x] 🟢 Backend **Galerie** : modèles `Galerie` + `PhotoGalerie` ; CRUD `/api/galeries` + routes publiques ; upload multi-images validé (JPG/PNG/WEBP/GIF, 10 Mo, 30 max), couverture, légendes, suppression des fichiers. Swagger régénéré.
+- [x] 🟢 Front public : page `/priere` (intentions du jour + formulaire), `/galerie` (albums, du plus récent au plus ancien) et `/galerie/[slug]` (grille + visionneuse clavier, métadonnées + JSON-LD `ImageGallery`) ; liens header/footer ; sitemap.
+- [x] 🟢 Front admin : `/admin/prieres` (filtres Nouvelles / Aujourd'hui / Planifiées / Archivées, recherche, planification) et `/admin/galerie` (+ éditeur d'album : glisser-déposer, couverture, légendes) ; sidebar + permission éditeur.
+- [x] 🟢 **Home éditoriale** : hero réduit à 75svh ; « À la une » (article vedette + 3 récents) avec colonne **Agenda** (à venir puis passés) ; bandeau **Table de prière** ; aperçu **Galerie** en bento ; anciennes sections `actus` / `upcoming-events` retirées.
+- [ ] 🔵 À tester en runtime avec la base (dépôt d'une intention, planification, création d'album avec photos) — non testé localement (MySQL arrêté).
+- [ ] 🔵 Mobile : écrans Table de prière / Galerie non réalisés (web uniquement pour l'instant).
+
 ---
 
 ## ✅ Definition of Done (par goal)
