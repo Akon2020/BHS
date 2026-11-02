@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ImageIcon,
   ImagePlus,
   Loader2,
   Star,
@@ -69,6 +70,9 @@ export default function GalerieEditeurPage() {
   const [loading, setLoading] = useState(!estNouveau);
   const [saving, setSaving] = useState(false);
   const [survol, setSurvol] = useState(false);
+  const [couvertureEnCours, setCouvertureEnCours] = useState<number | null>(
+    null,
+  );
   const [photoASupprimer, setPhotoASupprimer] = useState<PhotoGalerie | null>(
     null,
   );
@@ -137,6 +141,14 @@ export default function GalerieEditeurPage() {
     }
   };
 
+  // Sans couverture enregistrée, le serveur prend la 1re photo envoyée.
+  const choisirCouvertureApercu = (url: string) => {
+    setNouvelles((prev) => {
+      const choisie = prev.find((a) => a.url === url);
+      return choisie ? [choisie, ...prev.filter((a) => a.url !== url)] : prev;
+    });
+  };
+
   const retirerApercu = (url: string) => {
     URL.revokeObjectURL(url);
     setNouvelles((prev) => prev.filter((a) => a.url !== url));
@@ -187,6 +199,7 @@ export default function GalerieEditeurPage() {
 
   const definirCouverture = async (photo: PhotoGalerie) => {
     if (!idGalerie) return;
+    setCouvertureEnCours(photo.idPhoto);
     try {
       const fd = new FormData();
       fd.append("couverture", String(photo.idPhoto));
@@ -199,6 +212,8 @@ export default function GalerieEditeurPage() {
         title: "Erreur",
         description: error?.message || "Mise à jour impossible.",
       });
+    } finally {
+      setCouvertureEnCours(null);
     }
   };
 
@@ -252,6 +267,11 @@ export default function GalerieEditeurPage() {
   }
 
   const photos = album?.photos || [];
+  // Sans couverture enregistrée, la 1re photo envoyée le deviendra.
+  const choixCouvertureApercu = !album?.imageCouverture;
+  const couvertureAffichee =
+    mediaUrl(album?.imageCouverture) ||
+    (choixCouvertureApercu ? nouvelles[0]?.url : undefined);
 
   return (
     <div className="space-y-6">
@@ -356,6 +376,33 @@ export default function GalerieEditeurPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Photo de couverture</p>
+              <div className="relative aspect-[16/10] overflow-hidden rounded-lg border bg-muted">
+                {couvertureAffichee ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={couvertureAffichee}
+                    alt="Couverture de l'album"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <ImageIcon
+                      className="h-8 w-8 text-muted-foreground/50"
+                      aria-hidden
+                    />
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {photos.length > 0
+                  ? "Choisissez-la avec « Utiliser comme couverture » sous une photo."
+                  : nouvelles.length > 0
+                    ? "Choisissez-la avec l'étoile sur une photo à envoyer."
+                    : "Ajoutez des photos : la première deviendra la couverture."}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -420,10 +467,15 @@ export default function GalerieEditeurPage() {
                     « {estNouveau ? "Créer l'album" : "Enregistrer"} ».
                   </p>
                   <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
-                    {nouvelles.map((a) => (
+                    {nouvelles.map((a, i) => (
                       <li
                         key={a.url}
-                        className="relative aspect-square overflow-hidden rounded-lg bg-muted"
+                        className={cn(
+                          "relative aspect-square overflow-hidden rounded-lg bg-muted",
+                          choixCouvertureApercu &&
+                            i === 0 &&
+                            "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                        )}
                       >
                         {/* Aperçu local (blob) : next/image n'est pas adapté. */}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -432,6 +484,23 @@ export default function GalerieEditeurPage() {
                           alt={a.fichier.name}
                           className="h-full w-full object-cover"
                         />
+                        {choixCouvertureApercu &&
+                          (i === 0 ? (
+                            <Badge className="absolute bottom-1 left-1 gap-1 px-1.5 text-[10px]">
+                              <Star className="h-3 w-3 fill-current" aria-hidden />
+                              Couverture
+                            </Badge>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => choisirCouvertureApercu(a.url)}
+                              aria-label={`Utiliser ${a.fichier.name} comme couverture`}
+                              title="Utiliser comme couverture"
+                              className="absolute left-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                            >
+                              <Star className="h-4 w-4" />
+                            </button>
+                          ))}
                         <button
                           type="button"
                           onClick={() => retirerApercu(a.url)}
@@ -468,7 +537,13 @@ export default function GalerieEditeurPage() {
                         album?.imageCouverture === photo.chemin;
                       return (
                         <li key={photo.idPhoto} className="space-y-2">
-                          <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted">
+                          <div
+                            className={cn(
+                              "relative aspect-[4/3] overflow-hidden rounded-lg bg-muted",
+                              estCouverture &&
+                                "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                            )}
+                          >
                             <Image
                               src={mediaUrl(photo.chemin) as string}
                               alt={photo.legende || form.titre}
@@ -482,19 +557,7 @@ export default function GalerieEditeurPage() {
                                 Couverture
                               </Badge>
                             )}
-                            <div className="absolute right-2 top-2 flex gap-1">
-                              {!estCouverture && (
-                                <Button
-                                  size="icon"
-                                  variant="secondary"
-                                  className="h-8 w-8"
-                                  aria-label="Définir comme couverture"
-                                  title="Définir comme couverture"
-                                  onClick={() => definirCouverture(photo)}
-                                >
-                                  <Star className="h-4 w-4" />
-                                </Button>
-                              )}
+                            <div className="absolute right-2 top-2">
                               <Button
                                 size="icon"
                                 variant="destructive"
@@ -507,6 +570,30 @@ export default function GalerieEditeurPage() {
                               </Button>
                             </div>
                           </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={estCouverture ? "secondary" : "outline"}
+                            className="w-full gap-1.5"
+                            disabled={estCouverture || couvertureEnCours !== null}
+                            aria-pressed={estCouverture}
+                            onClick={() => definirCouverture(photo)}
+                          >
+                            {couvertureEnCours === photo.idPhoto ? (
+                              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                            ) : (
+                              <Star
+                                className={cn(
+                                  "h-4 w-4",
+                                  estCouverture && "fill-current text-primary",
+                                )}
+                                aria-hidden
+                              />
+                            )}
+                            {estCouverture
+                              ? "Photo de couverture"
+                              : "Utiliser comme couverture"}
+                          </Button>
                           <Input
                             aria-label="Légende de la photo"
                             placeholder="Légende (facultatif)"

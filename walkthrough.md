@@ -707,3 +707,13 @@ Note : l'entrée 0.1 ci-dessus indiquait à tort que l'export `config` devient `
 - `app/globals.css` : classe `.prose-description` (paragraphes, gras, liens, listes, titres, citations, images) basée sur les tokens du thème.
 
 **Vérifications** : `tsc` propre ; modale testée sur une page temporaire avec une description longue (contenu défilant, actions visibles, `<script>`/`onerror` neutralisés).
+
+## Correctif — photos de la galerie invisibles + choix de la couverture
+
+**Cause** : Next.js 16 refuse par défaut d'optimiser (`next/image`) une image servie par une IP privée ; en local l'API est sur `localhost:5500`, l'optimiseur répondait 400 et toutes les images de l'API apparaissaient cassées (galerie, mais aussi couvertures d'articles/événements en dev). En production l'API (`api.burningheartihs.org`) a une IP publique et n'est pas concernée.
+
+**Modifications**
+- `Frontend/next.config.mjs` : `images.dangerouslyAllowLocalIP` activé **uniquement hors production**.
+- `app/admin/galerie/[id]/page.tsx` : choix de couverture explicite — bouton « Utiliser comme couverture » sous chaque photo (état « Photo de couverture » + contour sur la photo active, chargement pendant l'enregistrement) ; aperçu « Photo de couverture » dans le panneau Informations ; à la création (ou album sans couverture), étoile sur les photos à envoyer pour choisir celle qui deviendra la couverture (placée en tête de l'envoi).
+
+**Vérifications** : `tsc` propre ; `/_next/image` répond 200 pour les photos locales ; page album vérifiée (7 photos affichées, visionneuse et flèches clavier).
