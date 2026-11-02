@@ -60,9 +60,6 @@ export function HeroCarousel() {
         />
       ))}
 
-      {/* Dégradé de lisibilité */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background" />
-
       {/* Flèches précédent / suivant */}
       <button
         type="button"
