@@ -33,6 +33,8 @@ import tacheRouter from "./routes/tache.route.js";
 import calendrierRouter from "./routes/calendrier.route.js";
 import dispositifRouter from "./routes/dispositif.route.js";
 import notificationRouter from "./routes/notification.route.js";
+import priereRouter from "./routes/priere.route.js";
+import galerieRouter from "./routes/galerie.route.js";
 import { startScheduler } from "./utils/scheduler.js";
 
 const app = express();
@@ -101,6 +103,8 @@ app.use("/api/taches", tacheRouter);
 app.use("/api/calendrier", calendrierRouter);
 app.use("/api/dispositifs", dispositifRouter);
 app.use("/api/notifications", notificationRouter);
+app.use("/api/prieres", priereRouter);
+app.use("/api/galeries", galerieRouter);
 
 app.get("/error", errorLogs);
 app.use(errorMiddleware);

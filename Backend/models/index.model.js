@@ -29,6 +29,9 @@ import EntreeCalendrier from "./entreeCalendrier.model.js";
 import DispositifPush from "./dispositifPush.model.js";
 import Notification from "./notification.model.js";
 import PreferenceNotification from "./preferenceNotification.model.js";
+import DemandePriere from "./demandePriere.model.js";
+import Galerie from "./galerie.model.js";
+import PhotoGalerie from "./photoGalerie.model.js";
 
 // Blog associations
 Blog.belongsTo(Utilisateur, { foreignKey: "idAuteur", as: "auteur" });
@@ -277,6 +280,26 @@ Utilisateur.hasMany(PreferenceNotification, {
   hooks: true,
 });
 
+// Table de prière associations
+DemandePriere.belongsTo(Utilisateur, {
+  foreignKey: "traitePar",
+  as: "traiteur",
+});
+
+// Galerie associations
+Galerie.belongsTo(Utilisateur, { foreignKey: "createdBy", as: "createur" });
+Galerie.hasMany(PhotoGalerie, {
+  foreignKey: "idGalerie",
+  as: "photos",
+  onDelete: "CASCADE",
+  hooks: true,
+});
+PhotoGalerie.belongsTo(Galerie, {
+  foreignKey: "idGalerie",
+  as: "galerie",
+  onDelete: "CASCADE",
+});
+
 // Synchronisation des modèles
 const syncModels = async () => {
   try {
@@ -390,5 +413,8 @@ export {
   DispositifPush,
   Notification,
   PreferenceNotification,
+  DemandePriere,
+  Galerie,
+  PhotoGalerie,
   syncModels,
 };
