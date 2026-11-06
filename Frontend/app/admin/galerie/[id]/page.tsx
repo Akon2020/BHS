@@ -309,7 +309,7 @@ export default function GalerieEditeurPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-lg">Informations</CardTitle>
@@ -531,7 +531,7 @@ export default function GalerieEditeurPage() {
                     Aucune photo pour l&apos;instant.
                   </p>
                 ) : (
-                  <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {photos.map((photo) => {
                       const estCouverture =
                         album?.imageCouverture === photo.chemin;

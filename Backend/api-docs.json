@@ -4787,8 +4787,14 @@
     "/api/users/update/{id}": {
       "patch": {
         "summary": "Met à jour un utilisateur",
+        "description": "Un non-admin ne peut modifier que son propre compte ; seul un admin peut changer le rôle.",
         "tags": [
           "Utilisateurs"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "parameters": [
           {
@@ -4817,12 +4823,15 @@
                     "type": "string",
                     "enum": [
                       "admin",
-                      "auteur"
-                    ]
+                      "editeur",
+                      "membre"
+                    ],
+                    "description": "Pris en compte uniquement pour un admin"
                   },
                   "avatar": {
                     "type": "string",
-                    "format": "binary"
+                    "format": "binary",
+                    "description": "JPG, PNG, WEBP ou GIF, 5 Mo maximum"
                   }
                 }
               }
@@ -4832,6 +4841,12 @@
         "responses": {
           "200": {
             "description": "Utilisateur mis à jour avec succès"
+          },
+          "400": {
+            "description": "Image ou rôle invalide"
+          },
+          "403": {
+            "description": "Modification du compte d'un autre utilisateur"
           },
           "404": {
             "description": "Utilisateur non trouvé"

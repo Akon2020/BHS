@@ -717,3 +717,29 @@ Note : l'entrée 0.1 ci-dessus indiquait à tort que l'export `config` devient `
 - `app/admin/galerie/[id]/page.tsx` : choix de couverture explicite — bouton « Utiliser comme couverture » sous chaque photo (état « Photo de couverture » + contour sur la photo active, chargement pendant l'enregistrement) ; aperçu « Photo de couverture » dans le panneau Informations ; à la création (ou album sans couverture), étoile sur les photos à envoyer pour choisir celle qui deviendra la couverture (placée en tête de l'envoi).
 
 **Vérifications** : `tsc` propre ; `/_next/image` répond 200 pour les photos locales ; page album vérifiée (7 photos affichées, visionneuse et flèches clavier).
+
+## Correctif — photo de profil (`/admin/profile`)
+
+**Cause** : l'instance axios (`lib/axios.ts`) impose `Content-Type: application/json` ; axios 1.x convertit alors un `FormData` en JSON et le fichier est perdu. `updateUser` et `createUser` (`actions/users.ts`) n'indiquaient pas `multipart/form-data` (contrairement à la galerie/aux témoignages). Vérifié avec l'axios du projet : sans en-tête → `application/json`, fichier absent ; avec → multipart, fichier présent. L'aperçu local (`data:`) était en plus préfixé par l'URL de l'API, d'où un aperçu cassé.
+
+**Modifications**
+- `actions/users.ts` : `multipart/form-data` explicite pour `createUser` et `updateUser` (corrige aussi l'avatar dans la modale d'édition d'utilisateur).
+- `app/admin/profile/page.tsx` : la photo est **enregistrée dès qu'elle est choisie** (spinner sur l'avatar, toast), validation format/taille (JPG/PNG/WEBP/GIF, 5 Mo), bouton clavier-accessible ; le formulaire « Compte » ne gère plus que nom + email.
+- `hooks/useAuth.ts` : événement `PROFIL_MIS_A_JOUR` pour rafraîchir l'utilisateur ; les en-têtes (site + admin) affichent la nouvelle photo sans recharger et utilisent `mediaUrl` (plus de requête `…/undefined`).
+- Backend `middlewares/upload.middleware.js` : `uploadAvatar` (une image, 5 Mo, formats image, erreurs 400 lisibles) ; filtre d'images mutualisé avec la galerie. Utilisé par `POST /api/users/add` et `PATCH /api/users/update/:id`.
+- **Sécurité** `controllers/utilisateur.controller.js` : un non-admin ne peut plus modifier le compte d'un autre (403) ni changer de rôle (auparavant un `membre` pouvait se donner le rôle `admin`) ; rôle validé côté admin. Fichier envoyé supprimé en cas de refus. Swagger mis à jour.
+
+**Vérifications** : `tsc` propre, lint backend propre, API démarrée (routes OK, 401 sans jeton). Non testé connecté (pas d'accès au compte).
+
+## Correctif — responsive mobile des sections ajoutées
+
+**Symptôme** : sur mobile (360 px), la page d'accueil débordait horizontalement (largeur de page 418 px) : les colonnes « À la une » et « Agenda » mesuraient 402 px.
+
+**Cause** : les grilles n'avaient de colonnes déclarées qu'à partir de `sm`/`lg`. En mobile, la piste implicite est `auto` et chaque élément garde sa largeur min-content (`min-width: auto`), qui pousse la piste au-delà de l'écran avec certains contenus réels.
+
+**Modifications**
+- `grid-cols-1` (= `minmax(0, 1fr)`) ajouté en base à toutes les grilles ajoutées : home (À la une, liste compacte, bandeau Table de prière, Galerie), `/priere` (mise en page + engagements + formulaire), `/galerie`, admin Table de prière, admin Galerie (liste + éditeur).
+- `break-words` sur les textes saisis (titres et extraits d'articles, intentions, description et titre d'album ; titre d'album en `text-3xl` sur mobile) pour les longs liens insécables.
+- Admin Table de prière : onglets de filtre qui passent à la ligne au lieu de défiler (tous visibles) ; double padding des cartes supprimé (`py-0`), idem pour les cartes d'album.
+
+**Vérifications** (360 px, `scrollWidth = 360` partout) : `/` avec les articles réels de la prod, `/priere`, `/galerie` ; écrans admin Table de prière / Galerie / éditeur d'album rendus sur une route de test temporaire avec données simulées (textes et emails longs) et photos réelles de la base locale. `tsc` propre.

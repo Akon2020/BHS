@@ -92,11 +92,11 @@ function ArticleVedette({ article }: { article: Blog }) {
           {formatDateCourte(article.createdAt)}
         </span>
       </div>
-      <h3 className="mt-3 text-balance font-serif text-2xl font-bold leading-tight transition-colors group-hover:text-primary sm:text-3xl">
+      <h3 className="mt-3 text-balance break-words font-serif text-2xl font-bold leading-tight transition-colors group-hover:text-primary sm:text-3xl">
         {article.titre}
       </h3>
       {article.extrait && (
-        <p className="mt-3 line-clamp-3 max-w-2xl leading-relaxed text-muted-foreground">
+        <p className="mt-3 line-clamp-3 max-w-2xl break-words leading-relaxed text-muted-foreground">
           {article.extrait}
         </p>
       )}
@@ -248,7 +248,7 @@ export function ALaUneSection() {
           </p>
         </div>
 
-        <div className="grid gap-10 lg:grid-cols-3 lg:gap-12">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-12">
           {/* Articles */}
           <div className="lg:col-span-2">
             {loading ? (
@@ -262,7 +262,7 @@ export function ALaUneSection() {
               <>
                 <ArticleVedette article={vedette} />
                 {autres.length > 0 && (
-                  <div className="mt-10 grid gap-6 border-t pt-8 sm:grid-cols-3">
+                  <div className="mt-10 grid grid-cols-1 gap-6 border-t pt-8 sm:grid-cols-3">
                     {autres.map((a) => (
                       <ArticleCompact key={a.idBlog} article={a} />
                     ))}

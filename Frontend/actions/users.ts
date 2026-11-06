@@ -31,7 +31,9 @@ export const createUser = async (userData: {
       if (value) formData.append(key, value as any);
     });
 
-    const res = await api.post("/api/users/add", formData);
+    const res = await api.post("/api/users/add", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return res.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Erreur inconnue");
@@ -40,7 +42,11 @@ export const createUser = async (userData: {
 
 export const updateUser = async (id: number, userData: FormData) => {
   try {
-    const res = await api.patch(`/api/users/update/${id}`, userData);
+    // Multipart explicite : sinon axios convertit le FormData en JSON
+    // (Content-Type par défaut de l'instance) et l'avatar est perdu.
+    const res = await api.patch(`/api/users/update/${id}`, userData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return res.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Erreur inconnue");

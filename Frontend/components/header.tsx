@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { mediaUrl } from "@/lib/media";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
@@ -172,7 +173,7 @@ export function Header() {
                   >
                     <Avatar className="size-9 border">
                       <AvatarImage
-                        src={`${process.env.NEXT_PUBLIC_API_URL}/${currentUser?.avatar || undefined}`}
+                        src={mediaUrl(currentUser?.avatar)}
                         alt={getUserDisplayName(currentUser)}
                         className="object-cover"
                       />

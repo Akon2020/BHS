@@ -71,14 +71,14 @@ export function GalerieApercuSection() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
             <Skeleton className="aspect-[4/3] rounded-2xl sm:col-span-2 lg:row-span-2 lg:aspect-auto" />
             <Skeleton className="aspect-[4/3] rounded-2xl" />
             <Skeleton className="aspect-[4/3] rounded-2xl" />
             <Skeleton className="aspect-[4/3] rounded-2xl sm:col-span-2" />
           </div>
         ) : (
-          <div className="grid auto-rows-[220px] gap-4 sm:grid-cols-2 lg:auto-rows-[240px] lg:grid-cols-4">
+          <div className="grid grid-cols-1 auto-rows-[220px] gap-4 sm:grid-cols-2 lg:auto-rows-[240px] lg:grid-cols-4">
             {albums.map((album, i) => (
               <CarteAlbum
                 key={album.idGalerie}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -21,6 +21,12 @@ import { toast } from "@/components/ui/use-toast";
 import { updateUser, changePassword } from "@/actions/users";
 import { getProfile, logout } from "@/actions/auth";
 import { User } from "@/types/user";
+import { PROFIL_MIS_A_JOUR } from "@/hooks/useAuth";
+import { mediaUrl } from "@/lib/media";
+import { Camera, Loader2 } from "lucide-react";
+
+const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const AVATAR_TAILLE_MAX = 5 * 1024 * 1024;
 
 export default function AdminProfilePage() {
   const router = useRouter();
@@ -32,8 +38,9 @@ export default function AdminProfilePage() {
   // Form states
   const [nomComplet, setNomComplet] = useState("");
   const [email, setEmail] = useState("");
-  const [avatar, setAvatar] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarApercu, setAvatarApercu] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   // Password form states
   const [currentPassword, setCurrentPassword] = useState("");
@@ -47,7 +54,6 @@ export default function AdminProfilePage() {
       setUser(profile);
       setNomComplet(profile.nomComplet);
       setEmail(profile.email);
-      setAvatarPreview(profile.avatar || null);
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -64,15 +70,50 @@ export default function AdminProfilePage() {
     fetchProfile();
   }, []);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      const file = e.target.files[0];
-      setAvatar(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  // La photo est enregistrée dès qu'elle est choisie.
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+
+    if (!AVATAR_TYPES.includes(file.type)) {
+      toast({
+        title: "Format non pris en charge",
+        description: "Choisissez une image JPG, PNG, WEBP ou GIF.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (file.size > AVATAR_TAILLE_MAX) {
+      toast({
+        title: "Image trop lourde",
+        description: "La photo doit faire 5 Mo maximum.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const apercu = URL.createObjectURL(file);
+    setAvatarApercu(apercu);
+    try {
+      setIsUploadingAvatar(true);
+      const formData = new FormData();
+      formData.append("avatar", file);
+      await updateUser(user.idUtilisateur, formData);
+      await fetchProfile();
+      window.dispatchEvent(new Event(PROFIL_MIS_A_JOUR));
+      toast({ title: "Photo de profil mise à jour" });
+    } catch (error: any) {
+      toast({
+        title: "Erreur",
+        description:
+          error.message || "Impossible de mettre à jour la photo de profil",
+        variant: "destructive",
+      });
+    } finally {
+      URL.revokeObjectURL(apercu);
+      setAvatarApercu(null);
+      setIsUploadingAvatar(false);
     }
   };
 
@@ -92,9 +133,6 @@ export default function AdminProfilePage() {
       const formData = new FormData();
       formData.append("nomComplet", nomComplet);
       formData.append("email", email);
-      if (avatar) {
-        formData.append("avatar", avatar);
-      }
 
       await updateUser(user!.idUtilisateur, formData);
       toast({
@@ -104,6 +142,7 @@ export default function AdminProfilePage() {
 
       // Refresh profile
       await fetchProfile();
+      window.dispatchEvent(new Event(PROFIL_MIS_A_JOUR));
     } catch (error: any) {
       toast({
         title: "Erreur",
@@ -222,20 +261,21 @@ export default function AdminProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
-            <Avatar className="h-32 w-32">
-              <AvatarImage
-                src={
-                  avatarPreview
-                    ? avatarPreview.startsWith("http")
-                      ? avatarPreview
-                      : `${process.env.NEXT_PUBLIC_API_URL}/${avatarPreview}`
-                    : undefined
-                }
-                alt={user.nomComplet}
-                className="object-cover"
-              />
-              <AvatarFallback>{getInitials(user.nomComplet)}</AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-32 w-32">
+                <AvatarImage
+                  src={avatarApercu || mediaUrl(user.avatar)}
+                  alt={user.nomComplet}
+                  className="object-cover"
+                />
+                <AvatarFallback>{getInitials(user.nomComplet)}</AvatarFallback>
+              </Avatar>
+              {isUploadingAvatar && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
+                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                </div>
+              )}
+            </div>
             <div className="text-center">
               <h3 className="text-xl font-medium">{user.nomComplet}</h3>
               <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -243,17 +283,28 @@ export default function AdminProfilePage() {
                 {user.role === "admin" ? "Administrateur" : "Éditeur"}
               </p>
             </div>
-            <Button variant="outline" asChild>
-              <label className="cursor-pointer">
-                Changer la photo
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
-              </label>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2"
+              disabled={isUploadingAvatar}
+              onClick={() => avatarInputRef.current?.click()}
+            >
+              <Camera className="h-4 w-4" aria-hidden />
+              {isUploadingAvatar ? "Envoi en cours..." : "Changer la photo"}
             </Button>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept={AVATAR_TYPES.join(",")}
+              onChange={handleAvatarChange}
+              className="sr-only"
+              tabIndex={-1}
+              aria-label="Choisir une photo de profil"
+            />
+            <p className="text-xs text-muted-foreground">
+              JPG, PNG, WEBP ou GIF · 5 Mo maximum
+            </p>
           </CardContent>
         </Card>
 

@@ -60,7 +60,7 @@ export default function AlbumClient({ album }: { album: Galerie }) {
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Toute la galerie
         </Link>
-        <h1 className="mt-4 text-balance font-serif text-4xl font-bold tracking-tight sm:text-5xl">
+        <h1 className="mt-4 text-balance break-words font-serif text-3xl font-bold tracking-tight sm:text-5xl">
           {album.titre}
         </h1>
         <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
@@ -78,7 +78,7 @@ export default function AlbumClient({ album }: { album: Galerie }) {
           )}
         </div>
         {album.description && (
-          <p className="mt-6 max-w-2xl whitespace-pre-line text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-6 max-w-2xl whitespace-pre-line break-words text-lg leading-relaxed text-muted-foreground">
             {album.description}
           </p>
         )}

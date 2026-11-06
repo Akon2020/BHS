@@ -86,7 +86,7 @@ export function IntentionsListe({
           >
             <p
               className={cn(
-                "font-serif text-lg leading-relaxed",
+                "break-words font-serif text-lg leading-relaxed",
                 inverse && "text-primary-foreground",
               )}
             >

@@ -57,11 +57,11 @@ export default function PrierePage() {
         </div>
       </section>
 
-      <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 pb-20 lg:grid-cols-2 lg:gap-16 lg:px-8">
+      <div className="mx-auto grid grid-cols-1 w-full max-w-7xl gap-12 px-4 pb-20 lg:grid-cols-2 lg:gap-16 lg:px-8">
         <section aria-labelledby="aujourdhui-titre">
           <IntentionsAujourdhui />
 
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2">
+          <ul className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {engagements.map(({ icon: Icon, titre, texte }) => (
               <li key={titre} className="rounded-xl bg-muted/40 p-5">
                 <Icon className="h-5 w-5 text-primary" aria-hidden />

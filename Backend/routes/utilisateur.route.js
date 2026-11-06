@@ -12,7 +12,7 @@ import {
   authenticationJWT,
   authorizeRoles,
 } from "../middlewares/auth.middleware.js";
-import upload from "../middlewares/upload.middleware.js";
+import { uploadAvatar } from "../middlewares/upload.middleware.js";
 import { normalizeUploadPaths } from "../utils/normalizeUploadPaths.js";
 
 const userRouter = Router();
@@ -128,7 +128,7 @@ userRouter.post(
   "/add",
   authenticationJWT,
   authorizeRoles("admin"),
-  upload.single("avatar"),
+  uploadAvatar,
   normalizeUploadPaths,
   createUtilisateur,
 );
@@ -138,7 +138,9 @@ userRouter.post(
  * /api/users/update/{id}:
  *   patch:
  *     summary: Met à jour un utilisateur
+ *     description: Un non-admin ne peut modifier que son propre compte ; seul un admin peut changer le rôle.
  *     tags: [Utilisateurs]
+ *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: id
@@ -158,13 +160,19 @@ userRouter.post(
  *                 type: string
  *               role:
  *                 type: string
- *                 enum: [admin, auteur]
+ *                 enum: [admin, editeur, membre]
+ *                 description: Pris en compte uniquement pour un admin
  *               avatar:
  *                 type: string
  *                 format: binary
+ *                 description: JPG, PNG, WEBP ou GIF, 5 Mo maximum
  *     responses:
  *       200:
  *         description: Utilisateur mis à jour avec succès
+ *       400:
+ *         description: Image ou rôle invalide
+ *       403:
+ *         description: Modification du compte d'un autre utilisateur
  *       404:
  *         description: Utilisateur non trouvé
  *       500:
@@ -174,7 +182,7 @@ userRouter.patch(
   "/update/:id",
   authenticationJWT,
   authorizeRoles("admin", "editeur", "membre"),
-  upload.single("avatar"),
+  uploadAvatar,
   normalizeUploadPaths,
   updateUtilisateur,
 );
