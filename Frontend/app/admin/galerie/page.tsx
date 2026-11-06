@@ -86,13 +86,13 @@ export default function GalerieAdminPage() {
           </CardContent>
         </Card>
       ) : (
-        <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {albums.map((album) => {
             const src = mediaUrl(album.imageCouverture);
             const nb = Number(album.nombrePhotos ?? 0);
             return (
               <li key={album.idGalerie}>
-                <Card className="h-full overflow-hidden">
+                <Card className="h-full gap-0 overflow-hidden py-0">
                   <div className="relative aspect-[16/10] bg-muted">
                     {src ? (
                       <Image

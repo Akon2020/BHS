@@ -255,7 +255,7 @@ export default function PrieresAdminPage() {
         <div
           role="tablist"
           aria-label="Filtrer les demandes"
-          className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1"
+          className="flex flex-wrap gap-1 rounded-lg bg-muted p-1"
         >
           {FILTRES.map(({ valeur, label }) => {
             const n = compteur(valeur);
@@ -322,10 +322,10 @@ export default function PrieresAdminPage() {
           </CardContent>
         </Card>
       ) : (
-        <ul className="grid gap-4 xl:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {demandes.map((d) => (
             <li key={d.idDemandePriere}>
-              <Card className="h-full">
+              <Card className="h-full gap-0 py-0">
                 <CardContent className="flex h-full flex-col gap-4 p-5">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -374,7 +374,7 @@ export default function PrieresAdminPage() {
                     </div>
                   </div>
 
-                  <p className="whitespace-pre-line text-sm leading-relaxed">
+                  <p className="whitespace-pre-line break-words text-sm leading-relaxed">
                     {d.intention}
                   </p>
                   {d.intentionPublique && (
@@ -382,7 +382,7 @@ export default function PrieresAdminPage() {
                       <p className="text-xs font-medium text-muted-foreground">
                         Version affichée sur le site
                       </p>
-                      <p className="mt-1">{d.intentionPublique}</p>
+                      <p className="mt-1 break-words">{d.intentionPublique}</p>
                     </div>
                   )}
 

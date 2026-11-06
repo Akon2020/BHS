@@ -24,7 +24,7 @@ export function PriereDuJourSection() {
         className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-white/10 blur-3xl"
       />
 
-      <div className="relative mx-auto grid max-w-7xl gap-10 px-4 lg:grid-cols-5 lg:gap-16 lg:px-8">
+      <div className="relative mx-auto grid grid-cols-1 max-w-7xl gap-10 px-4 lg:grid-cols-5 lg:gap-16 lg:px-8">
         <div className="lg:col-span-2">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
             <Flame className="h-6 w-6" aria-hidden />

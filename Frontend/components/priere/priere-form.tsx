@@ -81,7 +81,7 @@ export function PriereForm() {
       noValidate
       className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm sm:p-8"
     >
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="priere-prenom">Prénom</Label>
           <Input
